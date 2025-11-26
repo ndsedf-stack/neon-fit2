@@ -262,7 +262,7 @@
     function loadHistory() {
       const container = document.getElementById('history-container');
       const emptyState = document.getElementById('empty-state');
-      const history = WorkoutHistory.getAll();
+      const history = WorkoutHistory.getAll() || [];
       
       if (history.length === 0) {
         container.classList.add('hidden');

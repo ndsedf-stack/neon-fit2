@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+  <title>NEON FIT // OPÉRATIONS</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  
+  <style>
+    :root { 
+      --cyan: #00eaff; 
+      --magenta: #ff2d95; 
+      --dark-bg: #050510; 
+    }
+    
+    body { 
+      background-color: var(--dark-bg); 
+      font-family: 'Inter', sans-serif; 
+      color: white; 
+      padding-bottom: env(safe-area-inset-bottom); 
+      -webkit-tap-highlight-color: transparent; 
+      touch-action: manipulation; 
+    }
+    
+    .font-hud { 
+      font-family: 'Rajdhani', sans-serif; 
+    }
+    
+    /* ========================================
+       TIMELINE HORIZONTAL SCROLL
+       ======================================== */
+    .timeline-container { 
+      display: flex; 
+      overflow-x: auto; 
+      scroll-snap-type: x mandatory; 
+      padding: 0 20px; 
+      gap: 8px; 
+      scrollbar-width: none; 
+      margin-bottom: 12px; 
+      -webkit-overflow-scrolling: touch; 
+    }
+    
+    .timeline-container::-webkit-scrollbar { 
+      display: none; 
+    }
+    
+    /* ========================================
+       WEEK CHIPS
+       ======================================== */
+    .week-chip { 
+      scroll-snap-align: center; 
+      flex: 0 0 auto; 
+      width: 56px; 
+      height: 64px; 
+      background: rgba(255,255,255,0.05); 
+      border: 1px solid rgba(255,255,255,0.1); 
+      border-radius: 14px; 
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      justify-content: center; 
+      transform: translateZ(0); 
+      cursor: pointer; 
+    }
+    
+    .week-chip:active { 
+      transform: scale(0.95); 
+      background: rgba(255,255,255,0.1); 
+    }
+    
+    .week-chip.active { 
+      background: rgba(0, 234, 255, 0.15); 
+      border-color: var(--cyan); 
+      box-shadow: 0 0 15px rgba(0, 234, 255, 0.3); 
+    }
+    
+    .week-chip.deload { 
+      border-color: #22c55e; 
+      color: #22c55e; 
+    }
+    
+    .week-chip.deload.active { 
+      background: rgba(34, 197, 94, 0.15); 
+      box-shadow: 0 0 15px rgba(34, 197, 94, 0.3); 
+    }
+    
+    .week-chip.peak { 
+      border-color: #a855f7; 
+      color: #a855f7; 
+    }
+    
+    .week-chip.peak.active { 
+      background: rgba(168, 85, 247, 0.15); 
+      box-shadow: 0 0 15px rgba(168, 85, 247, 0.3); 
+    }
+    
+    /* ========================================
+       TOUCH INTERACTIONS
+       ======================================== */
+    .touch-pop { 
+      transition: transform 0.1s, filter 0.1s; 
+      transform: translateZ(0); 
+      cursor: pointer; 
+    }
+    
+    .touch-pop:active { 
+      transform: scale(0.97); 
+      filter: brightness(1.3); 
+    }
+    
+    /* ========================================
+       CARD SHEEN EFFECT
+       ======================================== */
+    .card-sheen { 
+      position: relative; 
+      overflow: hidden; 
+    }
+    
+    .card-sheen::after { 
+      content: ''; 
+      position: absolute; 
+      top: 0; 
+      left: -150%; 
+      width: 100%; 
+      height: 100%; 
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent); 
+      transform: skewX(-25deg); 
+      transition: left 0.5s; 
+      pointer-events: none; 
+    }
+    
+    .card-sheen:active::after { 
+      left: 150%; 
+      transition: left 0.3s; 
+    }
+    
+    /* ========================================
+       ANIMATIONS
+       ======================================== */
+    @keyframes slideUpFade { 
+      from { 
+        opacity: 0; 
+        transform: translateY(20px); 
+      } 
+      to { 
+        opacity: 1; 
+        transform: translateY(0); 
+      } 
+    }
+    
+    .animate-entry { 
+      animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
+      opacity: 0; 
+    }
+    
+    /* ========================================
+       MODAL
+       ======================================== */
+    .modal-overlay { 
+      position: fixed; 
+      inset: 0; 
+      z-index: 100; 
+      background: rgba(5, 5, 16, 0.95); 
+      backdrop-filter: blur(10px); 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      opacity: 0; 
+      pointer-events: none; 
+      transition: opacity 0.3s; 
+    }
+    
+    .modal-overlay.open { 
+      opacity: 1; 
+      pointer-events: auto; 
+    }
+    
+    .modal-content { 
+      width: 90%; 
+      max-height: 80vh; 
+      overflow-y: auto; 
+      background: #0f0f20; 
+      border: 1px solid rgba(255,255,255,0.1); 
+      border-radius: 24px; 
+      padding: 20px; 
+      transform: scale(0.9); 
+      transition: transform 0.3s; 
+    }
+    
+    .modal-overlay.open .modal-content { 
+      transform: scale(1); 
+    }
+  </style>
+</head>
+
+<body class="antialiased pb-24">
+  <!-- FIX FOR IOS ACTIVE STATES -->
+  <script>document.addEventListener("touchstart", function(){}, true);</script>
+  
+  <!-- ========================================
+       HEADER WITH TIMELINE
+       ======================================== -->
+  <header class="fixed top-0 w-full z-40 bg-[#050510]/95 backdrop-blur-md border-b border-white/10 pt-safe pb-2 shadow-2xl">
+    <!-- Top Bar -->
+    <div class="px-4 h-12 flex items-center justify-between mb-2 mt-2">
+      <h1 class="text-xl font-hud font-black text-white italic tracking-wider">OPÉRATIONS TACTIQUES</h1>
+      
+      <button onclick="window.location.href='index.html'" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-slate-400 touch-pop border border-white/10">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+    
+    <!-- Timeline Scroll -->
+    <div class="timeline-container" id="timeline"></div>
+    
+    <!-- Block Info Banner -->
+    <div class="mx-4 mb-2 mt-2 p-3 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between touch-pop" id="block-info-banner">
+      <div>
+        <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest" id="block-label">BLOC ACTIF</div>
+        <div class="text-sm font-hud font-bold text-white leading-none mt-1" id="block-name">LOADING...</div>
+      </div>
+      <div class="text-right">
+        <div class="text-[9px] font-bold text-[var(--cyan)] uppercase bg-[var(--cyan)]/10 px-2 py-1 rounded border border-[var(--cyan)]/20" id="block-tech">TECHNIQUE</div>
+      </div>
+    </div>
+  </header>
+  
+  <!-- ========================================
+       MAIN CONTENT
+       ======================================== -->
+  <main class="pt-[240px] px-4 space-y-4">
+    <!-- Achievements Section -->
+    <section class="animate-entry" style="animation-delay: 0s;">
+      <h2 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 pl-1">Succès Récents</h2>
+      
+      <div class="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+        <!-- Achievement: First Blood -->
+        <div class="flex-shrink-0 w-28 bg-[#0a0a1a] border border-white/10 rounded-xl p-2 flex flex-col items-center justify-center gap-1 touch-pop">
+          <i data-lucide="medal" class="w-6 h-6 text-yellow-500 drop-shadow-md"></i>
+          <div class="text-[9px] text-center font-bold">Premier Sang</div>
+        </div>
+        
+        <!-- Achievement: Heavy Weight (Locked) -->
+        <div class="flex-shrink-0 w-28 bg-[#0a0a1a] border border-white/10 rounded-xl p-2 flex flex-col items-center justify-center gap-1 touch-pop opacity-50 grayscale">
+          <i data-lucide="dumbbell" class="w-6 h-6 text-slate-600"></i>
+          <div class="text-[9px] text-center font-bold text-slate-500">Poids Lourd</div>
+        </div>
+        
+        <!-- Achievement: Inferno (Locked) -->
+        <div class="flex-shrink-0 w-28 bg-[#0a0a1a] border border-white/10 rounded-xl p-2 flex flex-col items-center justify-center gap-1 touch-pop opacity-50 grayscale">
+          <i data-lucide="flame" class="w-6 h-6 text-slate-600"></i>
+          <div class="text-[9px] text-center font-bold text-slate-500">Inferno</div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Workouts Container (Dynamic) -->
+    <section id="workouts-container" class="space-y-3"></section>
+  </main>
+  
+  <!-- ========================================
+       DETAILS MODAL
+       ======================================== -->
+  <div id="details-modal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="flex justify-between items-start mb-4">
+        <div>
+          <h3 class="text-2xl font-hud font-black text-white uppercase italic" id="modal-title">TITRE</h3>
+          <div class="text-xs font-bold text-[var(--cyan)]" id="modal-subtitle">SUBTITLE</div>
+        </div>
+        <button onclick="closeModal()" class="p-2 bg-white/10 rounded-full touch-pop">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      
+      <div id="modal-body" class="space-y-3"></div>
+      
+      <div class="mt-6">
+        <button id="modal-start-btn" class="w-full py-4 bg-[var(--cyan)] text-black font-black font-hud text-xl uppercase rounded-xl shadow-[0_0_20px_rgba(0,234,255,0.4)] touch-pop">
+          LANCER LA MISSION
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <script type="module">
+    import programData from './program-data.js';
+    
+    // ========================================
+    // STATE
+    // ========================================
+    
+    let currentWeek = parseInt(localStorage.getItem('hybrid_current_week') || 1);
+    
+    // ========================================
+    // INITIALIZATION
+    // ========================================
+    
+    function initOps() { 
+      lucide.createIcons(); 
+      renderTimeline(); 
+      renderWorkouts(currentWeek); 
+    }
+    
+    // ========================================
+    // TIMELINE RENDERING
+    // ========================================
+    
+    function renderTimeline() { 
+      const container = document.getElementById('timeline'); 
+      container.innerHTML = ''; 
+      
+      // Create 26 week chips
+      for (let i = 1; i <= 26; i++) { 
+        const weekData = programData.getWeek(i); 
+        const isDeload = weekData.isDeload; 
+        const isPeak = i === 25; 
+        
+        let extraClass = ''; 
+        if (isDeload) extraClass = 'deload'; 
+        if (isPeak) extraClass = 'peak'; 
+        
+        const chip = document.createElement('div'); 
+        chip.className = `week-chip ${i === currentWeek ? 'active' : ''} ${extraClass} animate-entry`; 
+        chip.style.animationDelay = `${i * 0.02}s`; 
+        
+        // Click handler
+        chip.onclick = () => { 
+          // Remove active from all chips
+          document.querySelectorAll('.week-chip').forEach(c => c.classList.remove('active')); 
+          
+          // Mark this chip as active
+          chip.classList.add('active'); 
+          
+          // Update current week
+          currentWeek = i; 
+          localStorage.setItem('hybrid_current_week', i); 
+          
+          // Haptic feedback
+          if (navigator.vibrate) navigator.vibrate(10); 
+          
+          // Render workouts for this week
+          renderWorkouts(i); 
+        }; 
+        
+        // Label text
+        const label = isDeload ? 'DELOAD' : (isPeak ? 'PEAK' : 'SEM'); 
+        chip.innerHTML = `
+          <span class="text-[7px] font-bold opacity-70 uppercase">${label}</span>
+          <span class="text-xl font-hud font-bold">${i}</span>
+        `; 
+        
+        container.appendChild(chip); 
+      } 
+      
+      // Auto-scroll to active chip
+      setTimeout(() => { 
+        const active = container.querySelector('.active'); 
+        if (active) {
+          active.scrollIntoView({ behavior: 'smooth', inline: 'center' }); 
+        }
+      }, 500); 
+    }
+    
+    // ========================================
+    // WORKOUTS RENDERING
+    // ========================================
+    
+    function renderWorkouts(week) { 
+      const container = document.getElementById('workouts-container'); 
+      container.innerHTML = ''; 
+      
+      const weekData = programData.getWeek(week); 
+      
+      // Update block info banner
+      document.getElementById('block-label').textContent = `BLOC ${weekData.block} • SEMAINE ${week}`; 
+      document.getElementById('block-name').textContent = weekData.blockName.toUpperCase(); 
+      document.getElementById('block-tech').textContent = weekData.technique; 
+      
+      const days = ['dimanche', 'mardi', 'vendredi', 'maison']; 
+      
+      // Day metadata for styling
+      const dayMeta = { 
+        'dimanche': { 
+          color: 'text-[var(--cyan)]', 
+          bg: 'bg-[var(--cyan)]/10', 
+          border: 'border-[var(--cyan)]/30', 
+          icon: 'zap' 
+        }, 
+        'mardi': { 
+          color: 'text-[var(--magenta)]', 
+          bg: 'bg-[var(--magenta)]/10', 
+          border: 'border-[var(--magenta)]/30', 
+          icon: 'dumbbell' 
+        }, 
+        'vendredi': { 
+          color: 'text-[var(--cyan)]', 
+          bg: 'bg-[var(--cyan)]/10', 
+          border: 'border-[var(--cyan)]/30', 
+          icon: 'activity' 
+        }, 
+        'maison': { 
+          color: 'text-slate-400', 
+          bg: 'bg-slate-800', 
+          border: 'border-slate-700', 
+          icon: 'home' 
+        } 
+      }; 
+      
+      // Create workout cards
+      days.forEach((day, index) => { 
+        const workout = weekData[day]; 
+        if (!workout) return; 
+        
+        const meta = dayMeta[day]; 
+        
+        // Technique badge
+        let techniqueBadge = `<span class="px-2 py-0.5 rounded bg-black/40 border border-white/10 text-[9px] font-bold ${meta.color} uppercase">${weekData.technique.split('+')[0]}</span>`; 
+        
+        if (day === 'maison') {
+          techniqueBadge = `<span class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-[9px] font-bold text-slate-400 uppercase">ACCESSOIRE</span>`; 
+        }
+        
+        let activeClass = 'border-white/10'; 
+        
+        const card = document.createElement('div'); 
+        card.className = `card-sheen bg-[#0f172a] ${activeClass} border rounded-2xl p-4 touch-pop active:bg-[#1e293b] animate-entry relative overflow-hidden`; 
+        card.style.animationDelay = `${index * 0.1}s`; 
+        
+        // Click handler - navigate to session
+        card.onclick = () => window.location.href = `session.html?week=${week}&day=${day}`; 
+        
+        card.innerHTML = `
+          <div class="flex justify-between items-start mb-4 relative z-10">
+            <!-- Icon -->
+            <div class="w-12 h-12 rounded-xl ${meta.bg} border ${meta.border} flex items-center justify-center shadow-lg">
+              <i data-lucide="${meta.icon}" class="w-6 h-6 ${meta.color}"></i>
+            </div>
+            
+            <!-- Workout Info -->
+            <div class="flex-1 ml-4">
+              <div class="flex items-center gap-2 mb-1">
+                ${techniqueBadge}
+                <span class="text-[9px] font-bold text-slate-500 uppercase tracking-wider">${day.toUpperCase()}</span>
+              </div>
+              <h3 class="text-lg font-hud font-black text-white italic uppercase leading-none">${workout.name.split('+')[0]}</h3>
+            </div>
+            
+            <!-- Details Button -->
+            <button class="scan-btn w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-[var(--cyan)] hover:text-black transition-colors touch-pop border border-white/10" data-day="${day}">
+              <i data-lucide="eye" class="w-5 h-5 pointer-events-none"></i>
+            </button>
+          </div>
+          
+          <!-- Footer Stats -->
+          <div class="flex items-center justify-between border-t border-white/5 pt-3 relative z-10">
+            <div class="flex gap-4">
+              <div>
+                <div class="text-[8px] font-bold text-slate-500 uppercase">Durée</div>
+                <div class="text-sm font-mono font-bold text-white">${workout.duration}m</div>
+              </div>
+              <div>
+                <div class="text-[8px] font-bold text-slate-500 uppercase">Séries</div>
+                <div class="text-sm font-mono font-bold text-white">${workout.totalSets}</div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-[8px] font-bold text-slate-500 uppercase">RPE Cible</div>
+              <div class="text-sm font-bold text-[var(--magenta)] glow-text-magenta">${weekData.rpeTarget}</div>
+            </div>
+          </div>
+        `; 
+        
+        container.appendChild(card); 
+      }); 
+      
+      // Attach modal button handlers
+      document.querySelectorAll('.scan-btn').forEach(btn => { 
+        btn.addEventListener('click', (e) => { 
+          e.stopPropagation(); 
+          openDetails(btn.dataset.day); 
+        }); 
+      }); 
+      
+      lucide.createIcons(); 
+    }
+    
+    // ========================================
+    // MODAL MANAGEMENT
+    // ========================================
+    
+    window.openDetails = (day) => { 
+      const workout = programData.getWorkout(currentWeek, day); 
+      
+      document.getElementById('modal-title').textContent = day.toUpperCase(); 
+      document.getElementById('modal-subtitle').textContent = workout.name; 
+      
+      const list = document.getElementById('modal-body'); 
+      list.innerHTML = ''; 
+      
+      workout.exercises.forEach((ex, idx) => { 
+        const item = document.createElement('div'); 
+        item.className = 'flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5'; 
+        item.innerHTML = `
+          <div class="flex items-center gap-3">
+            <div class="w-6 h-6 rounded bg-white/10 flex items-center justify-center text-xs font-bold text-slate-400">${idx + 1}</div>
+            <div>
+              <div class="text-sm font-bold text-white">${ex.name}</div>
+              <div class="text-[10px] text-slate-500 font-mono">${ex.sets}x${ex.reps} • ${ex.weight}kg</div>
+            </div>
+          </div>
+        `; 
+        list.appendChild(item); 
+      }); 
+      
+      document.getElementById('modal-start-btn').onclick = () => {
+        window.location.href = `session.html?week=${currentWeek}&day=${day}`; 
+      };
+      
+      document.getElementById('details-modal').classList.add('open'); 
+    };
+    
+    window.closeModal = () => {
+      document.getElementById('details-modal').classList.remove('open'); 
+    };
+    
+    // ========================================
+    // START APPLICATION
+    // ========================================
+    
+    initOps();
+  </script>
+</body>
+</html>

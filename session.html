@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+  <title>SESSION // COCKPIT TACTIQUE</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  
+  <style>
+    :root { 
+      --cyan: #00eaff; 
+      --magenta: #ff2d95; 
+      --orange: #f97316; 
+      --bg: #050510; 
+      --panel-bg: rgba(20, 25, 40, 0.95); 
+    }
+    
+    body { 
+      background-color: var(--bg); 
+      font-family: 'Inter', sans-serif; 
+      color: white; 
+      height: 100vh; 
+      overflow: hidden; 
+      display: flex; 
+      flex-direction: column; 
+      padding-top: env(safe-area-inset-top); 
+      padding-bottom: env(safe-area-inset-bottom); 
+      touch-action: manipulation; 
+    }
+    
+    .font-hud { font-family: 'Rajdhani', sans-serif; }
+    .font-mono-tech { font-family: 'Share Tech Mono', monospace; }
+    .accel-gpu { transform: translateZ(0); will-change: transform; }
+    
+    .cockpit-svg-container { 
+      width: 100%; 
+      height: 100%; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      position: relative; 
+    }
+    
+    .reactor-ring { 
+      fill: none; 
+      stroke: rgba(255,255,255,0.1); 
+      stroke-width: 1; 
+      transform-origin: center; 
+      animation: spin 30s linear infinite; 
+    }
+    
+    .reactor-core { 
+      fill: var(--cyan); 
+      opacity: 0.2; 
+      filter: blur(20px); 
+      transition: fill 0.5s, opacity 0.5s; 
+    }
+    
+    .reactor-core.resting { 
+      fill: var(--orange); 
+      opacity: 0.4; 
+      animation: pulseCore 1s infinite alternate; 
+    }
+    
+    @keyframes spin { 
+      100% { transform: rotate(360deg); } 
+    }
+    
+    @keyframes pulseCore { 
+      0% { opacity: 0.2; transform: scale(1); } 
+      100% { opacity: 0.5; transform: scale(1.1); } 
+    }
+    
+    .intel-panel { 
+      background: var(--panel-bg); 
+      border: 1px solid rgba(0, 234, 255, 0.15); 
+      border-left: 4px solid var(--cyan); 
+      backdrop-filter: blur(10px); 
+      box-shadow: 0 5px 20px rgba(0,0,0,0.5); 
+    }
+    
+    .flash-screen { 
+      position: fixed; 
+      inset: 0; 
+      pointer-events: none; 
+      z-index: 90; 
+      background: white; 
+      opacity: 0; 
+    }
+    
+    .flash-screen.hit { animation: flashHit 0.2s ease-out; }
+    
+    @keyframes flashHit { 
+      0% { opacity: 0.2; } 
+      100% { opacity: 0; } 
+    }
+    
+    .touch-btn { 
+      transition: transform 0.05s, filter 0.1s; 
+      cursor: pointer; 
+    }
+    
+    .touch-btn:active { 
+      transform: scale(0.95); 
+      filter: brightness(1.3); 
+    }
+    
+    .lcd-panel { 
+      background: #0a0a15; 
+      border: 1px solid #334155; 
+      border-radius: 12px; 
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.8); 
+      position: relative; 
+    }
+    
+    .lcd-panel::before { 
+      content: ''; 
+      position: absolute; 
+      inset: 0; 
+      background: linear-gradient(rgba(255,255,255,0.03) 50%, transparent 50%); 
+      background-size: 100% 4px; 
+      pointer-events: none; 
+    }
+  </style>
+</head>
+
+<body>
+  <script>document.addEventListener("touchstart", function(){}, true);</script>
+  
+  <!-- XP Flash Animation -->
+  <div id="xp-flash" class="fixed inset-0 pointer-events-none z-[100] flex items-center justify-center opacity-0 scale-50 transition-all duration-500">
+    <div class="text-center transform translate-y-[-50px]">
+      <div class="text-4xl font-black font-hud text-[var(--magenta)] drop-shadow-[0_0_15px_rgba(255,45,149,0.8)]">+50 XP</div>
+      <div class="text-sm font-bold text-white uppercase tracking-widest">SÉRIE VALIDÉE</div>
+    </div>
+  </div>
+  
+  <!-- Flash Screen Effect -->
+  <div class="flash-screen" id="flash-fx"></div>
+  
+  <!-- Header -->
+  <header class="flex-none h-14 px-4 flex justify-between items-center bg-[#050510]/90 backdrop-blur-md border-b border-white/10 z-50">
+    <button onclick="window.location.href='workouts.html'" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-slate-400 touch-btn">
+      <i data-lucide="x" class="w-5 h-5"></i>
+    </button>
+    
+    <div class="px-3 py-1 rounded-full bg-white/5 border border-white/10 flex items-center gap-2">
+      <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+      <span class="text-xs font-mono-tech font-bold text-white" id="session-timer">00:00</span>
+    </div>
+    
+    <div class="w-10 h-10 flex items-center justify-center touch-btn">
+      <i data-lucide="more-vertical" class="w-5 h-5 text-slate-400"></i>
+    </div>
+  </header>
+  
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-col relative overflow-hidden">
+    <!-- Cockpit Visual Area -->
+    <div class="flex-1 relative flex items-center justify-center min-h-[300px]">
+      <!-- Grid Background -->
+      <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px] opacity-30 pointer-events-none"></div>
+      
+      <!-- SVG Reactor -->
+      <div class="w-full h-full relative cockpit-svg-container accel-gpu" id="cockpit-visual">
+        <svg viewBox="0 0 400 400" class="w-full h-full max-w-[400px]">
+          <defs>
+            <radialGradient id="coreGrad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="currentColor" stop-opacity="0.3"/>
+              <stop offset="100%" stop-color="transparent"/>
+            </radialGradient>
+          </defs>
+          
+          <!-- Reactor Rings -->
+          <circle cx="200" cy="200" r="140" class="reactor-ring" stroke-dasharray="10 5" opacity="0.3" />
+          <circle cx="200" cy="200" r="120" class="reactor-ring" stroke-dasharray="80 140" stroke="var(--magenta)" stroke-width="2" style="animation-duration: 15s; animation-direction: reverse;" />
+          
+          <!-- Core Circle -->
+          <circle id="reactor-core-circle" cx="200" cy="200" r="80" fill="url(#coreGrad)" class="reactor-core text-[var(--cyan)]" />
+          
+          <!-- Rest Progress Ring -->
+          <circle id="rest-progress-ring" cx="200" cy="200" r="95" fill="none" stroke="var(--orange)" stroke-width="6" stroke-linecap="round" stroke-dasharray="596" stroke-dashoffset="596" transform="rotate(-90 200 200)" opacity="0" />
+          
+          <!-- Standard Mode Display -->
+          <g id="data-mode-standard">
+            <text x="200" y="190" text-anchor="middle" fill="#fff" font-family="Rajdhani" font-size="60" font-weight="bold" id="current-set-disp">1</text>
+            <text x="200" y="220" text-anchor="middle" fill="#94a3b8" font-family="Share Tech Mono" font-size="14" letter-spacing="2">SÉRIE ACTUELLE</text>
+          </g>
+          
+          <!-- Rest Mode Display -->
+          <g id="data-mode-rest" opacity="0">
+            <text x="200" y="205" text-anchor="middle" fill="#fff" font-family="Share Tech Mono" font-size="50" font-weight="bold" id="rest-timer-txt">00:00</text>
+            <text x="200" y="235" text-anchor="middle" fill="var(--orange)" font-family="Rajdhani" font-size="12" font-weight="bold" letter-spacing="2">REFROIDISSEMENT</text>
+          </g>
+        </svg>
+      </div>
+      
+      <!-- Top Info Panels -->
+      <div class="absolute top-4 left-4 right-4 space-y-2 pointer-events-none">
+        <!-- Superset Badge -->
+        <div id="superset-badge" class="hidden rounded-lg p-2 border border-[var(--magenta)] bg-gradient-to-r from-[rgba(255,45,149,0.2)] to-transparent flex items-center gap-3 backdrop-blur-md shadow-[0_0_15px_rgba(255,45,149,0.3)]">
+          <div class="w-8 h-8 rounded-full bg-[var(--magenta)] flex items-center justify-center animate-pulse">
+            <i data-lucide="link" class="w-4 h-4 text-white"></i>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-[9px] font-bold text-[var(--magenta)] uppercase tracking-widest">SUPERSET ACTIF</span>
+            <span class="text-xs text-white font-bold leading-none" id="superset-name">--</span>
+          </div>
+        </div>
+        
+        <!-- Intel Panel -->
+        <div class="intel-panel rounded-r-lg p-3">
+          <div class="flex justify-between items-start mb-1">
+            <span class="text-[9px] font-bold text-cyan-400 uppercase tracking-widest">RENSEIGNEMENTS TACTIQUES</span>
+            <span class="text-[9px] font-mono text-slate-400" id="block-tech">TEMPO</span>
+          </div>
+          <div class="text-sm text-slate-200 font-medium leading-tight" id="ex-notes">--</div>
+        </div>
+      </div>
+      
+      <!-- Bottom Exercise Info -->
+      <div class="absolute bottom-4 left-4 right-4 pointer-events-none">
+        <div class="flex items-center justify-between mb-1">
+          <span class="px-2 py-0.5 rounded bg-[var(--cyan)]/10 border border-[var(--cyan)]/30 text-[9px] font-bold text-[var(--cyan)] uppercase" id="muscle-tag">CIBLE</span>
+          <div class="flex gap-1" id="dots-container"></div>
+        </div>
+        <h1 class="text-3xl font-hud font-black text-white uppercase italic leading-none drop-shadow-md truncate" id="ex-name">CHARGEMENT...</h1>
+      </div>
+    </div>
+    
+    <!-- Bottom Control Panel -->
+    <div class="bg-[#0f0f1a] border-t border-white/10 rounded-t-[30px] p-5 pb-10 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] z-20">
+      <!-- LCD Display -->
+      <div class="lcd-panel flex justify-between mb-6 px-4 py-3">
+        <div class="text-center w-1/3 border-r border-slate-700">
+          <div class="text-[8px] text-slate-500 uppercase font-bold mb-1">CIBLE</div>
+          <div class="text-lg font-mono-tech font-bold text-white">
+            <span id="t-sets">0</span>×<span id="t-reps">0</span>
+          </div>
+        </div>
+        <div class="text-center w-1/3 border-r border-slate-700">
+          <div class="text-[8px] text-slate-500 uppercase font-bold mb-1">CHARGE</div>
+          <div class="text-lg font-mono-tech font-bold text-[var(--cyan)]" id="t-load">0</div>
+        </div>
+        <div class="text-center w-1/3">
+          <div class="text-[8px] text-slate-500 uppercase font-bold mb-1">REPOS</div>
+          <div class="text-lg font-mono-tech font-bold text-white" id="t-rest">90s</div>
+        </div>
+      </div>
+      
+      <!-- Input Controls -->
+      <div class="grid grid-cols-2 gap-4 mb-6">
+        <!-- Weight Control -->
+        <div class="bg-slate-800/50 rounded-2xl p-2 flex flex-col items-center border border-white/5">
+          <span class="text-[8px] text-slate-500 uppercase font-bold mb-2">POIDS (KG)</span>
+          <div class="flex items-center justify-between w-full px-2">
+            <button onclick="modWeight(-2.5)" class="w-14 h-14 rounded-xl bg-white/10 flex items-center justify-center text-white text-2xl font-bold touch-btn active:bg-white/20 border border-white/5">-</button>
+            <span class="text-3xl font-hud font-bold text-white" id="in-weight">0</span>
+            <button onclick="modWeight(2.5)" class="w-14 h-14 rounded-xl bg-white/10 flex items-center justify-center text-white text-2xl font-bold touch-btn active:bg-white/20 border border-white/5">+</button>
+          </div>
+        </div>
+        
+        <!-- Reps Control -->
+        <div class="bg-slate-800/50 rounded-2xl p-2 flex flex-col items-center border border-white/5">
+          <span class="text-[8px] text-slate-500 uppercase font-bold mb-2">RÉPS</span>
+          <div class="flex items-center justify-between w-full px-2">
+            <button onclick="modReps(-1)" class="w-14 h-14 rounded-xl bg-white/10 flex items-center justify-center text-white text-2xl font-bold touch-btn active:bg-white/20 border border-white/5">-</button>
+            <span class="text-3xl font-hud font-bold text-white" id="in-reps">0</span>
+            <button onclick="modReps(1)" class="w-14 h-14 rounded-xl bg-white/10 flex items-center justify-center text-white text-2xl font-bold touch-btn active:bg-white/20 border border-white/5">+</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Action Buttons -->
+      <div id="action-area">
+        <!-- Validate Button -->
+        <button id="btn-validate" onclick="logSet()" class="w-full h-20 rounded-2xl bg-gradient-to-r from-[var(--cyan)] to-blue-600 flex items-center justify-center gap-3 shadow-[0_0_20px_rgba(0,234,255,0.4)] touch-btn group overflow-hidden relative">
+          <div class="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500"></div>
+          <span class="text-2xl font-hud font-black text-black uppercase tracking-widest">VALIDER SÉRIE</span>
+          <i data-lucide="check-circle-2" class="w-8 h-8 text-black fill-current"></i>
+        </button>
+        
+        <!-- Skip Rest Button -->
+        <button id="btn-skip-rest" onclick="skipRest()" class="hidden w-full h-20 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center gap-3 touch-btn">
+          <span class="text-xl font-hud font-bold text-white uppercase tracking-wider">PASSER LE REPOS</span>
+          <i data-lucide="fast-forward" class="w-6 h-6 text-white fill-current"></i>
+        </button>
+      </div>
+    </div>
+  </main>
+  
+  <script type="module">
+    import programData from './program-data.js';
+    import { WorkoutHistory } from './workout-history.js';
+    import { Gamification, Inputs, Utils, initIcons, CONSTANTS } from './app.js';
+    
+    // ========================================
+    // STATE
+    // ========================================
+    let s = { 
+      week: 1, 
+      day: 'dimanche', 
+      exIdx: 0, 
+      setIdx: 0, 
+      startTime: Date.now() 
+    };
+    
+    let workout = null;
+    let restTimer = null;
+    let weekData = null;
+    
+    // ========================================
+    // GLOBAL FUNCTIONS (called from HTML onclick)
+    // ========================================
+    
+    window.modWeight = (delta) => Inputs.modifyWeight(delta);
+    window.modReps = (delta) => Inputs.modifyReps(delta);
+    
+    window.logSet = () => { 
+      const ex = workout.exercises[s.exIdx];
+      
+      // ===== LOG HISTORIQUE =====
+      const weight = parseFloat(document.getElementById('in-weight').textContent);
+      const reps = parseInt(document.getElementById('in-reps').textContent);
+      
+      WorkoutHistory.logSet({
+        week: s.week,
+        day: s.day,
+        exercise: ex.name,
+        exerciseIndex: s.exIdx,
+        setNumber: s.setIdx + 1,
+        weight: weight,
+        reps: reps,
+        targetWeight: ex.weight,
+        targetReps: typeof ex.reps === 'string' ? 8 : ex.reps,
+        technique: weekData.technique,
+        notes: ex.notes || ''
+      });
+      // ===== FIN LOG =====
+      
+      // Flash effect
+      document.getElementById('flash-fx').classList.add('hit'); 
+      setTimeout(() => document.getElementById('flash-fx').classList.remove('hit'), 200); 
+      
+      // XP animation
+      const xpFlash = document.getElementById('xp-flash'); 
+      xpFlash.style.opacity = '1'; 
+      xpFlash.style.transform = 'scale(1)'; 
+      setTimeout(() => { 
+        xpFlash.style.opacity = '0'; 
+        xpFlash.style.transform = 'scale(1.5) translateY(-50px)'; 
+        setTimeout(() => { 
+          xpFlash.style.transform = 'scale(0.5)'; 
+        }, 300); 
+      }, CONSTANTS.XP_FLASH_DURATION); 
+      
+      // Add XP using Gamification module
+      Gamification.addXP(CONSTANTS.XP_PER_SET);
+      
+      // Mark dot as completed
+      const dots = document.getElementById('dots-container').children; 
+      if (dots[s.setIdx]) {
+        dots[s.setIdx].classList.add('bg-[var(--cyan)]', 'shadow-[0_0_5px_var(--cyan)]'); 
+      }
+      
+      // Move to next set
+      s.setIdx++; 
+      document.getElementById('current-set-disp').textContent = s.setIdx + 1; 
+      
+      // Check if exercise is finished
+      const isFinished = s.setIdx >= ex.sets; 
+      
+      // Start rest timer
+      startRest(ex.rest || 90, isFinished); 
+    };
+    
+    window.skipRest = () => { 
+      clearInterval(restTimer); 
+      
+      // Reset reactor visual to active state
+      document.getElementById('reactor-core-circle').classList.remove('resting'); 
+      document.getElementById('reactor-core-circle').classList.add('text-[var(--cyan)]'); 
+      document.getElementById('reactor-core-circle').classList.remove('text-[var(--orange)]'); 
+      document.getElementById('rest-progress-ring').style.opacity = '0'; 
+      
+      // Switch displays
+      document.getElementById('data-mode-standard').setAttribute('opacity', '1'); 
+      document.getElementById('data-mode-rest').setAttribute('opacity', '0'); 
+      
+      // Switch buttons
+      document.getElementById('btn-validate').classList.remove('hidden'); 
+      document.getElementById('btn-skip-rest').classList.add('hidden'); 
+      
+      // Load next exercise if this one is done
+      if (window._nextEx) {
+        loadEx(s.exIdx + 1); 
+      }
+    };
+    
+    // ========================================
+    // INITIALIZATION
+    // ========================================
+    
+    function init() { 
+      initIcons(); 
+      
+      // Get URL parameters
+      const p = new URLSearchParams(window.location.search); 
+      s.week = parseInt(p.get('week')) || 1; 
+      s.day = p.get('day') || 'dimanche'; 
+      
+      // Load workout data
+      try { 
+        weekData = programData.getWeek(s.week); 
+        workout = programData.getWorkout(s.week, s.day); 
+      } catch(e) { 
+        console.error('Error loading workout:', e);
+        window.location.href = 'workouts.html'; 
+        return; 
+      } 
+      
+      // Set block technique
+      document.getElementById('block-tech').textContent = weekData.technique || "STANDARD"; 
+      
+      // Start session timer
+      setInterval(() => { 
+        const d = Math.floor((Date.now() - s.startTime) / 1000); 
+        document.getElementById('session-timer').textContent = Utils.formatTime(d);
+      }, 1000); 
+      
+      // Load first exercise
+      loadEx(0); 
+    }
+    
+    // ========================================
+    // EXERCISE MANAGEMENT
+    // ========================================
+    
+    function loadEx(idx) { 
+      // Check if workout is complete
+      if (idx >= workout.exercises.length) { 
+        // Add workout completion XP
+        Gamification.addXP(CONSTANTS.XP_PER_WORKOUT);
+        alert("MISSION ACCOMPLIE !"); 
+        window.location.href = 'index.html'; 
+        return; 
+      } 
+      
+      // Update state
+      s.exIdx = idx; 
+      s.setIdx = 0; 
+      
+      const ex = workout.exercises[idx]; 
+      
+      // Update display
+      document.getElementById('ex-name').textContent = ex.name; 
+      document.getElementById('muscle-tag').textContent = ex.muscle[0]; 
+      document.getElementById('t-sets').textContent = ex.sets; 
+      document.getElementById('t-reps').textContent = ex.reps; 
+      document.getElementById('t-load').textContent = ex.weight + 'kg'; 
+      document.getElementById('t-rest').textContent = (ex.rest || 90) + 's'; 
+      document.getElementById('in-weight').textContent = ex.weight; 
+      document.getElementById('in-reps').textContent = typeof ex.reps === 'string' ? 8 : ex.reps; 
+      document.getElementById('current-set-disp').textContent = "1"; 
+      document.getElementById('ex-notes').textContent = ex.notes || "Exécution contrôlée."; 
+      
+      // Handle superset badge
+      const ssBadge = document.getElementById('superset-badge'); 
+      if (ex.isSuperset) { 
+        ssBadge.classList.remove('hidden'); 
+        ssBadge.classList.add('flex'); 
+        document.getElementById('superset-name').textContent = ex.supersetWith || "NEXT"; 
+      } else { 
+        ssBadge.classList.add('hidden'); 
+        ssBadge.classList.remove('flex'); 
+      } 
+      
+      // Create progress dots
+      const dc = document.getElementById('dots-container'); 
+      dc.innerHTML = ''; 
+      for (let i = 0; i < ex.sets; i++) { 
+        const d = document.createElement('div'); 
+        d.className = 'w-2 h-2 rounded-full bg-white/20 transition-all'; 
+        dc.appendChild(d); 
+      } 
+    }
+    
+    // ========================================
+    // REST TIMER
+    // ========================================
+    
+    function startRest(duration, isExDone) { 
+      window._nextEx = isExDone; 
+      let rem = duration; 
+      const total = duration; 
+      
+      // Clear existing timer
+      if (restTimer) clearInterval(restTimer); 
+      
+      // Set reactor to resting state
+      document.getElementById('reactor-core-circle').classList.add('resting'); 
+      document.getElementById('reactor-core-circle').classList.remove('text-[var(--cyan)]'); 
+      document.getElementById('reactor-core-circle').classList.add('text-[var(--orange)]'); 
+      document.getElementById('rest-progress-ring').style.opacity = '1'; 
+      
+      // Switch displays
+      document.getElementById('data-mode-standard').setAttribute('opacity', '0'); 
+      document.getElementById('data-mode-rest').setAttribute('opacity', '1'); 
+      
+      // Switch buttons
+      document.getElementById('btn-validate').classList.add('hidden'); 
+      document.getElementById('btn-skip-rest').classList.remove('hidden'); 
+      
+      const ring = document.getElementById('rest-progress-ring'); 
+      const circ = 596; 
+      
+      const updateTimer = () => { 
+        rem--; 
+        
+        // Update timer display
+        document.getElementById('rest-timer-txt').textContent = Utils.formatTime(rem);
+        
+        // Update progress ring
+        const offset = circ - ((rem / total) * circ); 
+        ring.style.strokeDashoffset = offset; 
+        
+        // Check if timer finished
+        if (rem <= 0) { 
+          Utils.vibrate([200, 100, 200]);
+          skipRest(); 
+        } 
+      }; 
+      
+      updateTimer(); 
+      restTimer = setInterval(updateTimer, 1000); 
+    }
+    
+    // ========================================
+    // START APP
+    // ========================================
+    
+    init();
+  </script>
+</body>
+</html>

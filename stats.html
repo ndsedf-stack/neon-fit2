@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+  <title>NEON FIT // STATISTIQUES</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  
+  <style>
+    :root { 
+      --cyan: #00eaff; 
+      --magenta: #ff2d95; 
+      --dark-bg: #050510; 
+    }
+    
+    body { 
+      background-color: var(--dark-bg); 
+      font-family: 'Inter', sans-serif; 
+      color: white; 
+      padding-bottom: env(safe-area-inset-bottom); 
+      -webkit-tap-highlight-color: transparent; 
+    }
+    
+    .font-hud { font-family: 'Rajdhani', sans-serif; }
+    .font-mono-tech { font-family: 'Share Tech Mono', monospace; }
+    
+    .glow-text-cyan { text-shadow: 0 0 10px rgba(0, 234, 255, 0.6); }
+    
+    .touch-pop { 
+      transition: transform 0.1s, filter 0.1s; 
+      cursor: pointer; 
+    }
+    
+    .touch-pop:active { 
+      transform: scale(0.97); 
+      filter: brightness(1.3); 
+    }
+    
+    @keyframes slideUpFade {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .animate-entry {
+      animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      opacity: 0;
+    }
+    
+    .stat-card {
+      background: linear-gradient(135deg, rgba(0, 234, 255, 0.05) 0%, rgba(255, 45, 149, 0.05) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 200%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+      animation: shimmer 3s infinite;
+    }
+    
+    @keyframes shimmer {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+  </style>
+</head>
+
+<body class="antialiased pb-24">
+  <script>document.addEventListener("touchstart", function(){}, true);</script>
+  
+  <!-- Header -->
+  <header class="fixed top-0 w-full z-40 bg-[#050510]/95 backdrop-blur-md border-b border-white/10 pt-safe pb-3 shadow-2xl">
+    <div class="px-4 h-12 flex items-center justify-between mt-2">
+      <h1 class="text-xl font-hud font-black text-white italic tracking-wider">
+        STATISTIQUES
+      </h1>
+      
+      <button onclick="window.location.href='index.html'" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-slate-400 touch-pop border border-white/10">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+  </header>
+  
+  <!-- Main Content -->
+  <main class="pt-20 px-4 pb-32 space-y-6">
+    
+    <!-- Overview Stats -->
+    <section class="animate-entry" style="animation-delay: 0s;">
+      <h2 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 pl-1">
+        Vue d'ensemble
+      </h2>
+      
+      <div class="grid grid-cols-2 gap-3">
+        <!-- Total Workouts -->
+        <div class="stat-card">
+          <div class="relative z-10">
+            <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+              Séances
+            </div>
+            <div class="text-3xl font-hud font-black text-[var(--cyan)] glow-text-cyan" id="stat-workouts">
+              0
+            </div>
+          </div>
+        </div>
+        
+        <!-- Total Sets -->
+        <div class="stat-card">
+          <div class="relative z-10">
+            <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+              Séries
+            </div>
+            <div class="text-3xl font-hud font-black text-[var(--cyan)] glow-text-cyan" id="stat-sets">
+              0
+            </div>
+          </div>
+        </div>
+        
+        <!-- Total Volume -->
+        <div class="stat-card">
+          <div class="relative z-10">
+            <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+              Volume Total
+            </div>
+            <div class="text-3xl font-hud font-black text-[var(--magenta)]" id="stat-volume">
+              0t
+            </div>
+          </div>
+        </div>
+        
+        <!-- Streak -->
+        <div class="stat-card">
+          <div class="relative z-10">
+            <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+              Série Jours
+            </div>
+            <div class="text-3xl font-hud font-black text-orange-500 flex items-center gap-1">
+              <i data-lucide="flame" class="w-6 h-6 fill-orange-500/20"></i>
+              <span id="stat-streak">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Recent History -->
+    <section class="animate-entry" style="animation-delay: 0.1s;">
+      <div class="flex items-center justify-between mb-3 pl-1">
+        <h2 class="text-xs font-bold text-slate-500 uppercase tracking-widest">
+          Historique Récent
+        </h2>
+        <button onclick="clearHistory()" class="text-[10px] font-bold text-red-500 hover:text-red-400 transition-colors touch-pop">
+          Effacer
+        </button>
+      </div>
+      
+      <div id="history-container" class="space-y-2">
+        <!-- History items injected here -->
+      </div>
+      
+      <div id="empty-state" class="hidden text-center py-12">
+        <i data-lucide="database" class="w-12 h-12 text-slate-600 mx-auto mb-3"></i>
+        <p class="text-sm text-slate-500">Aucun historique pour le moment</p>
+        <p class="text-xs text-slate-600 mt-1">Complétez votre première séance !</p>
+      </div>
+    </section>
+    
+    <!-- Export/Import -->
+    <section class="animate-entry" style="animation-delay: 0.2s;">
+      <h2 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 pl-1">
+        Données
+      </h2>
+      
+      <div class="flex gap-3">
+        <button onclick="exportData()" class="flex-1 py-3 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center gap-2 touch-pop">
+          <i data-lucide="download" class="w-4 h-4"></i>
+          <span class="text-sm font-bold">Exporter</span>
+        </button>
+        
+        <button onclick="importData()" class="flex-1 py-3 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center gap-2 touch-pop">
+          <i data-lucide="upload" class="w-4 h-4"></i>
+          <span class="text-sm font-bold">Importer</span>
+        </button>
+      </div>
+    </section>
+    
+  </main>
+  
+  <!-- Bottom Nav -->
+  <nav class="fixed bottom-5 left-4 right-4 h-16 bg-[#0a0a15]/90 backdrop-blur-2xl border border-white/10 rounded-2xl flex justify-around items-center z-50 shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
+    <button onclick="window.location.href='index.html'" class="flex flex-col items-center gap-1 w-12 text-slate-500 hover:text-white transition-colors touch-pop">
+      <i data-lucide="layout-grid" class="w-6 h-6"></i>
+      <span class="text-[8px] font-bold uppercase">QG</span>
+    </button>
+    
+    <button onclick="window.location.href='workouts.html'" class="flex flex-col items-center gap-1 w-12 text-slate-500 hover:text-white transition-colors touch-pop">
+      <i data-lucide="target" class="w-6 h-6"></i>
+      <span class="text-[8px] font-bold uppercase">Ops</span>
+    </button>
+    
+    <!-- FAB -->
+    <div class="relative -top-6">
+      <button onclick="window.location.href='workouts.html'" class="w-16 h-16 rounded-full bg-gradient-to-br from-[var(--magenta)] to-purple-700 flex items-center justify-center shadow-[0_0_25px_rgba(255,45,149,0.5)] border-4 border-[#050510] transition-transform active:scale-90 touch-pop">
+        <i data-lucide="zap" class="w-8 h-8 text-white fill-white"></i>
+      </button>
+    </div>
+
+    <button class="flex flex-col items-center gap-1 w-12 text-[var(--cyan)] touch-pop">
+      <i data-lucide="bar-chart-2" class="w-6 h-6 drop-shadow-[0_0_8px_rgba(0,234,255,0.6)]"></i>
+      <span class="text-[8px] font-bold uppercase">Stats</span>
+    </button>
+    
+    <button onclick="alert('Bientôt disponible')" class="flex flex-col items-center gap-1 w-12 text-slate-500 hover:text-white transition-colors touch-pop">
+      <i data-lucide="user-circle" class="w-6 h-6"></i>
+      <span class="text-[8px] font-bold uppercase">ID</span>
+    </button>
+  </nav>
+  
+  <script type="module">
+    import { WorkoutHistory, WorkoutStats } from './workout-history.js';
+    import { initIcons } from './app.js';
+    
+    // ========================================
+    // INITIALIZATION
+    // ========================================
+    
+    function init() {
+      initIcons();
+      loadStats();
+      loadHistory();
+    }
+    
+    // ========================================
+    // LOAD STATISTICS
+    // ========================================
+    
+    function loadStats() {
+      // Overview stats
+      document.getElementById('stat-workouts').textContent = WorkoutStats.getTotalWorkouts();
+      document.getElementById('stat-sets').textContent = WorkoutStats.getTotalSets();
+      
+      const volume = WorkoutStats.getTotalVolume();
+      document.getElementById('stat-volume').textContent = (volume / 1000).toFixed(1) + 't';
+      
+      document.getElementById('stat-streak').textContent = WorkoutStats.getStreak();
+    }
+    
+    // ========================================
+    // LOAD HISTORY
+    // ========================================
+    
+    function loadHistory() {
+      const container = document.getElementById('history-container');
+      const emptyState = document.getElementById('empty-state');
+      const history = WorkoutHistory.getAll();
+      
+      if (history.length === 0) {
+        container.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+        return;
+      }
+      
+      container.classList.remove('hidden');
+      emptyState.classList.add('hidden');
+      container.innerHTML = '';
+      
+      // Group by workout session (date + week + day)
+      const sessions = {};
+      
+      history.forEach(entry => {
+        const key = `${entry.date}-${entry.week}-${entry.day}`;
+        if (!sessions[key]) {
+          sessions[key] = {
+            date: entry.date,
+            week: entry.week,
+            day: entry.day,
+            sets: []
+          };
+        }
+        sessions[key].sets.push(entry);
+      });
+      
+      // Convert to array and sort by date (newest first)
+      const sessionList = Object.values(sessions).sort((a, b) => {
+        return new Date(b.date.split('/').reverse().join('-')) - 
+               new Date(a.date.split('/').reverse().join('-'));
+      });
+      
+      // Show last 20 sessions
+      sessionList.slice(0, 20).forEach((session, index) => {
+        const card = document.createElement('div');
+        card.className = 'bg-[#0f172a] border border-white/10 rounded-xl p-3 animate-entry';
+        card.style.animationDelay = `${index * 0.05}s`;
+        
+        const totalVolume = session.sets.reduce((sum, s) => sum + (s.weight * s.reps), 0);
+        const exercises = new Set(session.sets.map(s => s.exercise)).size;
+        
+        card.innerHTML = `
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-lg bg-[var(--cyan)]/10 border border-[var(--cyan)]/30 flex items-center justify-center">
+                <i data-lucide="calendar" class="w-4 h-4 text-[var(--cyan)]"></i>
+              </div>
+              <div>
+                <div class="text-sm font-bold text-white">${session.day.toUpperCase()}</div>
+                <div class="text-[10px] text-slate-500">Semaine ${session.week} • ${session.date}</div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-xs font-mono-tech font-bold text-white">${session.sets.length} sets</div>
+              <div class="text-[10px] text-slate-500">${exercises} exercices</div>
+            </div>
+          </div>
+          <div class="flex items-center justify-between pt-2 border-t border-white/5">
+            <div class="text-[10px] text-slate-500">Volume total</div>
+            <div class="text-sm font-bold text-[var(--magenta)]">${(totalVolume / 1000).toFixed(1)}t</div>
+          </div>
+        `;
+        
+        container.appendChild(card);
+      });
+      
+      initIcons();
+    }
+    
+    // ========================================
+    // GLOBAL FUNCTIONS
+    // ========================================
+    
+    window.clearHistory = () => {
+      if (WorkoutHistory.clear()) {
+        loadStats();
+        loadHistory();
+      }
+    };
+    
+    window.exportData = () => {
+      const data = WorkoutHistory.export();
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `neon-fit-backup-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+    
+    window.importData = () => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'application/json';
+      input.onchange = (e) => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          if (WorkoutHistory.import(event.target.result)) {
+            alert('Import réussi !');
+            loadStats();
+            loadHistory();
+          } else {
+            alert('Erreur lors de l\'import');
+          }
+        };
+        reader.readAsText(file);
+      };
+      input.click();
+    };
+    
+    // ========================================
+    // START
+    // ========================================
+    
+    init();
+  </script>
+</body>
+</html>

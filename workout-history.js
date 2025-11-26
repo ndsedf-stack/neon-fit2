@@ -72,7 +72,7 @@ export const WorkoutHistory = {
    * @returns {Array}
    */
   getByWeek: (week) => {
-    return WorkoutHistory.getAll().filter(entry => entry.week === week);
+    return (WorkoutHistory.getAll() || []).filter(entry => entry.week === week);
   },
   
   /**
@@ -82,7 +82,7 @@ export const WorkoutHistory = {
    * @returns {Array}
    */
   getByDay: (week, day) => {
-    return WorkoutHistory.getAll().filter(
+    return (WorkoutHistory.getAll() || []).filter(
       entry => entry.week === week && entry.day === day
     );
   },
@@ -94,7 +94,7 @@ export const WorkoutHistory = {
    * @returns {Array}
    */
   getByExercise: (exerciseName, limit = null) => {
-    let results = WorkoutHistory.getAll().filter(
+    let results = (WorkoutHistory.getAll() || []).filter(
       entry => entry.exercise === exerciseName
     );
     
@@ -122,13 +122,13 @@ export const WorkoutHistory = {
    * @returns {Object} { current, previous, improvement }
    */
   getComparison: (currentWeek, day, exerciseName) => {
-    const current = WorkoutHistory.getAll().filter(
+    const current = (WorkoutHistory.getAll() || []).filter(
       entry => entry.week === currentWeek && 
                entry.day === day && 
                entry.exercise === exerciseName
     );
     
-    const previous = WorkoutHistory.getAll().filter(
+    const previous = (WorkoutHistory.getAll() || []).filter(
       entry => entry.week === currentWeek - 1 && 
                entry.day === day && 
                entry.exercise === exerciseName
@@ -220,7 +220,7 @@ export const WorkoutStats = {
    * @returns {number}
    */
   getTotalSets: () => {
-    return WorkoutHistory.getAll().length;
+    return (WorkoutHistory.getAll() || []).length;
   },
   
   /**
@@ -228,7 +228,7 @@ export const WorkoutStats = {
    * @returns {number}
    */
   getTotalVolume: () => {
-    return WorkoutHistory.getAll().reduce(
+    return (WorkoutHistory.getAll() || []).reduce(
       (total, entry) => total + (entry.weight * entry.reps), 
       0
     );
@@ -332,11 +332,11 @@ export const ProgressTracker = {
    * @returns {Object|null}
    */
   checkProgress: (exerciseName, currentWeek) => {
-    const current = WorkoutHistory.getAll().filter(
+    const current = (WorkoutHistory.getAll() || []).filter(
       entry => entry.week === currentWeek && entry.exercise === exerciseName
     );
     
-    const previous = WorkoutHistory.getAll().filter(
+    const previous = (WorkoutHistory.getAll() || []).filter(
       entry => entry.week === currentWeek - 1 && entry.exercise === exerciseName
     );
     

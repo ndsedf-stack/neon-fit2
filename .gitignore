@@ -1,0 +1,19 @@
+# Fichiers temporaires
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Fichiers de log
+*.log
+
+# Node modules (si vous en ajoutez plus tard)
+node_modules/
+
+# Fichiers de build
+dist/
+build/
+
+# Fichiers d'environnement
+.env
+.env.local

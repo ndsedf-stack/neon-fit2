@@ -422,18 +422,3 @@
   </script>
 </body>
 </html>
-
-### 2. `index.css` (STYLES - COMPLET)
-
-```css
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* Custom Scrollbar Hide */
-.scrollbar-hide::-webkit-scrollbar { display: none; }
-.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-
-/* Safe Area */
-.pt-safe { padding-top: env(safe-area-inset-top); }
-.pb-safe { padding-bottom: env(safe-area-inset-bottom); }

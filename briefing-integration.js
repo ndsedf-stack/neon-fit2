@@ -113,48 +113,71 @@ function init() {
   } 
   else if (path.includes('workouts.html')) {
     // Same as index.html - Eye buttons open briefing DIRECTLY
+    // CRITICAL: Override buttons BEFORE original listeners attach!
     
+    // Try IMMEDIATELY
     setTimeout(() => {
-      console.log('🔥 OVERRIDING WORKOUTS.HTML SCAN BUTTONS');
-      
-      const scanButtons = document.querySelectorAll('.scan-btn');
-      console.log(`🔍 Found ${scanButtons.length} scan buttons`);
-      
-      scanButtons.forEach((btn, index) => {
-        const day = btn.dataset.day;
-        if (!day) return;
-        
-        console.log(`🎯 Overriding scan button ${index + 1}: ${day}`);
-        
-        // Clone to remove ALL listeners
-        const newBtn = btn.cloneNode(true);
-        btn.parentNode.replaceChild(newBtn, btn);
-        
-        // Add NEW listener that opens BRIEFING directly
-        newBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          e.stopImmediatePropagation();
-          
-          const currentWeek = Utils.getCurrentWeek();
-          
-          if (navigator.vibrate) {
-            navigator.vibrate(10);
-          }
-          
-          console.log(`📋 Opening briefing from eye button: Week ${currentWeek}, Day ${day}`);
-          
-          // Redirect to briefing DIRECTLY
-          window.location.href = `briefing.html?week=${currentWeek}&day=${day}`;
-          
-          return false;
-        }, true);
-      });
-      
-      console.log('✅ All workouts scan buttons overridden to open briefing');
-      
-    }, 1500);
+      overrideWorkoutsScanButtons();
+    }, 100);
+    
+    // Try again after 500ms
+    setTimeout(() => {
+      overrideWorkoutsScanButtons();
+    }, 500);
+    
+    // Final try after 1000ms
+    setTimeout(() => {
+      overrideWorkoutsScanButtons();
+    }, 1000);
   }
+}
+
+// Extract to separate function to avoid duplication
+function overrideWorkoutsScanButtons() {
+  const scanButtons = document.querySelectorAll('.scan-btn');
+  if (scanButtons.length === 0) return;
+  
+  console.log(`🔥 OVERRIDING ${scanButtons.length} workouts scan buttons`);
+  
+  scanButtons.forEach((btn, index) => {
+    const day = btn.dataset.day;
+    if (!day) return;
+    
+    // Check if already overridden
+    if (btn.dataset.briefingOverride === 'true') {
+      return;
+    }
+    
+    console.log(`🎯 Overriding scan button ${index + 1}: ${day}`);
+    
+    // Clone to remove ALL listeners
+    const newBtn = btn.cloneNode(true);
+    newBtn.dataset.briefingOverride = 'true'; // Mark as overridden
+    btn.parentNode.replaceChild(newBtn, btn);
+    
+    // Add NEW listener that opens BRIEFING directly
+    newBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      
+      const currentWeek = Utils.getCurrentWeek();
+      
+      if (navigator.vibrate) {
+        navigator.vibrate(10);
+      }
+      
+      console.log(`📋 FORCE OPEN briefing: Week ${currentWeek}, Day ${day}`);
+      
+      // IMMEDIATE redirect
+      window.location.href = `briefing.html?week=${currentWeek}&day=${day}`;
+      
+      return false;
+    }, true); // Capture phase
+  });
+  
+  console.log('✅ Workouts scan buttons overridden');
+}
 }
 
 // Start integration when DOM is ready

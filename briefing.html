@@ -389,7 +389,7 @@
         /* Exercise Card */
         .exercise-card {
             position: relative;
-            background: rgba(20, 20, 20, 0.7);
+            background: rgba(20, 20, 20, 0.5); /* Réduit de 0.7 à 0.5 */
             border-radius: 20px;
             padding: 18px;
             margin-bottom: 12px;
@@ -499,7 +499,7 @@
         
         /* Mission Briefing */
         .mission-briefing {
-            background: linear-gradient(135deg, rgba(0, 217, 255, 0.05), rgba(168, 85, 247, 0.05));
+            background: linear-gradient(135deg, rgba(0, 217, 255, 0.03), rgba(168, 85, 247, 0.03)); /* Réduit de 0.05 à 0.03 */
             border-radius: 20px;
             padding: 24px;
             border: 1px solid rgba(0, 217, 255, 0.2);
@@ -919,13 +919,13 @@
         canvas.height = window.innerHeight;
         
         const stars = [];
-        const starCount = 100;
+        const starCount = 200; // Augmenté de 100 à 200
         
         class Star {
             constructor() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 0.8 + 0.1;
+                this.size = Math.random() * 1.5 + 0.3; // Augmenté de 0.8 à 1.5
                 this.brightness = Math.random();
                 this.twinkleSpeed = Math.random() * 0.008 + 0.002;
                 this.color = this.getStarColor();

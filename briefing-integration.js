@@ -248,7 +248,7 @@ function init() {
   console.log(`🔍 Current page: ${path}`);
   
   // Detect which page we're on
-  if (path.includes('index.html') || path === '/' || path === '') {
+  if (path.includes('index.html') || path === '/' || path === '' || path.endsWith('/')) {
     // Index page - wait for cards to be rendered
     setTimeout(() => {
       integrateIndexPage();

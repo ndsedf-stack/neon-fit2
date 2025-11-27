@@ -370,13 +370,9 @@
     
     /* iOS Safari specific fixes */
     @supports (-webkit-touch-callout: none) {
-      /* Disable iOS rubber band effect on fixed elements */
-      body {
-        position: fixed;
-        width: 100%;
-        overflow-y: scroll;
-        -webkit-overflow-scrolling: touch;
-      }
+  body {
+    -webkit-overflow-scrolling: touch;
+  }
       
       /* Better tap highlighting */
       * {

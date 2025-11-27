@@ -51,36 +51,19 @@ async function integrateIndexPage() {
     // Wait for workout cards to be rendered
     await waitForElement('.scan-btn');
     
-    // Find all workout cards
-    const workoutCards = document.querySelectorAll('#workout-stack > div');
-    console.log(`Found ${workoutCards.length} workout cards`);
+    // Find all scan buttons (eye buttons)
+    const scanButtons = document.querySelectorAll('.scan-btn');
+    console.log(`Found ${scanButtons.length} workout cards`);
     
-    workoutCards.forEach((card, index) => {
-      // Find scan button to get the day
-      const scanBtn = card.querySelector('.scan-btn');
-      if (!scanBtn) return;
-      
+    scanButtons.forEach((scanBtn, index) => {
       const day = scanBtn.dataset.day;
       
-      // Check if briefing button already exists
-      const existingBriefingBtn = card.querySelector('.briefing-btn');
-      if (existingBriefingBtn) {
-        console.log(`⚠️ Briefing button already exists for ${day}`);
-        return;
-      }
+      // Remove ALL existing event listeners by cloning
+      const newScanBtn = scanBtn.cloneNode(true);
+      scanBtn.parentNode.replaceChild(newScanBtn, scanBtn);
       
-      // Find the button container (should be the parent of scan button)
-      const btnContainer = scanBtn.parentNode;
-      
-      // Create briefing button
-      const briefingBtn = document.createElement('button');
-      briefingBtn.className = 'briefing-btn w-10 h-10 rounded-full bg-black/30 border border-[var(--cyan)]/40 flex items-center justify-center backdrop-blur-md hover:bg-[var(--cyan)] hover:text-black transition-colors shadow-lg touch-pop';
-      briefingBtn.dataset.day = day;
-      briefingBtn.innerHTML = '<i data-lucide="file-text" class="w-5 h-5 pointer-events-none"></i>';
-      briefingBtn.style.cssText = 'z-index: 999; position: relative; pointer-events: auto;';
-      
-      // CRITICAL: Add click handler that COMPLETELY blocks propagation
-      const handleClick = (e) => {
+      // Add NEW click handler that opens briefing instead of modal
+      newScanBtn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
@@ -91,24 +74,15 @@ async function integrateIndexPage() {
           navigator.vibrate(10);
         }
         
-        console.log(`📋 FORCE Opening briefing: Week ${currentWeek}, Day ${day}`);
+        console.log(`📋 Opening briefing from eye button: Week ${currentWeek}, Day ${day}`);
         
-        // IMMEDIATE redirect - don't wait for anything
+        // Redirect to briefing
         window.location.href = `briefing.html?week=${currentWeek}&day=${day}`;
         
         return false;
-      };
+      }, true);
       
-      // Attach to ALL event types on CAPTURE phase
-      briefingBtn.addEventListener('click', handleClick, true);
-      briefingBtn.addEventListener('mousedown', handleClick, true);
-      briefingBtn.addEventListener('touchstart', handleClick, true);
-      briefingBtn.addEventListener('pointerdown', handleClick, true);
-      
-      // Insert button BEFORE scan button
-      btnContainer.insertBefore(briefingBtn, scanBtn);
-      
-      console.log(`✅ Added briefing button for ${day}`);
+      console.log(`✅ Redirected eye button for ${day} to briefing.html`);
     });
     
     // Re-init Lucide icons

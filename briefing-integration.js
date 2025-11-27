@@ -4,7 +4,13 @@
  * Usage: Add <script type="module" src="./briefing-integration.js"></script> after app.js
  */
 
-import { Utils } from './app.js';
+// Utils is available globally from app.js
+const Utils = window.Utils || {
+  getCurrentWeek: () => {
+    const weekKey = localStorage.getItem('currentWeek');
+    return weekKey ? parseInt(weekKey) : 1;
+  }
+};
 
 console.log('🚀 Briefing Integration Module loaded');
 

@@ -799,7 +799,15 @@
         
         // Update muscle groups
         const muscleGroups = document.getElementById('muscleGroups');
-        const mainMuscles = dayData.exercises.map(ex => ex.mainMuscle).filter((v, i, a) => a.indexOf(v) === i);
+        const mainMuscles = dayData.exercises
+            .map(ex => {
+                // muscle peut être un string ou un array
+                if (Array.isArray(ex.muscle)) {
+                    return ex.muscle[0]; // Prendre le premier muscle si array
+                }
+                return ex.muscle;
+            })
+            .filter((v, i, a) => a.indexOf(v) === i && v);
         muscleGroups.textContent = mainMuscles.join(' + ').toUpperCase();
         
         // Calculate stats
@@ -843,13 +851,15 @@
                 ? `${exercise.reps[0]}-${exercise.reps[exercise.reps.length - 1]}`
                 : exercise.reps;
             
+            const muscleDisplay = Array.isArray(exercise.muscle) ? exercise.muscle[0] : exercise.muscle;
+            
             card.innerHTML = `
                 <div class="card-header">
                     <div class="exercise-number">${index + 1}</div>
                     <div class="exercise-info">
                         <div class="exercise-name">${exercise.name}</div>
                         <div class="exercise-meta">
-                            <span class="badge muscle">🔥 ${exercise.mainMuscle.toUpperCase()}</span>
+                            <span class="badge muscle">🔥 ${muscleDisplay.toUpperCase()}</span>
                             <span class="badge type">${exercise.category.toUpperCase()}</span>
                         </div>
                     </div>

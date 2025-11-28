@@ -348,6 +348,84 @@
       transform: scale(0.97);
     }
     
+    /* Floating Particles */
+    @-webkit-keyframes particle-float {
+      0%, 100% { -webkit-transform: translateY(0px); transform: translateY(0px); opacity: 0.3; }
+      50% { -webkit-transform: translateY(-20px); transform: translateY(-20px); opacity: 0.8; }
+    }
+    @keyframes particle-float {
+      0%, 100% { -webkit-transform: translateY(0px); transform: translateY(0px); opacity: 0.3; }
+      50% { -webkit-transform: translateY(-20px); transform: translateY(-20px); opacity: 0.8; }
+    }
+    
+    .particle {
+      position: absolute;
+      background: rgba(0, 217, 255, 0.8);
+      border-radius: 50%;
+      -webkit-animation: particle-float 3s infinite ease-in-out;
+      animation: particle-float 3s infinite ease-in-out;
+    }
+    
+    /* Skip Button NeuroFit Style */
+    .skip-btn-neuro {
+      position: relative;
+      padding: 18px 40px;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      overflow: hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    .skip-btn-glow {
+      position: absolute;
+      inset: -4px;
+      border-radius: 50px;
+      background: linear-gradient(135deg, #00d9ff, #00ff88, #ff9500);
+      opacity: 0.6;
+      filter: blur(15px);
+      -webkit-animation: skip-glow 1.5s ease-in-out infinite;
+      animation: skip-glow 1.5s ease-in-out infinite;
+    }
+    
+    .skip-btn-inner {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 32px;
+      border-radius: 50px;
+      background: linear-gradient(135deg, rgba(0, 217, 255, 0.15), rgba(0, 255, 136, 0.1));
+      border: 2px solid #00d9ff;
+      color: #00d9ff;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      box-shadow: 0 0 25px rgba(0, 217, 255, 0.4), inset 0 0 20px rgba(0, 217, 255, 0.1);
+      -webkit-transition: all 0.3s;
+      transition: all 0.3s;
+    }
+    
+    .skip-btn-neuro:active .skip-btn-inner {
+      -webkit-transform: scale(0.95);
+      transform: scale(0.95);
+      box-shadow: 0 0 40px rgba(0, 217, 255, 0.6), inset 0 0 30px rgba(0, 217, 255, 0.2);
+    }
+    
+    /* Rest overlay critical state */
+    .rest-critical #rest-overlay-timer {
+      background: linear-gradient(135deg, #ef4444 0%, #f97316 100%) !important;
+      -webkit-background-clip: text !important;
+      -webkit-text-fill-color: transparent !important;
+      -webkit-animation: countdown-pulse 0.5s ease-in-out infinite;
+      animation: countdown-pulse 0.5s ease-in-out infinite;
+    }
+    
+    .rest-critical #rest-circle-progress {
+      stroke: #ef4444 !important;
+    }
+    
     @supports (-webkit-touch-callout: none) {
       /* Fixes spécifiques iOS Safari */
       * { -webkit-tap-highlight-color: rgba(0, 234, 255, 0.2); }
@@ -375,6 +453,75 @@
   
   <!-- Flash Screen Effect -->
   <div class="flash-screen" id="flash-fx"></div>
+  
+  <!-- REST TIMER OVERLAY - NEUROFIT STYLE -->
+  <div id="rest-overlay" class="fixed inset-0 z-[90] hidden">
+    <!-- Background with blur -->
+    <div class="absolute inset-0 bg-[#0a0e1a]/95 backdrop-blur-xl"></div>
+    
+    <!-- Floating particles -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+      <div class="particle" style="left: 10%; top: 20%; width: 4px; height: 4px; animation-delay: 0s;"></div>
+      <div class="particle" style="left: 80%; top: 30%; width: 3px; height: 3px; animation-delay: 0.5s;"></div>
+      <div class="particle" style="left: 30%; top: 70%; width: 5px; height: 5px; animation-delay: 1s;"></div>
+      <div class="particle" style="left: 70%; top: 80%; width: 3px; height: 3px; animation-delay: 1.5s;"></div>
+      <div class="particle" style="left: 50%; top: 15%; width: 4px; height: 4px; animation-delay: 2s;"></div>
+    </div>
+    
+    <!-- Content -->
+    <div class="relative z-10 h-full flex flex-col items-center justify-center px-6">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <h2 class="text-lg font-bold tracking-widest uppercase" style="background: linear-gradient(135deg, #00d9ff 0%, #00ff88 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+          REFROIDISSEMENT
+        </h2>
+        <p class="text-sm text-white/50 mt-1">Repos actif • Respirez</p>
+      </div>
+      
+      <!-- Timer Circle -->
+      <div class="relative w-72 h-72 mb-10" style="filter: drop-shadow(0 0 40px rgba(0, 217, 255, 0.4));">
+        <svg width="100%" height="100%" viewBox="0 0 280 280">
+          <defs>
+            <linearGradient id="timerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#00d9ff;stop-opacity:1" />
+              <stop offset="50%" style="stop-color:#00ff88;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#ff9500;stop-opacity:1" />
+            </linearGradient>
+          </defs>
+          
+          <!-- Background circle -->
+          <circle cx="140" cy="140" r="120" fill="none" stroke="rgba(0, 217, 255, 0.1)" stroke-width="12" />
+          
+          <!-- Progress circle -->
+          <circle id="rest-circle-progress" cx="140" cy="140" r="120" fill="none" stroke="url(#timerGradient)" stroke-width="12" stroke-linecap="round" stroke-dasharray="753.98" stroke-dashoffset="0" transform="rotate(-90 140 140)" style="filter: drop-shadow(0 0 10px currentColor); transition: stroke-dashoffset 0.1s linear;" />
+        </svg>
+        
+        <!-- Timer text -->
+        <div class="absolute inset-0 flex flex-col items-center justify-center">
+          <span id="rest-overlay-timer" class="text-7xl font-bold font-mono" style="background: linear-gradient(135deg, #00d9ff 0%, #00ff88 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 20px rgba(0, 217, 255, 0.8));">
+            01:30
+          </span>
+          <span class="text-sm text-[#00d9ff]/80 mt-2 tracking-widest uppercase">SECONDES</span>
+        </div>
+      </div>
+      
+      <!-- Next exercise info -->
+      <div class="text-center mb-8 px-4 py-3 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm">
+        <span class="text-xs text-white/40 uppercase tracking-wider">PROCHAIN</span>
+        <p id="rest-next-exercise" class="text-lg font-bold text-white mt-1">Série suivante</p>
+      </div>
+      
+      <!-- Skip Button - Premium -->
+      <button onclick="skipRest()" class="skip-btn-neuro group">
+        <div class="skip-btn-glow"></div>
+        <div class="skip-btn-inner">
+          <i data-lucide="skip-forward" class="w-6 h-6"></i>
+          <span>PASSER</span>
+          <i data-lucide="zap" class="w-5 h-5 animate-pulse"></i>
+        </div>
+      </button>
+    </div>
+  </div>
   
   <!-- Header -->
   <header class="flex-none h-14 px-4 flex justify-between items-center bg-[#050510]/90 backdrop-blur-md border-b border-white/10 z-50">
@@ -539,19 +686,6 @@
           </div>
         </button>
         
-        <!-- Skip Rest Button - PREMIUM NEURO STYLE -->
-        <button id="btn-skip-rest" onclick="skipRest()" class="hidden w-full h-[72px] rounded-full flex items-center justify-center gap-4 touch-btn group relative overflow-hidden transition-all duration-300 skip-rest-premium">
-          <!-- Outer glow ring -->
-          <div class="absolute -inset-1 rounded-full bg-gradient-to-r from-orange-500 via-amber-400 to-orange-600 opacity-60 blur-md group-active:opacity-100 transition-opacity"></div>
-          <!-- Button background -->
-          <div class="absolute inset-0 rounded-full bg-gradient-to-br from-[#1a0f05] via-[#0d0805] to-[#1a0a00] border-2 border-orange-500/70"></div>
-          <!-- Shimmer effect -->
-          <div class="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-orange-400/20 to-transparent shimmer-orange"></div>
-          <!-- Content -->
-          <i data-lucide="skip-forward" class="w-7 h-7 text-orange-400 relative z-10 drop-shadow-[0_0_10px_rgba(249,115,22,0.8)]"></i>
-          <span class="text-xl font-hud font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-amber-300 to-orange-500 uppercase tracking-wider relative z-10 drop-shadow-[0_0_15px_rgba(249,115,22,0.6)]">PASSER REPOS</span>
-          <i data-lucide="zap" class="w-5 h-5 text-amber-400 relative z-10 animate-pulse"></i>
-        </button>
       </div>
     </div>
   </main>
@@ -664,19 +798,13 @@
     window.skipRest = () => { 
       clearInterval(restTimer); 
       
-      // Reset reactor visual to active state
-      document.getElementById('reactor-core-circle').classList.remove('resting'); 
-      document.getElementById('reactor-core-circle').classList.add('text-[var(--cyan)]'); 
-      document.getElementById('reactor-core-circle').classList.remove('text-[var(--orange)]'); 
-      document.getElementById('rest-progress-ring').style.opacity = '0'; 
+      // Hide NeuroFit overlay
+      const overlay = document.getElementById('rest-overlay');
+      overlay.classList.add('hidden');
+      overlay.classList.remove('rest-critical');
       
-      // Switch displays
-      document.getElementById('data-mode-standard').setAttribute('opacity', '1'); 
-      document.getElementById('data-mode-rest').setAttribute('opacity', '0'); 
-      
-      // Switch buttons
-      document.getElementById('btn-validate').classList.remove('hidden'); 
-      document.getElementById('btn-skip-rest').classList.add('hidden'); 
+      // Re-init icons in overlay for next time
+      initIcons();
       
       // Load next exercise if this one is done
       if (window._nextEx) {
@@ -773,64 +901,77 @@
     }
     
     // ========================================
-    // REST TIMER
+    // REST TIMER - NEUROFIT STYLE
     // ========================================
     
     function startRest(duration, isExDone) { 
       window._nextEx = isExDone; 
       let rem = duration; 
       const total = duration; 
+      const circumference = 753.98; // 2 * PI * 120
       
       // Clear existing timer
       if (restTimer) clearInterval(restTimer); 
       
-      // Set reactor to resting state
-      document.getElementById('reactor-core-circle').classList.add('resting'); 
-      document.getElementById('reactor-core-circle').classList.remove('text-[var(--cyan)]'); 
-      document.getElementById('reactor-core-circle').classList.add('text-[var(--orange)]'); 
-      document.getElementById('rest-progress-ring').style.opacity = '1'; 
+      // Show NeuroFit overlay
+      const overlay = document.getElementById('rest-overlay');
+      overlay.classList.remove('hidden');
+      overlay.classList.remove('rest-critical');
       
-      // Switch displays
-      document.getElementById('data-mode-standard').setAttribute('opacity', '0'); 
-      document.getElementById('data-mode-rest').setAttribute('opacity', '1'); 
+      // Init icons in overlay
+      initIcons();
       
-      // Switch buttons
-      document.getElementById('btn-validate').classList.add('hidden'); 
-      document.getElementById('btn-skip-rest').classList.remove('hidden'); 
+      // Get overlay elements
+      const timerText = document.getElementById('rest-overlay-timer');
+      const progressCircle = document.getElementById('rest-circle-progress');
+      const nextExText = document.getElementById('rest-next-exercise');
       
-      const ring = document.getElementById('rest-progress-ring'); 
-      const circ = 596; 
+      // Set next exercise info
+      if (isExDone && s.exIdx + 1 < workout.exercises.length) {
+        nextExText.textContent = workout.exercises[s.exIdx + 1].name;
+      } else if (!isExDone) {
+        nextExText.textContent = `${workout.exercises[s.exIdx].name} • Série ${s.setIdx + 1}`;
+      } else {
+        nextExText.textContent = "Fin de l'entraînement";
+      }
+      
+      // Format time helper
+      const formatTime = (secs) => {
+        const m = Math.floor(secs / 60);
+        const s = secs % 60;
+        return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+      };
+      
+      // Initial display
+      timerText.textContent = formatTime(rem);
+      progressCircle.style.strokeDashoffset = '0';
       
       const updateTimer = () => { 
         rem--; 
         
-        const timerTxt = document.getElementById('rest-timer-txt');
-        
         // Update timer display
-        timerTxt.textContent = Utils.formatTime(rem);
+        timerText.textContent = formatTime(rem);
+        
+        // Update progress circle (depleting)
+        const progress = rem / total;
+        const offset = circumference * (1 - progress);
+        progressCircle.style.strokeDashoffset = offset;
         
         // Critical countdown effect (last 3 seconds)
         if (rem <= 3 && rem > 0) {
-          timerTxt.classList.add('countdown-critical');
+          overlay.classList.add('rest-critical');
           // Vibrate on each second
           if (navigator.vibrate) navigator.vibrate(100);
-        } else {
-          timerTxt.classList.remove('countdown-critical');
         }
-        
-        // Update progress ring
-        const offset = circ - ((rem / total) * circ); 
-        ring.style.strokeDashoffset = offset; 
         
         // Check if timer finished
         if (rem <= 0) { 
-          timerTxt.classList.remove('countdown-critical');
+          overlay.classList.remove('rest-critical');
           if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]);
           skipRest(); 
         } 
       }; 
       
-      updateTimer(); 
       restTimer = setInterval(updateTimer, 1000); 
     }
     

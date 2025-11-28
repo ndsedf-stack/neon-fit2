@@ -12,6 +12,7 @@
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
   <script src="program-data-v2.js?v=1764336042"></script>
   <script src="app-v2.js?v=1764336042"></script>
+  <script src="cloud-sync.js"></script>
 
   <style>
     :root {
@@ -233,11 +234,12 @@
   <canvas id="starfield" style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none;"></canvas>
   
   <header class="fixed top-0 w-full z-50 bg-[#020408]/95 backdrop-blur-xl border-b border-white/5 pt-safe px-4 pb-3 shadow-lg">
-    <div class="flex justify-between items-end mb-2">
+    <div class="flex justify-between items-center mb-2">
       <div class="flex flex-col">
         <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">RANG OPÉRATEUR</span>
         <span class="text-base font-hud font-black text-white uppercase tracking-wide" style="color: var(--cyan); text-shadow: 0 0 10px rgba(34, 211, 238, 0.5);" id="user-rank">RECRUE IV</span>
       </div>
+      <div id="cloud-sync-ui" class="flex items-center gap-3"></div>
       <div class="text-right">
         <span class="text-xs font-hud font-bold text-cyan-400" id="xp-display">0 / 1000 XP</span>
       </div>
@@ -639,6 +641,13 @@
       document.addEventListener('DOMContentLoaded', initDashboard);
     } else {
       initDashboard();
+    }
+
+    // Initialize Cloud Sync
+    if (window.CloudSync) {
+      CloudSync.init().then(function() {
+        CloudSync.renderAuthUI('cloud-sync-ui');
+      });
     }
   </script>
 </body>

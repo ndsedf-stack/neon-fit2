@@ -120,6 +120,20 @@ All pages include iOS Safari optimizations:
 - Updated `briefing.html` with real-time progress circles showing workout completion status
 
 ## Script Architecture
-- **Classic scripts (non-module)**: app-v2.js, program-data-v2.js, workout-history-v2.js, stats-data.js
+- **Classic scripts (non-module)**: app-v2.js, program-data-v2.js, workout-history-v2.js, stats-data.js, cloud-sync.js
 - **ES6 modules**: app.js, program-data.js, workout-history.js (used only in session.html)
 - All classic scripts expose via `window` object for cross-script access
+
+## Cloud Sync & Authentication (November 2025)
+- **Server**: Express.js server with Replit Auth (supports Apple ID, Google, GitHub, email)
+- **Database**: PostgreSQL with tables: users, sessions, workout_data
+- **API Endpoints**:
+  - `GET /api/auth/status` - Check authentication status
+  - `GET /api/login` - Initiate login flow
+  - `GET /api/logout` - Logout user
+  - `GET /api/sync/data` - Pull all workout data from cloud
+  - `POST /api/sync/data` - Push single data key to cloud
+  - `POST /api/sync/bulk` - Push all workout data to cloud
+- **Frontend**: cloud-sync.js module handles auth UI and automatic sync
+- **Auto-sync**: Data syncs every 60 seconds when authenticated
+- **Offline-first**: LocalStorage used as primary, cloud as backup

@@ -21,20 +21,20 @@ args = "Start NEON FIT app"
 name = "Start NEON FIT app"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npx http-server -p 5000 --cors -a 0.0.0.0"
-waitForPort = 5000
-
 [workflows.workflow.metadata]
 outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node server/index.js"
+waitForPort = 5000
 
 [[ports]]
 localPort = 5000
 externalPort = 80
 
 [[ports]]
-localPort = 33083
+localPort = 37913
 externalPort = 3000
 
 [deployment]

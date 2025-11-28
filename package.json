@@ -10,6 +10,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "http-server": "^14.1.1"
+    "connect-pg-simple": "^10.0.0",
+    "express": "^5.1.0",
+    "express-session": "^1.18.2",
+    "http-server": "^14.1.1",
+    "memoizee": "^0.4.17",
+    "openid-client": "^5.7.1",
+    "passport": "^0.7.0",
+    "pg": "^8.16.3"
   }
 }

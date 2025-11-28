@@ -1,5 +1,5 @@
 // Service Worker - Force refresh des ressources
-const CACHE_VERSION = 'v1764334602';
+const CACHE_VERSION = 'v1764355096';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -15,7 +15,7 @@ const urlsToCache = [
 
 // Installation : vider tous les anciens caches
 self.addEventListener('install', event => {
-  console.log('SW: Installing...');
+  console.log('SW: Installing new version v1764355096');
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
@@ -30,7 +30,7 @@ self.addEventListener('install', event => {
 
 // Activation : nettoyer et prendre le contrôle
 self.addEventListener('activate', event => {
-  console.log('SW: Activating...');
+  console.log('SW: Activating v1764355096');
   event.waitUntil(self.clients.claim());
 });
 

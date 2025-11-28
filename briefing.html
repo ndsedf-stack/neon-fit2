@@ -57,7 +57,40 @@
             margin: 0 auto;
             padding-bottom: 120px;
         }
-        .header { padding: 40px 24px 20px; }
+        .header { padding: 20px 24px 20px; }
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: #94a3b8;
+            font-family: 'Chakra Petch', sans-serif;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+        .back-button:hover, .back-button:active {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--cyan);
+            color: var(--cyan);
+            box-shadow: 0 0 20px rgba(34, 211, 238, 0.2);
+        }
+        .back-button svg {
+            width: 16px;
+            height: 16px;
+            transition: transform 0.3s ease;
+        }
+        .back-button:hover svg, .back-button:active svg {
+            transform: translateX(-3px);
+        }
         .title-main {
             font-family: 'Chakra Petch', sans-serif;
             font-size: 42px;
@@ -628,6 +661,12 @@
     <canvas id="starfield" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;"></canvas>
     <div class="app-container">
         <header class="header">
+            <a href="workouts.html" class="back-button" id="back-button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+                Annuler
+            </a>
             <h1 class="title-main" id="title-main">LOADING...</h1>
             <div class="subtitle-tech">
                 <div class="accent-line"></div>

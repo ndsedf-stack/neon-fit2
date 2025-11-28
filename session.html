@@ -172,15 +172,145 @@
       backface-visibility: hidden;
     }
     
-    /* XP Flash animation */
+    /* XP Flash animation - PREMIUM (with iOS Safari prefixes) */
+    @-webkit-keyframes xp-flash {
+      0% { opacity: 0; -webkit-transform: scale(0.5) translateY(30px) translateZ(0); transform: scale(0.5) translateY(30px) translateZ(0); }
+      30% { opacity: 1; -webkit-transform: scale(1.3) translateY(-20px) translateZ(0); transform: scale(1.3) translateY(-20px) translateZ(0); }
+      50% { -webkit-transform: scale(1.1) translateY(-30px) translateZ(0); transform: scale(1.1) translateY(-30px) translateZ(0); }
+      100% { opacity: 0; -webkit-transform: scale(0.9) translateY(-60px) translateZ(0); transform: scale(0.9) translateY(-60px) translateZ(0); }
+    }
     @keyframes xp-flash {
-      0% { opacity: 0; transform: scale(0.8) translateY(20px) translateZ(0); }
-      50% { opacity: 1; transform: scale(1.1) translateY(-10px) translateZ(0); }
-      100% { opacity: 0; transform: scale(1) translateY(-30px) translateZ(0); }
+      0% { opacity: 0; -webkit-transform: scale(0.5) translateY(30px) translateZ(0); transform: scale(0.5) translateY(30px) translateZ(0); }
+      30% { opacity: 1; -webkit-transform: scale(1.3) translateY(-20px) translateZ(0); transform: scale(1.3) translateY(-20px) translateZ(0); }
+      50% { -webkit-transform: scale(1.1) translateY(-30px) translateZ(0); transform: scale(1.1) translateY(-30px) translateZ(0); }
+      100% { opacity: 0; -webkit-transform: scale(0.9) translateY(-60px) translateZ(0); transform: scale(0.9) translateY(-60px) translateZ(0); }
     }
     
     .xp-flash {
-      animation: xp-flash 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      -webkit-animation: xp-flash 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      animation: xp-flash 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    
+    /* Particle explosion effect (with iOS Safari prefixes) */
+    @-webkit-keyframes particle-burst {
+      0% { -webkit-transform: scale(0); transform: scale(0); opacity: 1; }
+      50% { opacity: 0.8; }
+      100% { -webkit-transform: scale(3); transform: scale(3); opacity: 0; }
+    }
+    @keyframes particle-burst {
+      0% { -webkit-transform: scale(0); transform: scale(0); opacity: 1; }
+      50% { opacity: 0.8; }
+      100% { -webkit-transform: scale(3); transform: scale(3); opacity: 0; }
+    }
+    
+    .particle-ring {
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      border: 2px solid var(--magenta);
+      border-radius: 50%;
+      -webkit-animation: particle-burst 0.8s ease-out forwards;
+      animation: particle-burst 0.8s ease-out forwards;
+    }
+    
+    /* Energy wave effect on validate (with iOS Safari prefixes) */
+    @-webkit-keyframes energy-wave {
+      0% { -webkit-transform: scale(1); transform: scale(1); opacity: 0.6; }
+      100% { -webkit-transform: scale(2.5); transform: scale(2.5); opacity: 0; }
+    }
+    @keyframes energy-wave {
+      0% { -webkit-transform: scale(1); transform: scale(1); opacity: 0.6; }
+      100% { -webkit-transform: scale(2.5); transform: scale(2.5); opacity: 0; }
+    }
+    
+    .energy-wave {
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(135deg, var(--cyan), var(--magenta));
+      -webkit-animation: energy-wave 0.6s ease-out forwards;
+      animation: energy-wave 0.6s ease-out forwards;
+    }
+    
+    /* Glowing border animation (with iOS Safari prefixes) */
+    @-webkit-keyframes glow-pulse {
+      0%, 100% { box-shadow: 0 0 20px rgba(0, 234, 255, 0.3), inset 0 0 20px rgba(0, 234, 255, 0.1); }
+      50% { box-shadow: 0 0 40px rgba(0, 234, 255, 0.5), inset 0 0 30px rgba(0, 234, 255, 0.2); }
+    }
+    @keyframes glow-pulse {
+      0%, 100% { box-shadow: 0 0 20px rgba(0, 234, 255, 0.3), inset 0 0 20px rgba(0, 234, 255, 0.1); }
+      50% { box-shadow: 0 0 40px rgba(0, 234, 255, 0.5), inset 0 0 30px rgba(0, 234, 255, 0.2); }
+    }
+    
+    .glow-active {
+      -webkit-animation: glow-pulse 2s ease-in-out infinite;
+      animation: glow-pulse 2s ease-in-out infinite;
+    }
+    
+    /* Progress bar shimmer (with iOS Safari prefixes) */
+    @-webkit-keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    
+    .progress-shimmer {
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      background-size: 200% 100%;
+      -webkit-animation: shimmer 1.5s infinite;
+      animation: shimmer 1.5s infinite;
+    }
+    
+    /* Countdown pulse for last 3 seconds (with iOS Safari prefixes) */
+    @-webkit-keyframes countdown-pulse {
+      0%, 100% { -webkit-transform: scale(1); transform: scale(1); }
+      50% { -webkit-transform: scale(1.15); transform: scale(1.15); color: #ef4444; }
+    }
+    @keyframes countdown-pulse {
+      0%, 100% { -webkit-transform: scale(1); transform: scale(1); }
+      50% { -webkit-transform: scale(1.15); transform: scale(1.15); color: #ef4444; }
+    }
+    
+    .countdown-critical {
+      -webkit-animation: countdown-pulse 0.5s ease-in-out infinite;
+      animation: countdown-pulse 0.5s ease-in-out infinite;
+    }
+    
+    /* Success checkmark animation (with iOS Safari prefixes) */
+    @-webkit-keyframes check-pop {
+      0% { -webkit-transform: scale(0) rotate(-45deg); transform: scale(0) rotate(-45deg); opacity: 0; }
+      50% { -webkit-transform: scale(1.3) rotate(0deg); transform: scale(1.3) rotate(0deg); }
+      100% { -webkit-transform: scale(1) rotate(0deg); transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+    @keyframes check-pop {
+      0% { -webkit-transform: scale(0) rotate(-45deg); transform: scale(0) rotate(-45deg); opacity: 0; }
+      50% { -webkit-transform: scale(1.3) rotate(0deg); transform: scale(1.3) rotate(0deg); }
+      100% { -webkit-transform: scale(1) rotate(0deg); transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+    
+    .check-animate {
+      -webkit-animation: check-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      animation: check-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    
+    /* Holographic effect on core (with iOS Safari prefixes) */
+    @-webkit-keyframes holo-shift {
+      0% { -webkit-filter: hue-rotate(0deg) blur(20px); filter: hue-rotate(0deg) blur(20px); }
+      50% { -webkit-filter: hue-rotate(30deg) blur(25px); filter: hue-rotate(30deg) blur(25px); }
+      100% { -webkit-filter: hue-rotate(0deg) blur(20px); filter: hue-rotate(0deg) blur(20px); }
+    }
+    @keyframes holo-shift {
+      0% { -webkit-filter: hue-rotate(0deg) blur(20px); filter: hue-rotate(0deg) blur(20px); }
+      50% { -webkit-filter: hue-rotate(30deg) blur(25px); filter: hue-rotate(30deg) blur(25px); }
+      100% { -webkit-filter: hue-rotate(0deg) blur(20px); filter: hue-rotate(0deg) blur(20px); }
+    }
+    
+    .holo-core {
+      -webkit-animation: holo-shift 4s ease-in-out infinite;
+      animation: holo-shift 4s ease-in-out infinite;
     }
     
     @supports (-webkit-touch-callout: none) {
@@ -195,11 +325,16 @@
 <body>
   <script>document.addEventListener("touchstart", function(){}, {passive: true});</script>
   
-  <!-- XP Flash Animation -->
-  <div id="xp-flash" class="fixed inset-0 pointer-events-none z-[100] flex items-center justify-center opacity-0 scale-50 transition-all duration-500">
-    <div class="text-center transform translate-y-[-50px]">
-      <div class="text-4xl font-black font-hud text-[var(--magenta)] drop-shadow-[0_0_15px_rgba(255,45,149,0.8)]">+50 XP</div>
-      <div class="text-sm font-bold text-white uppercase tracking-widest">SÉRIE VALIDÉE</div>
+  <!-- XP Flash Animation - PREMIUM -->
+  <div id="xp-flash" class="fixed inset-0 pointer-events-none z-[100] flex items-center justify-center opacity-0">
+    <div class="text-center relative">
+      <div id="particle-container" class="absolute inset-0 flex items-center justify-center pointer-events-none"></div>
+      <div class="text-6xl font-black font-hud text-transparent bg-clip-text bg-gradient-to-r from-[var(--cyan)] via-white to-[var(--magenta)] drop-shadow-[0_0_30px_rgba(255,45,149,0.8)]" style="-webkit-background-clip: text;">+50 XP</div>
+      <div class="text-sm font-bold text-white uppercase tracking-[0.3em] mt-2 opacity-80">SÉRIE VALIDÉE</div>
+      <div class="mt-3 flex justify-center gap-1">
+        <div class="w-8 h-1 rounded-full bg-[var(--cyan)] shadow-[0_0_10px_var(--cyan)]"></div>
+        <div class="w-2 h-1 rounded-full bg-[var(--magenta)] shadow-[0_0_10px_var(--magenta)]"></div>
+      </div>
     </div>
   </div>
   
@@ -245,8 +380,8 @@
           <circle cx="200" cy="200" r="140" class="reactor-ring" stroke-dasharray="10 5" opacity="0.3" />
           <circle cx="200" cy="200" r="120" class="reactor-ring" stroke-dasharray="80 140" stroke="var(--magenta)" stroke-width="2" style="animation-duration: 15s; animation-direction: reverse;" />
           
-          <!-- Core Circle -->
-          <circle id="reactor-core-circle" cx="200" cy="200" r="80" fill="url(#coreGrad)" class="reactor-core text-[var(--cyan)]" />
+          <!-- Core Circle with Holographic Effect -->
+          <circle id="reactor-core-circle" cx="200" cy="200" r="80" fill="url(#coreGrad)" class="reactor-core text-[var(--cyan)] holo-core" />
           
           <!-- Rest Progress Ring -->
           <circle id="rest-progress-ring" cx="200" cy="200" r="95" fill="none" stroke="var(--orange)" stroke-width="6" stroke-linecap="round" stroke-dasharray="596" stroke-dashoffset="596" transform="rotate(-90 200 200)" opacity="0" />
@@ -318,42 +453,62 @@
         </div>
       </div>
       
-      <!-- Input Controls -->
-      <div class="grid grid-cols-2 gap-4 mb-4">
+      <!-- Input Controls - PREMIUM DESIGN -->
+      <div class="grid grid-cols-2 gap-3 mb-4">
         <!-- Weight Control -->
-        <div class="bg-slate-800/50 rounded-2xl p-2 flex flex-col items-center border border-white/5">
-          <span class="text-[8px] text-slate-500 uppercase font-bold mb-1">POIDS (KG)</span>
-          <div class="flex items-center justify-between w-full px-1">
-            <button onclick="modWeight(-2.5)" class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-white text-xl font-bold touch-btn active:bg-white/20 border border-white/5">-</button>
-            <span class="text-2xl font-hud font-bold text-white" id="in-weight">0</span>
-            <button onclick="modWeight(2.5)" class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-white text-xl font-bold touch-btn active:bg-white/20 border border-white/5">+</button>
+        <div class="bg-gradient-to-b from-slate-800/60 to-slate-900/80 rounded-2xl p-3 flex flex-col items-center border border-white/10 shadow-lg relative overflow-hidden">
+          <div class="absolute inset-0 bg-gradient-to-br from-[var(--cyan)]/5 to-transparent pointer-events-none"></div>
+          <span class="text-[9px] text-[var(--cyan)] uppercase font-bold mb-2 tracking-widest relative z-10">CHARGE KG</span>
+          <div class="flex items-center justify-between w-full px-1 relative z-10">
+            <button onclick="modWeight(-2.5)" class="w-14 h-14 rounded-2xl bg-black/40 flex items-center justify-center text-white text-2xl font-bold touch-btn active:bg-[var(--cyan)]/20 border border-white/10 shadow-inner transition-all duration-150 hover:border-[var(--cyan)]/50">
+              <i data-lucide="minus" class="w-5 h-5"></i>
+            </button>
+            <div class="flex flex-col items-center">
+              <span class="text-4xl font-hud font-black text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]" id="in-weight">0</span>
+            </div>
+            <button onclick="modWeight(2.5)" class="w-14 h-14 rounded-2xl bg-black/40 flex items-center justify-center text-white text-2xl font-bold touch-btn active:bg-[var(--cyan)]/20 border border-white/10 shadow-inner transition-all duration-150 hover:border-[var(--cyan)]/50">
+              <i data-lucide="plus" class="w-5 h-5"></i>
+            </button>
           </div>
         </div>
         
         <!-- Reps Control -->
-        <div class="bg-slate-800/50 rounded-2xl p-2 flex flex-col items-center border border-white/5">
-          <span class="text-[8px] text-slate-500 uppercase font-bold mb-1">RÉPS</span>
-          <div class="flex items-center justify-between w-full px-1">
-            <button onclick="modReps(-1)" class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-white text-xl font-bold touch-btn active:bg-white/20 border border-white/5">-</button>
-            <span class="text-2xl font-hud font-bold text-white" id="in-reps">0</span>
-            <button onclick="modReps(1)" class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-white text-xl font-bold touch-btn active:bg-white/20 border border-white/5">+</button>
+        <div class="bg-gradient-to-b from-slate-800/60 to-slate-900/80 rounded-2xl p-3 flex flex-col items-center border border-white/10 shadow-lg relative overflow-hidden">
+          <div class="absolute inset-0 bg-gradient-to-br from-[var(--magenta)]/5 to-transparent pointer-events-none"></div>
+          <span class="text-[9px] text-[var(--magenta)] uppercase font-bold mb-2 tracking-widest relative z-10">RÉPÉTITIONS</span>
+          <div class="flex items-center justify-between w-full px-1 relative z-10">
+            <button onclick="modReps(-1)" class="w-14 h-14 rounded-2xl bg-black/40 flex items-center justify-center text-white text-2xl font-bold touch-btn active:bg-[var(--magenta)]/20 border border-white/10 shadow-inner transition-all duration-150 hover:border-[var(--magenta)]/50">
+              <i data-lucide="minus" class="w-5 h-5"></i>
+            </button>
+            <div class="flex flex-col items-center">
+              <span class="text-4xl font-hud font-black text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]" id="in-reps">0</span>
+            </div>
+            <button onclick="modReps(1)" class="w-14 h-14 rounded-2xl bg-black/40 flex items-center justify-center text-white text-2xl font-bold touch-btn active:bg-[var(--magenta)]/20 border border-white/10 shadow-inner transition-all duration-150 hover:border-[var(--magenta)]/50">
+              <i data-lucide="plus" class="w-5 h-5"></i>
+            </button>
           </div>
         </div>
       </div>
       
-      <!-- Action Buttons -->
-      <div id="action-area">
-        <!-- Validate Button -->
-        <button id="btn-validate" onclick="logSet()" class="w-full h-16 rounded-2xl bg-gradient-to-r from-[var(--cyan)] to-blue-600 flex items-center justify-center gap-3 shadow-[0_0_20px_rgba(0,234,255,0.4)] touch-btn group overflow-hidden relative">
-          <div class="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500"></div>
-          <span class="text-xl font-hud font-black text-black uppercase tracking-widest">VALIDER SÉRIE</span>
-          <i data-lucide="check-circle-2" class="w-6 h-6 text-black fill-current"></i>
+      <!-- Action Buttons - PREMIUM -->
+      <div id="action-area" class="space-y-3">
+        <!-- Validate Button with Energy Wave -->
+        <button id="btn-validate" onclick="logSet()" class="w-full h-[72px] rounded-2xl flex items-center justify-center gap-4 touch-btn group overflow-hidden relative glow-active" style="background: linear-gradient(135deg, var(--cyan) 0%, #0891b2 50%, #06b6d4 100%); box-shadow: 0 0 30px rgba(0, 234, 255, 0.4), 0 10px 40px rgba(0, 0, 0, 0.3);">
+          <div id="energy-wave-container" class="absolute inset-0 pointer-events-none"></div>
+          <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0 translate-x-[-100%] group-active:translate-x-[100%] transition-transform duration-300"></div>
+          <i data-lucide="zap" class="w-7 h-7 text-black relative z-10"></i>
+          <span class="text-xl font-hud font-black text-black uppercase tracking-[0.15em] relative z-10">VALIDER</span>
+          <div class="absolute right-4 flex items-center gap-1 relative z-10">
+            <span class="text-xs font-bold text-black/60">+50</span>
+            <span class="text-[10px] font-black text-black/80">XP</span>
+          </div>
         </button>
         
-        <!-- Skip Rest Button -->
-        <button id="btn-skip-rest" onclick="skipRest()" class="hidden w-full h-16 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center gap-3 touch-btn active:bg-white/20">
-          <span class="text-lg font-hud font-bold text-white uppercase tracking-wider">PASSER LE REPOS</span>
-          <i data-lucide="fast-forward" class="w-5 h-5 text-white fill-current"></i>
+        <!-- Skip Rest Button - Premium Orange -->
+        <button id="btn-skip-rest" onclick="skipRest()" class="hidden w-full h-16 rounded-2xl flex items-center justify-center gap-3 touch-btn relative overflow-hidden transition-all duration-300" style="background: linear-gradient(135deg, rgba(249, 115, 22, 0.2) 0%, rgba(234, 88, 12, 0.1) 100%); border: 2px solid rgba(249, 115, 22, 0.5); box-shadow: 0 0 20px rgba(249, 115, 22, 0.2);">
+          <div class="absolute inset-0 bg-gradient-to-r from-orange-500/0 via-orange-500/20 to-orange-500/0 translate-x-[-100%] group-active:translate-x-[100%] transition-transform duration-300"></div>
+          <i data-lucide="skip-forward" class="w-6 h-6 text-orange-400 relative z-10"></i>
+          <span class="text-lg font-hud font-bold text-orange-400 uppercase tracking-wider relative z-10">PASSER REPOS</span>
         </button>
       </div>
     </div>
@@ -412,17 +567,37 @@
       document.getElementById('flash-fx').classList.add('hit'); 
       setTimeout(() => document.getElementById('flash-fx').classList.remove('hit'), 200); 
       
-      // XP animation
+      // Energy Wave effect on button
+      const waveContainer = document.getElementById('energy-wave-container');
+      const wave = document.createElement('div');
+      wave.className = 'energy-wave';
+      waveContainer.appendChild(wave);
+      setTimeout(() => wave.remove(), 600);
+      
+      // Haptic feedback (if available)
+      if (navigator.vibrate) navigator.vibrate([50, 30, 100]);
+      
+      // XP animation - PREMIUM
       const xpFlash = document.getElementById('xp-flash'); 
+      xpFlash.classList.add('xp-flash');
       xpFlash.style.opacity = '1'; 
-      xpFlash.style.transform = 'scale(1)'; 
+      
+      // Add particle ring effect
+      const particleContainer = document.getElementById('particle-container');
+      for (let i = 0; i < 3; i++) {
+        setTimeout(() => {
+          const ring = document.createElement('div');
+          ring.className = 'particle-ring';
+          ring.style.animationDelay = `${i * 0.1}s`;
+          particleContainer.appendChild(ring);
+          setTimeout(() => ring.remove(), 800);
+        }, i * 100);
+      }
+      
       setTimeout(() => { 
-        xpFlash.style.opacity = '0'; 
-        xpFlash.style.transform = 'scale(1.5) translateY(-50px)'; 
-        setTimeout(() => { 
-          xpFlash.style.transform = 'scale(0.5)'; 
-        }, 300); 
-      }, CONSTANTS.XP_FLASH_DURATION); 
+        xpFlash.style.opacity = '0';
+        xpFlash.classList.remove('xp-flash');
+      }, 1200); 
       
       // Add XP using Gamification module
       Gamification.addXP(CONSTANTS.XP_PER_SET);
@@ -587,8 +762,19 @@
       const updateTimer = () => { 
         rem--; 
         
+        const timerTxt = document.getElementById('rest-timer-txt');
+        
         // Update timer display
-        document.getElementById('rest-timer-txt').textContent = Utils.formatTime(rem);
+        timerTxt.textContent = Utils.formatTime(rem);
+        
+        // Critical countdown effect (last 3 seconds)
+        if (rem <= 3 && rem > 0) {
+          timerTxt.classList.add('countdown-critical');
+          // Vibrate on each second
+          if (navigator.vibrate) navigator.vibrate(100);
+        } else {
+          timerTxt.classList.remove('countdown-critical');
+        }
         
         // Update progress ring
         const offset = circ - ((rem / total) * circ); 
@@ -596,7 +782,8 @@
         
         // Check if timer finished
         if (rem <= 0) { 
-          Utils.vibrate([200, 100, 200]);
+          timerTxt.classList.remove('countdown-critical');
+          if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]);
           skipRest(); 
         } 
       }; 

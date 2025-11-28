@@ -1,5 +1,5 @@
 // Service Worker - NEON FIT v3.0
-const CACHE_VERSION = 'v1764358600';
+const CACHE_VERSION = 'v1764363752';
 const urlsToCache = [
   '/',
   '/index.html',

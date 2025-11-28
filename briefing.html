@@ -201,11 +201,12 @@
         .stats-zone {
             background: rgba(0, 0, 0, 0.3);
             border-top: 1px solid rgba(255, 255, 255, 0.05);
-            margin: 20px -28px -28px;
-            padding: 24px;
+            margin: 20px 0 0;
+            padding: 20px;
+            border-radius: 0 0 20px 20px;
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 16px;
         }
         .icon-box {
             width: 46px; 
@@ -242,9 +243,63 @@
             transition: all 0.3s ease;
         }
         .start-button:active { transform: scale(0.96); }
+        
+        /* Responsive Gauge System */
+        .gauges-row {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 20px 16px;
+            margin-bottom: 20px;
+        }
+        .gauge-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            flex: 0 0 auto;
+            width: calc((100% - 24px) / 3);
+            max-width: 100px;
+            min-width: 80px;
+        }
+        .gauge-svg {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 1;
+            display: block;
+        }
+        .gauge-value {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) translateY(-4px);
+            font-family: 'Chakra Petch', sans-serif;
+            font-size: clamp(18px, 5vw, 28px);
+            font-weight: 900;
+            letter-spacing: 0.5px;
+        }
+        .gauge-label {
+            margin-top: 8px;
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: #64748b;
+            font-weight: 700;
+        }
+        .gauge-progress-badge {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            font-size: 8px;
+            font-weight: 800;
+            padding: 2px 5px;
+            border-radius: 4px;
+            border: 1px solid;
+        }
     </style>
-  <script src="program-data-v2.js?v=1764350000"></script>
-  <script src="app-v2.js?v=1764350000"></script>
+  <script src="program-data-v2.js?v=1764351000"></script>
+  <script src="app-v2.js?v=1764351000"></script>
   <script src="workout-history-v2.js"></script>
   <script src="cloud-sync.js"></script>
 </head>
@@ -417,37 +472,33 @@
         function renderGauge(value, label, max, isGlow, progress = null) {
             const num = parseFloat(String(value).match(/\d+/)?.[0] || 0);
             const pct = Math.min((num / max), 1);
-            const r = 52, strokeWidth = 6, C = 2 * Math.PI * r;
+            const r = 40, strokeWidth = 5, C = 2 * Math.PI * r;
             const offset = C - (pct * C), angle = (pct * 360);
             const sc = isGlow ? '#22d3ee' : '#94a3b8';
             const dc = isGlow ? '#22d3ee' : '#e2e8f0';
-            const ds = isGlow ? 7 : 5;
+            const ds = isGlow ? 5 : 4;
             const tc = isGlow ? '#22d3ee' : '#f1f5f9';
-            const ts = isGlow ? '0 0 20px rgba(34, 211, 238, 0.8)' : 'none';
-            const gid = 'g' + (isGlow?'On':'Off');
+            const ts = isGlow ? '0 0 15px rgba(34, 211, 238, 0.8)' : 'none';
+            const gid = 'g' + (isGlow?'On':'Off') + Math.random().toString(36).substr(2,5);
             
             const hasProgress = progress !== null && progress.completed > 0;
             const progressPct = hasProgress ? Math.min(progress.completed / progress.target, 1) : 0;
-            const progressOffset = C - (progressPct * C);
-            const progressAngle = progressPct * 360;
             const progressComplete = hasProgress && progress.completed >= progress.target;
             
-            return `<div style="display:flex;flex-direction:column;align-items:center;position:relative;width:130px">
-<svg width="130" height="130" viewBox="0 0 130 130" style="display:block;shape-rendering:geometricPrecision">
+            return `<div class="gauge-container">
+<svg viewBox="0 0 100 100" class="gauge-svg">
 <defs>
-<filter id="${gid}"><feGaussianBlur stdDeviation="2.5"/></filter>
-<filter id="progressGlow"><feGaussianBlur stdDeviation="3"/></filter>
+<filter id="${gid}"><feGaussianBlur stdDeviation="2"/></filter>
+<filter id="pg${gid}"><feGaussianBlur stdDeviation="2.5"/></filter>
 </defs>
-<circle cx="65" cy="65" r="${r}" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="${strokeWidth}" transform="rotate(-90 65 65)"/>
-<circle cx="65" cy="65" r="${r}" fill="none" stroke="${sc}" stroke-width="${strokeWidth}" stroke-dasharray="${C}" stroke-dashoffset="${offset}" stroke-linecap="round" transform="rotate(-90 65 65)" style="transition:stroke-dashoffset 1.2s;filter:url(#${gid})"/>
-${hasProgress ? `
-<circle cx="65" cy="65" r="${r+10}" fill="none" stroke="${progressComplete ? '#22c55e' : '#f59e0b'}" stroke-width="3" stroke-dasharray="${2*Math.PI*(r+10)}" stroke-dashoffset="${2*Math.PI*(r+10) - (progressPct * 2*Math.PI*(r+10))}" stroke-linecap="round" transform="rotate(-90 65 65)" style="transition:stroke-dashoffset 1s;filter:url(#progressGlow);opacity:0.9"/>
-` : ''}
-<g transform="rotate(${angle-90} 65 65)"><circle cx="${65+r}" cy="65" r="${ds}" fill="${dc}" style="filter:drop-shadow(0 0 8px ${dc})"/></g>
+<circle cx="50" cy="50" r="${r}" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="${strokeWidth}"/>
+<circle cx="50" cy="50" r="${r}" fill="none" stroke="${sc}" stroke-width="${strokeWidth}" stroke-dasharray="${C}" stroke-dashoffset="${offset}" stroke-linecap="round" transform="rotate(-90 50 50)" style="transition:stroke-dashoffset 1.2s;filter:url(#${gid})"/>
+${hasProgress ? `<circle cx="50" cy="50" r="${r+8}" fill="none" stroke="${progressComplete ? '#22c55e' : '#f59e0b'}" stroke-width="2.5" stroke-dasharray="${2*Math.PI*(r+8)}" stroke-dashoffset="${2*Math.PI*(r+8) - (progressPct * 2*Math.PI*(r+8))}" stroke-linecap="round" transform="rotate(-90 50 50)" style="transition:stroke-dashoffset 1s;filter:url(#pg${gid});opacity:0.9"/>` : ''}
+<g transform="rotate(${angle-90} 50 50)"><circle cx="${50+r}" cy="50" r="${ds}" fill="${dc}" style="filter:drop-shadow(0 0 6px ${dc})"/></g>
 </svg>
-${hasProgress ? `<div style="position:absolute;top:4px;right:4px;font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px;background:${progressComplete ? 'rgba(34,197,94,0.2)' : 'rgba(245,158,11,0.2)'};color:${progressComplete ? '#22c55e' : '#f59e0b'};border:1px solid ${progressComplete ? '#22c55e' : '#f59e0b'}">${progress.completed}/${progress.target}</div>` : ''}
-<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) translateY(-8px);font-family:'Chakra Petch',sans-serif;font-size:34px;font-weight:900;color:${tc};letter-spacing:0.5px;text-shadow:${ts}">${value}</div>
-<span style="margin-top:8px;font-size:10px;text-transform:uppercase;letter-spacing:0.2em;color:#64748b;font-weight:700">${label}</span>
+${hasProgress ? `<div class="gauge-progress-badge" style="background:${progressComplete ? 'rgba(34,197,94,0.2)' : 'rgba(245,158,11,0.2)'};color:${progressComplete ? '#22c55e' : '#f59e0b'};border-color:${progressComplete ? '#22c55e' : '#f59e0b'}">${progress.completed}/${progress.target}</div>` : ''}
+<div class="gauge-value" style="color:${tc};text-shadow:${ts}">${value}</div>
+<span class="gauge-label">${label}</span>
 </div>`;
         }
 
@@ -474,7 +525,7 @@ ${hasProgress ? `<div style="position:absolute;top:4px;right:4px;font-size:9px;f
 <div class="ex-name">${ex.name}${badge}</div>
 <div class="tags">${ex.tags.map(t => `<span class="tag ${t.t}">${t.l}</span>`).join('')}</div>
 </div></div></div>
-<div style="display:flex;justify-content:center;gap:8px;padding:24px 0;margin-bottom:24px">
+<div class="gauges-row">
 ${renderGauge(ex.sets, 'SÉRIES', 8, false, ex.progress.completedSets > 0 ? { completed: ex.progress.completedSets, target: ex.sets } : null)}
 ${renderGauge(ex.reps, 'REPS', 15, false)}
 ${renderGauge(ex.load, 'CHARGE', 140, true, ex.progress.lastWeight > 0 ? { completed: ex.progress.lastWeight, target: parseFloat(ex.load) } : null)}

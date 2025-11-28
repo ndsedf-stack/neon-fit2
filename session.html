@@ -313,6 +313,41 @@
       animation: holo-shift 4s ease-in-out infinite;
     }
     
+    /* Skip Rest Button - Premium Orange Shimmer */
+    @-webkit-keyframes shimmer-orange {
+      0% { -webkit-transform: translateX(-100%); transform: translateX(-100%); }
+      100% { -webkit-transform: translateX(100%); transform: translateX(100%); }
+    }
+    @keyframes shimmer-orange {
+      0% { -webkit-transform: translateX(-100%); transform: translateX(-100%); }
+      100% { -webkit-transform: translateX(100%); transform: translateX(100%); }
+    }
+    
+    .shimmer-orange {
+      -webkit-animation: shimmer-orange 2s infinite;
+      animation: shimmer-orange 2s infinite;
+    }
+    
+    /* Skip Rest Premium Glow Pulse */
+    @-webkit-keyframes skip-glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(249, 115, 22, 0.4), 0 0 40px rgba(249, 115, 22, 0.2); }
+      50% { box-shadow: 0 0 30px rgba(249, 115, 22, 0.6), 0 0 60px rgba(249, 115, 22, 0.3); }
+    }
+    @keyframes skip-glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(249, 115, 22, 0.4), 0 0 40px rgba(249, 115, 22, 0.2); }
+      50% { box-shadow: 0 0 30px rgba(249, 115, 22, 0.6), 0 0 60px rgba(249, 115, 22, 0.3); }
+    }
+    
+    .skip-rest-premium {
+      -webkit-animation: skip-glow 1.5s ease-in-out infinite;
+      animation: skip-glow 1.5s ease-in-out infinite;
+    }
+    
+    .skip-rest-premium:active {
+      -webkit-transform: scale(0.97);
+      transform: scale(0.97);
+    }
+    
     @supports (-webkit-touch-callout: none) {
       /* Fixes spécifiques iOS Safari */
       * { -webkit-tap-highlight-color: rgba(0, 234, 255, 0.2); }
@@ -504,11 +539,18 @@
           </div>
         </button>
         
-        <!-- Skip Rest Button - Premium Orange -->
-        <button id="btn-skip-rest" onclick="skipRest()" class="hidden w-full h-16 rounded-2xl flex items-center justify-center gap-3 touch-btn relative overflow-hidden transition-all duration-300" style="background: linear-gradient(135deg, rgba(249, 115, 22, 0.2) 0%, rgba(234, 88, 12, 0.1) 100%); border: 2px solid rgba(249, 115, 22, 0.5); box-shadow: 0 0 20px rgba(249, 115, 22, 0.2);">
-          <div class="absolute inset-0 bg-gradient-to-r from-orange-500/0 via-orange-500/20 to-orange-500/0 translate-x-[-100%] group-active:translate-x-[100%] transition-transform duration-300"></div>
-          <i data-lucide="skip-forward" class="w-6 h-6 text-orange-400 relative z-10"></i>
-          <span class="text-lg font-hud font-bold text-orange-400 uppercase tracking-wider relative z-10">PASSER REPOS</span>
+        <!-- Skip Rest Button - PREMIUM NEURO STYLE -->
+        <button id="btn-skip-rest" onclick="skipRest()" class="hidden w-full h-[72px] rounded-full flex items-center justify-center gap-4 touch-btn group relative overflow-hidden transition-all duration-300 skip-rest-premium">
+          <!-- Outer glow ring -->
+          <div class="absolute -inset-1 rounded-full bg-gradient-to-r from-orange-500 via-amber-400 to-orange-600 opacity-60 blur-md group-active:opacity-100 transition-opacity"></div>
+          <!-- Button background -->
+          <div class="absolute inset-0 rounded-full bg-gradient-to-br from-[#1a0f05] via-[#0d0805] to-[#1a0a00] border-2 border-orange-500/70"></div>
+          <!-- Shimmer effect -->
+          <div class="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-orange-400/20 to-transparent shimmer-orange"></div>
+          <!-- Content -->
+          <i data-lucide="skip-forward" class="w-7 h-7 text-orange-400 relative z-10 drop-shadow-[0_0_10px_rgba(249,115,22,0.8)]"></i>
+          <span class="text-xl font-hud font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-amber-300 to-orange-500 uppercase tracking-wider relative z-10 drop-shadow-[0_0_15px_rgba(249,115,22,0.6)]">PASSER REPOS</span>
+          <i data-lucide="zap" class="w-5 h-5 text-amber-400 relative z-10 animate-pulse"></i>
         </button>
       </div>
     </div>

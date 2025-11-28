@@ -386,6 +386,71 @@
             color: #94a3b8;
         }
 
+        /* Performance Badges */
+        .perf-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-left: 8px;
+        }
+        .perf-badge.pr {
+            background: rgba(34, 211, 238, 0.15);
+            border: 1px solid rgba(34, 211, 238, 0.4);
+            color: var(--cyan);
+            animation: pulse-glow 2s infinite;
+        }
+        .perf-badge.deload {
+            background: rgba(251, 146, 60, 0.15);
+            border: 1px solid rgba(251, 146, 60, 0.4);
+            color: var(--orange);
+        }
+        .perf-badge.same {
+            background: rgba(100, 116, 139, 0.15);
+            border: 1px solid rgba(100, 116, 139, 0.4);
+            color: #94a3b8;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(34, 211, 238, 0.3); }
+            50% { box-shadow: 0 0 15px rgba(34, 211, 238, 0.6); }
+        }
+
+        /* Last Performance Info */
+        .last-perf {
+            margin-top: 8px;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+            font-size: 10px;
+            color: #64748b;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .last-perf-label {
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        .last-perf-value {
+            font-family: var(--font-tech);
+            font-weight: 700;
+            color: #cbd5e1;
+        }
+        .perf-delta {
+            font-size: 11px;
+            font-weight: 700;
+            margin-left: 6px;
+        }
+        .perf-delta.positive { color: var(--cyan); }
+        .perf-delta.negative { color: var(--orange); }
+
         /* Start Button */
         .start-button {
             position: fixed;
@@ -515,6 +580,124 @@
 
         console.log(`📋 Briefing loaded: Week ${week}, Day ${day}`);
 
+        // ========================================
+        // WORKOUT HISTORY FUNCTIONS
+        // ========================================
+
+        /**
+         * Get all workout history from localStorage
+         */
+        function getWorkoutHistory() {
+            try {
+                const history = localStorage.getItem('workout_history');
+                return history ? JSON.parse(history) : [];
+            } catch (error) {
+                console.error('Error loading workout history:', error);
+                return [];
+            }
+        }
+
+        /**
+         * Find last performance for a specific exercise
+         */
+        function getLastPerformance(exerciseName) {
+            const history = getWorkoutHistory();
+            
+            // Filter sessions that contain this exercise
+            const sessionsWithExercise = history.filter(session => {
+                return session.exercises && session.exercises.some(ex => 
+                    ex.name.toLowerCase() === exerciseName.toLowerCase()
+                );
+            });
+
+            if (sessionsWithExercise.length === 0) return null;
+
+            // Sort by date (most recent first)
+            sessionsWithExercise.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            // Get the exercise from most recent session
+            const lastSession = sessionsWithExercise[0];
+            const exercise = lastSession.exercises.find(ex => 
+                ex.name.toLowerCase() === exerciseName.toLowerCase()
+            );
+
+            return {
+                weight: exercise.weight || 0,
+                reps: exercise.reps || 0,
+                sets: exercise.sets || 0,
+                date: lastSession.date,
+                week: lastSession.week,
+                day: lastSession.day
+            };
+        }
+
+        /**
+         * Get performance comparison (PR, DELOAD, SAME)
+         */
+        function getPerformanceStatus(exerciseName, programWeight) {
+            const lastPerf = getLastPerformance(exerciseName);
+            
+            if (!lastPerf) return { status: 'first', badge: null, delta: 0 };
+
+            const delta = programWeight - lastPerf.weight;
+
+            if (delta > 0) {
+                return { 
+                    status: 'pr', 
+                    badge: 'NOUVEAU PR', 
+                    delta: delta,
+                    lastPerf: lastPerf
+                };
+            } else if (delta < 0) {
+                return { 
+                    status: 'deload', 
+                    badge: 'DELOAD', 
+                    delta: delta,
+                    lastPerf: lastPerf
+                };
+            } else {
+                return { 
+                    status: 'same', 
+                    badge: 'MÊME CHARGE', 
+                    delta: 0,
+                    lastPerf: lastPerf
+                };
+            }
+        }
+
+        /**
+         * Get all performances for an exercise (history)
+         */
+        function getExerciseHistory(exerciseName, limit = 3) {
+            const history = getWorkoutHistory();
+            
+            const performances = [];
+            
+            for (const session of history) {
+                if (session.exercises) {
+                    const exercise = session.exercises.find(ex => 
+                        ex.name.toLowerCase() === exerciseName.toLowerCase()
+                    );
+                    
+                    if (exercise) {
+                        performances.push({
+                            weight: exercise.weight || 0,
+                            reps: exercise.reps || 0,
+                            sets: exercise.sets || 0,
+                            date: session.date,
+                            week: session.week,
+                            day: session.day
+                        });
+                    }
+                }
+            }
+
+            // Sort by date (most recent first)
+            performances.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            return performances.slice(0, limit);
+        }
+
         // --- GET WORKOUT DATA ---
         let workout;
         try {
@@ -604,6 +787,10 @@
             
             // Auto-calculate stats
             const stats = calculateExerciseStats(ex);
+
+            // ✅ GET PERFORMANCE DATA
+            const perfStatus = getPerformanceStatus(ex.name, ex.weight);
+            const exerciseHistory = getExerciseHistory(ex.name, 3);
             
             return {
                 id: idx + 1,
@@ -625,9 +812,16 @@
                 isSuperset: ex.isSuperset || false,
                 supersetWith: ex.supersetWith || null,
                 category: ex.category,
-                muscle: ex.muscle
+                muscle: ex.muscle,
+                weight: ex.weight,
+
+                // ✅ PERFORMANCE DATA
+                perfStatus: perfStatus,
+                history: exerciseHistory
             };
         });
+
+        console.log('📊 WORKOUT_DATA with performance:', WORKOUT_DATA);
 
         // --- UPDATE HEADER ---
         document.getElementById('title-main').textContent = day.toUpperCase();
@@ -772,6 +966,42 @@
         function renderExerciseCard(ex, supersetLabel = '') {
             const hasSupersetBadge = supersetLabel !== '';
             
+            // Performance badge
+            let perfBadgeHTML = '';
+            if (ex.perfStatus.badge) {
+                const badgeClass = ex.perfStatus.status; // 'pr', 'deload', 'same'
+                perfBadgeHTML = `
+                    <span class="perf-badge ${badgeClass}">
+                        ${ex.perfStatus.status === 'pr' ? '🔥' : ex.perfStatus.status === 'deload' ? '⚠️' : '➡️'}
+                        ${ex.perfStatus.badge}
+                    </span>
+                `;
+            }
+
+            // Last performance info
+            let lastPerfHTML = '';
+            if (ex.perfStatus.lastPerf) {
+                const lp = ex.perfStatus.lastPerf;
+                const deltaSign = ex.perfStatus.delta > 0 ? '+' : '';
+                const deltaClass = ex.perfStatus.delta > 0 ? 'positive' : 
+                                   ex.perfStatus.delta < 0 ? 'negative' : '';
+                
+                lastPerfHTML = `
+                    <div class="last-perf">
+                        <span class="last-perf-label">Dernière perf</span>
+                        <div>
+                            <span class="last-perf-value">${lp.weight}kg × ${lp.reps}</span>
+                            ${ex.perfStatus.delta !== 0 ? `
+                                <span class="perf-delta ${deltaClass}">
+                                    (${deltaSign}${ex.perfStatus.delta}kg)
+                                </span>
+                            ` : ''}
+                            <span style="margin-left: 8px; opacity: 0.6;">S${lp.week}</span>
+                        </div>
+                    </div>
+                `;
+            }
+            
             return `
                 <div class="glass-card">
                     <div class="ex-header">
@@ -789,6 +1019,7 @@
                                             SUPERSET ${supersetLabel}
                                         </span>
                                     ` : ''}
+                                    ${perfBadgeHTML}
                                 </div>
                                 <div class="tags">
                                     ${ex.tags.map(t => `<span class="tag ${t.t}">${t.l}</span>`).join('')}
@@ -796,6 +1027,8 @@
                             </div>
                         </div>
                     </div>
+
+                    ${lastPerfHTML}
 
                     <div class="gauges-row">
                         ${renderGauge(ex.sets, 'SÉRIES', 8, false)}

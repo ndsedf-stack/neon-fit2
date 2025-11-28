@@ -235,8 +235,6 @@
         }
         .start-button:active { transform: scale(0.96); }
     </style>
-  <script src="program-data-v2.js?v=1764336042"></script>
-  <script src="app-v2.js?v=1764336042"></script>
 </head>
 <body>
     <div class="grain-overlay"></div>
@@ -274,7 +272,8 @@
         <div id="exercises-list"></div>
     </div>
     <button class="start-button" id="start-button">Commencer la session</button>
-    <script>
+    <script type="module">
+        import programData from './program-data.js';
         const urlParams = new URLSearchParams(window.location.search);
         const week = parseInt(urlParams.get('week')) || 1;
         const day = urlParams.get('day') || 'dimanche';

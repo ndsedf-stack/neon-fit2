@@ -426,6 +426,63 @@
       stroke: #ef4444 !important;
     }
     
+    /* Detail Circles - NeuroFit Style */
+    .detail-circle {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: rgba(10, 14, 26, 0.9);
+      border: 2px solid;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    
+    .detail-circle::before {
+      content: '';
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, currentColor, transparent);
+      opacity: 0.3;
+      filter: blur(8px);
+      z-index: -1;
+    }
+    
+    .detail-green {
+      border-color: #00ff88;
+      color: #00ff88;
+      box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+    }
+    
+    .detail-orange {
+      border-color: #ff9500;
+      color: #ff9500;
+      box-shadow: 0 0 20px rgba(255, 149, 0, 0.3);
+    }
+    
+    .detail-cyan {
+      border-color: #00d9ff;
+      color: #00d9ff;
+      box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+    }
+    
+    .detail-value {
+      font-size: 20px;
+      font-weight: 700;
+      text-shadow: 0 0 15px currentColor;
+    }
+    
+    .detail-label {
+      font-size: 9px;
+      color: rgba(255, 255, 255, 0.5);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+    
     @supports (-webkit-touch-callout: none) {
       /* Fixes spécifiques iOS Safari */
       * { -webkit-tap-highlight-color: rgba(0, 234, 255, 0.2); }
@@ -502,6 +559,27 @@
             01:30
           </span>
           <span class="text-sm text-[#00d9ff]/80 mt-2 tracking-widest uppercase">SECONDES</span>
+        </div>
+      </div>
+      
+      <!-- Exercise Details Circles - NeuroFit Style -->
+      <div class="flex gap-5 justify-center mb-8">
+        <!-- Séries Circle -->
+        <div class="detail-circle detail-green">
+          <span id="rest-sets-display" class="detail-value">3/5</span>
+          <span class="detail-label">SÉRIES</span>
+        </div>
+        
+        <!-- Poids Circle -->
+        <div class="detail-circle detail-orange">
+          <span id="rest-weight-display" class="detail-value">75kg</span>
+          <span class="detail-label">CHARGE</span>
+        </div>
+        
+        <!-- Tempo Circle -->
+        <div class="detail-circle detail-cyan">
+          <span id="rest-tempo-display" class="detail-value">3-1-2</span>
+          <span class="detail-label">TEMPO</span>
         </div>
       </div>
       
@@ -934,6 +1012,12 @@
       } else {
         nextExText.textContent = "Fin de l'entraînement";
       }
+      
+      // Update detail circles
+      const currentEx = workout.exercises[s.exIdx];
+      document.getElementById('rest-sets-display').textContent = `${s.setIdx}/${currentEx.sets}`;
+      document.getElementById('rest-weight-display').textContent = `${currentEx.weight}kg`;
+      document.getElementById('rest-tempo-display').textContent = weekData.technique || currentEx.tempo || '2-0-2';
       
       // Format time helper
       const formatTime = (secs) => {

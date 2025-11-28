@@ -44,20 +44,20 @@
       ::-webkit-scrollbar-track { background: transparent; }
       ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
       
-      /* FLOATING GLASS CARD - FIXED TRANSPARENCY */
+      /* ULTRA TRANSPARENT FLOATING GLASS CARD */
       .glass-card {
-        background: rgba(20, 20, 30, 0.05) !important; /* Extremely transparent */
-        backdrop-filter: blur(12px); /* Blur the stars behind */
-        -webkit-backdrop-filter: blur(12px);
+        background: rgba(255, 255, 255, 0.005) !important; /* 0.5% Opacity - Almost Invisible */
+        backdrop-filter: blur(16px); /* Strong blur to separate from background */
+        -webkit-backdrop-filter: blur(16px);
         border: 1px solid rgba(255, 255, 255, 0.08);
-        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
         transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
       }
       
       .glass-card:hover {
-        background: rgba(20, 20, 30, 0.1) !important;
+        background: rgba(255, 255, 255, 0.02) !important;
         border-color: rgba(6, 182, 212, 0.3);
-        box-shadow: 0 0 40px rgba(6, 182, 212, 0.1);
+        box-shadow: 0 0 50px rgba(6, 182, 212, 0.1);
         transform: translateY(-2px);
       }
       

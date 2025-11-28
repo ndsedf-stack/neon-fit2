@@ -2,7 +2,10 @@
 <html lang="fr" class="dark">
 <head>
   <meta charset="UTF-8" />
+  <!-- Meta Viewport optimisé pour iOS sans zoom et plein écran -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>SESSION // COCKPIT TACTIQUE</title>
   
   <script src="https://cdn.tailwindcss.com"></script>
@@ -18,22 +21,38 @@
       --panel-bg: rgba(20, 25, 40, 0.95); 
     }
     
+    html {
+      height: 100%;
+      overflow: hidden; /* Empêche le rebond élastique sur iOS */
+    }
+
     body { 
       background-color: var(--bg); 
       font-family: 'Inter', sans-serif; 
       color: white; 
-      height: 100vh; 
+      /* Utilisation de 100dvh pour s'adapter dynamiquement aux barres Safari */
+      height: 100vh;
+      height: 100dvh; 
+      width: 100vw;
       overflow: hidden; 
       display: flex; 
       flex-direction: column; 
+      /* Padding top géré pour l'encoche */
       padding-top: env(safe-area-inset-top); 
-      padding-bottom: env(safe-area-inset-bottom); 
+      /* IMPORTANT: Pas de padding bottom sur body, on le gère dans le panel du bas */
       touch-action: manipulation; 
+      position: fixed; /* Fixe le viewport pour éviter tout scroll accidentel */
+      inset: 0;
     }
     
     .font-hud { font-family: 'Rajdhani', sans-serif; }
     .font-mono-tech { font-family: 'Share Tech Mono', monospace; }
-    .accel-gpu { transform: translateZ(0); will-change: transform; }
+    
+    /* Optimisation GPU iOS */
+    .accel-gpu { 
+      transform: translateZ(0); 
+      will-change: transform; 
+    }
     
     .cockpit-svg-container { 
       width: 100%; 
@@ -42,6 +61,7 @@
       align-items: center; 
       justify-content: center; 
       position: relative; 
+      z-index: 10;
     }
     
     .reactor-ring { 
@@ -56,6 +76,7 @@
       fill: var(--cyan); 
       opacity: 0.2; 
       filter: blur(20px); 
+      -webkit-filter: blur(20px);
       transition: fill 0.5s, opacity 0.5s; 
     }
     
@@ -79,6 +100,7 @@
       border: 1px solid rgba(0, 234, 255, 0.15); 
       border-left: 4px solid var(--cyan); 
       backdrop-filter: blur(10px); 
+      -webkit-backdrop-filter: blur(10px);
       box-shadow: 0 5px 20px rgba(0,0,0,0.5); 
     }
     
@@ -101,6 +123,7 @@
     .touch-btn { 
       transition: transform 0.05s, filter 0.1s; 
       cursor: pointer; 
+      -webkit-tap-highlight-color: transparent;
     }
     
     .touch-btn:active { 
@@ -124,207 +147,53 @@
       background-size: 100% 4px; 
       pointer-events: none; 
     }
+
+    /* === CONTROLS PANEL === */
+    .controls-panel-container {
+      background-color: #0f0f1a;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      border-radius: 30px 30px 0 0;
+      padding: 1.25rem; /* p-5 */
+      /* Gestion critique de la safe area bottom */
+      padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
+      box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+      z-index: 20;
+      flex-shrink: 0; /* Ne jamais réduire */
+    }
   
     
     /* ========================================
-       iOS OPTIMIZATIONS - TOUCH EFFECTS
+       iOS OPTIMIZATIONS
        ======================================== */
     
-    /* Force hardware acceleration on iOS */
-    .touch-pop,
-    .card-sheen,
-    button,
-    .animate-entry {
-      -webkit-transform: translateZ(0);
+    .touch-pop, button, .animate-entry {
       transform: translateZ(0);
       -webkit-backface-visibility: hidden;
       backface-visibility: hidden;
-      -webkit-perspective: 1000;
-      perspective: 1000;
     }
     
-    /* Enhanced touch feedback for iOS */
-    .touch-pop {
-      -webkit-tap-highlight-color: transparent;
-      -webkit-touch-callout: none;
-      -webkit-user-select: none;
-      user-select: none;
-      cursor: pointer;
-      transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1),
-                  box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    
-    .touch-pop:active {
-      transform: scale(0.97) translateZ(0);
-      box-shadow: 0 0 20px rgba(0, 234, 255, 0.4),
-                  inset 0 0 20px rgba(0, 234, 255, 0.1);
-    }
-    
-    /* Enhanced card sheen for iOS */
-    .card-sheen {
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .card-sheen::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(
-        circle at center,
-        rgba(0, 234, 255, 0.15) 0%,
-        transparent 70%
-      );
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      pointer-events: none;
-      z-index: 1;
-    }
-    
-    .card-sheen:active::before {
-      opacity: 1;
-    }
-    
-    .card-sheen::after {
-      transition: opacity 0.3s ease, transform 0.6s ease;
-      will-change: opacity, transform;
-    }
-    
-    .card-sheen:active::after {
-      opacity: 1;
-      transform: translateX(100%) translateZ(0);
-    }
-    
-    /* Glow effects - enhanced for iOS */
-    .text-shadow-cyan,
-    [class*="text-shadow"] {
-      text-shadow: 0 0 10px currentColor,
-                   0 0 20px currentColor,
-                   0 0 30px currentColor;
-      -webkit-text-fill-color: currentColor;
-    }
-    
-    /* Neon border glow */
-    [class*="border-"][class*="cyan"],
-    [class*="border-"][class*="magenta"] {
-      box-shadow: 0 0 10px currentColor,
-                  inset 0 0 10px rgba(255, 255, 255, 0.1);
-    }
-    
-    /* Progress bar glow */
-    #xp-bar,
-    [id*="progress"] {
-      box-shadow: 0 0 20px var(--cyan),
-                  0 0 40px var(--cyan),
-                  inset 0 0 10px rgba(255, 255, 255, 0.3);
-      filter: brightness(1.2);
-    }
-    
-    /* Button hover states for iOS (use touchstart) */
-    button:active,
-    [onclick]:active {
-      transform: scale(0.95) translateZ(0);
-      box-shadow: 0 0 15px rgba(0, 234, 255, 0.5);
-      transition: all 0.1s ease;
-    }
-    
-    /* Reactor core animation - iOS optimized */
-    @keyframes reactor-pulse {
-      0%, 100% { 
-        transform: scale(1) translateZ(0);
-        opacity: 0.6;
-        filter: blur(20px) brightness(1);
-      }
-      50% { 
-        transform: scale(1.1) translateZ(0);
-        opacity: 1;
-        filter: blur(25px) brightness(1.5);
-      }
-    }
-    
-    /* XP Flash animation - iOS optimized */
+    /* XP Flash animation */
     @keyframes xp-flash {
-      0% { 
-        opacity: 0;
-        transform: scale(0.8) translateY(20px) translateZ(0);
-      }
-      50% { 
-        opacity: 1;
-        transform: scale(1.1) translateY(-10px) translateZ(0);
-      }
-      100% { 
-        opacity: 0;
-        transform: scale(1) translateY(-30px) translateZ(0);
-      }
+      0% { opacity: 0; transform: scale(0.8) translateY(20px) translateZ(0); }
+      50% { opacity: 1; transform: scale(1.1) translateY(-10px) translateZ(0); }
+      100% { opacity: 0; transform: scale(1) translateY(-30px) translateZ(0); }
     }
     
     .xp-flash {
       animation: xp-flash 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-      will-change: transform, opacity;
     }
     
-    /* Fade-in animations - iOS optimized */
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(20px) translateZ(0);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0) translateZ(0);
-      }
-    }
-    
-    .animate-entry {
-      animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-      opacity: 0;
-    }
-    
-    /* Workout cards pulse */
-    @keyframes card-pulse {
-      0%, 100% {
-        box-shadow: 0 0 20px rgba(0, 234, 255, 0.2);
-      }
-      50% {
-        box-shadow: 0 0 40px rgba(0, 234, 255, 0.4),
-                    0 0 60px rgba(0, 234, 255, 0.2);
-      }
-    }
-    
-    .card-active {
-      animation: card-pulse 2s ease-in-out infinite;
-    }
-    
-    /* iOS Safari specific fixes */
     @supports (-webkit-touch-callout: none) {
-  body {
-    -webkit-overflow-scrolling: touch;
-  }
-      
-      /* Better tap highlighting */
-      * {
-        -webkit-tap-highlight-color: rgba(0, 234, 255, 0.2);
-      }
-      
-      /* Fix for iOS input zoom */
-      input, select, textarea {
-        font-size: 16px !important;
-      }
-    }
-    
-    /* Performance optimizations */
-    * {
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
+      /* Fixes spécifiques iOS Safari */
+      * { -webkit-tap-highlight-color: rgba(0, 234, 255, 0.2); }
+      /* Empêche le zoom sur input */
+      input, select, textarea { font-size: 16px !important; }
     }
     </style>
 </head>
 
 <body>
-  <script>document.addEventListener("touchstart", function(){}, true);</script>
+  <script>document.addEventListener("touchstart", function(){}, {passive: true});</script>
   
   <!-- XP Flash Animation -->
   <div id="xp-flash" class="fixed inset-0 pointer-events-none z-[100] flex items-center justify-center opacity-0 scale-50 transition-all duration-500">
@@ -339,7 +208,7 @@
   
   <!-- Header -->
   <header class="flex-none h-14 px-4 flex justify-between items-center bg-[#050510]/90 backdrop-blur-md border-b border-white/10 z-50">
-    <button onclick="window.location.href='workouts.html'" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-slate-400 touch-btn">
+    <button onclick="window.location.href='workouts.html'" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-slate-400 touch-btn border border-white/5">
       <i data-lucide="x" class="w-5 h-5"></i>
     </button>
     
@@ -354,15 +223,17 @@
   </header>
   
   <!-- Main Content -->
-  <main class="flex-1 flex flex-col relative overflow-hidden">
+  <!-- flex-1 pour prendre tout l'espace restant, overflow-hidden pour que seul le SVG soit potentiellement coupé proprement si écran minuscule -->
+  <main class="flex-1 flex flex-col relative overflow-hidden w-full">
+    
     <!-- Cockpit Visual Area -->
-    <div class="flex-1 relative flex items-center justify-center min-h-[300px]">
+    <div class="flex-1 relative flex items-center justify-center min-h-0">
       <!-- Grid Background -->
       <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px] opacity-30 pointer-events-none"></div>
       
       <!-- SVG Reactor -->
-      <div class="w-full h-full relative cockpit-svg-container accel-gpu" id="cockpit-visual">
-        <svg viewBox="0 0 400 400" class="w-full h-full max-w-[400px]">
+      <div class="w-full h-full relative cockpit-svg-container accel-gpu p-4" id="cockpit-visual">
+        <svg viewBox="0 0 400 400" class="w-full h-full max-w-[400px] max-h-[400px]" preserveAspectRatio="xMidYMid meet">
           <defs>
             <radialGradient id="coreGrad" cx="50%" cy="50%" r="50%">
               <stop offset="0%" stop-color="currentColor" stop-opacity="0.3"/>
@@ -394,8 +265,8 @@
         </svg>
       </div>
       
-      <!-- Top Info Panels -->
-      <div class="absolute top-4 left-4 right-4 space-y-2 pointer-events-none">
+      <!-- Top Info Panels (Absolute) -->
+      <div class="absolute top-2 left-4 right-4 space-y-2 pointer-events-none z-20">
         <!-- Superset Badge -->
         <div id="superset-badge" class="hidden rounded-lg p-2 border border-[var(--magenta)] bg-gradient-to-r from-[rgba(255,45,149,0.2)] to-transparent flex items-center gap-3 backdrop-blur-md shadow-[0_0_15px_rgba(255,45,149,0.3)]">
           <div class="w-8 h-8 rounded-full bg-[var(--magenta)] flex items-center justify-center animate-pulse">
@@ -417,8 +288,8 @@
         </div>
       </div>
       
-      <!-- Bottom Exercise Info -->
-      <div class="absolute bottom-4 left-4 right-4 pointer-events-none">
+      <!-- Bottom Exercise Info (Absolute above controls) -->
+      <div class="absolute bottom-2 left-4 right-4 pointer-events-none z-20">
         <div class="flex items-center justify-between mb-1">
           <span class="px-2 py-0.5 rounded bg-[var(--cyan)]/10 border border-[var(--cyan)]/30 text-[9px] font-bold text-[var(--cyan)] uppercase" id="muscle-tag">CIBLE</span>
           <div class="flex gap-1" id="dots-container"></div>
@@ -428,9 +299,9 @@
     </div>
     
     <!-- Bottom Control Panel -->
-    <div class="bg-[#0f0f1a] border-t border-white/10 rounded-t-[30px] p-5 pb-10 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] z-20">
+    <div class="controls-panel-container">
       <!-- LCD Display -->
-      <div class="lcd-panel flex justify-between mb-6 px-4 py-3">
+      <div class="lcd-panel flex justify-between mb-4 px-4 py-2">
         <div class="text-center w-1/3 border-r border-slate-700">
           <div class="text-[8px] text-slate-500 uppercase font-bold mb-1">CIBLE</div>
           <div class="text-lg font-mono-tech font-bold text-white">
@@ -448,24 +319,24 @@
       </div>
       
       <!-- Input Controls -->
-      <div class="grid grid-cols-2 gap-4 mb-6">
+      <div class="grid grid-cols-2 gap-4 mb-4">
         <!-- Weight Control -->
         <div class="bg-slate-800/50 rounded-2xl p-2 flex flex-col items-center border border-white/5">
-          <span class="text-[8px] text-slate-500 uppercase font-bold mb-2">POIDS (KG)</span>
-          <div class="flex items-center justify-between w-full px-2">
-            <button onclick="modWeight(-2.5)" class="w-14 h-14 rounded-xl bg-white/10 flex items-center justify-center text-white text-2xl font-bold touch-btn active:bg-white/20 border border-white/5">-</button>
-            <span class="text-3xl font-hud font-bold text-white" id="in-weight">0</span>
-            <button onclick="modWeight(2.5)" class="w-14 h-14 rounded-xl bg-white/10 flex items-center justify-center text-white text-2xl font-bold touch-btn active:bg-white/20 border border-white/5">+</button>
+          <span class="text-[8px] text-slate-500 uppercase font-bold mb-1">POIDS (KG)</span>
+          <div class="flex items-center justify-between w-full px-1">
+            <button onclick="modWeight(-2.5)" class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-white text-xl font-bold touch-btn active:bg-white/20 border border-white/5">-</button>
+            <span class="text-2xl font-hud font-bold text-white" id="in-weight">0</span>
+            <button onclick="modWeight(2.5)" class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-white text-xl font-bold touch-btn active:bg-white/20 border border-white/5">+</button>
           </div>
         </div>
         
         <!-- Reps Control -->
         <div class="bg-slate-800/50 rounded-2xl p-2 flex flex-col items-center border border-white/5">
-          <span class="text-[8px] text-slate-500 uppercase font-bold mb-2">RÉPS</span>
-          <div class="flex items-center justify-between w-full px-2">
-            <button onclick="modReps(-1)" class="w-14 h-14 rounded-xl bg-white/10 flex items-center justify-center text-white text-2xl font-bold touch-btn active:bg-white/20 border border-white/5">-</button>
-            <span class="text-3xl font-hud font-bold text-white" id="in-reps">0</span>
-            <button onclick="modReps(1)" class="w-14 h-14 rounded-xl bg-white/10 flex items-center justify-center text-white text-2xl font-bold touch-btn active:bg-white/20 border border-white/5">+</button>
+          <span class="text-[8px] text-slate-500 uppercase font-bold mb-1">RÉPS</span>
+          <div class="flex items-center justify-between w-full px-1">
+            <button onclick="modReps(-1)" class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-white text-xl font-bold touch-btn active:bg-white/20 border border-white/5">-</button>
+            <span class="text-2xl font-hud font-bold text-white" id="in-reps">0</span>
+            <button onclick="modReps(1)" class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-white text-xl font-bold touch-btn active:bg-white/20 border border-white/5">+</button>
           </div>
         </div>
       </div>
@@ -473,16 +344,16 @@
       <!-- Action Buttons -->
       <div id="action-area">
         <!-- Validate Button -->
-        <button id="btn-validate" onclick="logSet()" class="w-full h-20 rounded-2xl bg-gradient-to-r from-[var(--cyan)] to-blue-600 flex items-center justify-center gap-3 shadow-[0_0_20px_rgba(0,234,255,0.4)] touch-btn group overflow-hidden relative">
+        <button id="btn-validate" onclick="logSet()" class="w-full h-16 rounded-2xl bg-gradient-to-r from-[var(--cyan)] to-blue-600 flex items-center justify-center gap-3 shadow-[0_0_20px_rgba(0,234,255,0.4)] touch-btn group overflow-hidden relative">
           <div class="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500"></div>
-          <span class="text-2xl font-hud font-black text-black uppercase tracking-widest">VALIDER SÉRIE</span>
-          <i data-lucide="check-circle-2" class="w-8 h-8 text-black fill-current"></i>
+          <span class="text-xl font-hud font-black text-black uppercase tracking-widest">VALIDER SÉRIE</span>
+          <i data-lucide="check-circle-2" class="w-6 h-6 text-black fill-current"></i>
         </button>
         
         <!-- Skip Rest Button -->
-        <button id="btn-skip-rest" onclick="skipRest()" class="hidden w-full h-20 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center gap-3 touch-btn">
-          <span class="text-xl font-hud font-bold text-white uppercase tracking-wider">PASSER LE REPOS</span>
-          <i data-lucide="fast-forward" class="w-6 h-6 text-white fill-current"></i>
+        <button id="btn-skip-rest" onclick="skipRest()" class="hidden w-full h-16 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center gap-3 touch-btn active:bg-white/20">
+          <span class="text-lg font-hud font-bold text-white uppercase tracking-wider">PASSER LE REPOS</span>
+          <i data-lucide="fast-forward" class="w-5 h-5 text-white fill-current"></i>
         </button>
       </div>
     </div>

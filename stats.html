@@ -173,15 +173,16 @@
                     if (!containerRef.current || !canvas) return;
                     const dpr = window.devicePixelRatio || 1;
                     const rect = containerRef.current.getBoundingClientRect();
-                    const size = rect.width;
+                    const size = Math.min(rect.width - 32, rect.height - 32, 350);
                     canvas.width = size * dpr;
                     canvas.height = size * dpr;
                     canvas.style.width = `${size}px`;
                     canvas.style.height = `${size}px`;
+                    ctx.setTransform(1, 0, 0, 1, 0, 0);
                     ctx.scale(dpr, dpr);
                 };
                 window.addEventListener('resize', handleResize);
-                setTimeout(handleResize, 0);
+                setTimeout(handleResize, 100);
 
                 const toRad = (deg) => (deg * Math.PI) / 180;
                 const createCarbonPattern = () => {
@@ -407,10 +408,15 @@
                 let animationId;
                 const handleResize = () => {
                     if (!containerRef.current || !canvas) return;
-                    const dpr = window.devicePixelRatio || 1; const rect = containerRef.current.getBoundingClientRect(); const size = rect.width;
-                    canvas.width = size * dpr; canvas.height = size * dpr; canvas.style.width = `${size}px`; canvas.style.height = `${size}px`; ctx.scale(dpr, dpr);
+                    const dpr = window.devicePixelRatio || 1; 
+                    const rect = containerRef.current.getBoundingClientRect(); 
+                    const size = Math.min(rect.width - 48, rect.height - 48, 350);
+                    canvas.width = size * dpr; canvas.height = size * dpr; 
+                    canvas.style.width = `${size}px`; canvas.style.height = `${size}px`; 
+                    ctx.setTransform(1, 0, 0, 1, 0, 0);
+                    ctx.scale(dpr, dpr);
                 };
-                window.addEventListener('resize', handleResize); setTimeout(handleResize, 0);
+                window.addEventListener('resize', handleResize); setTimeout(handleResize, 100);
                 const toRad = (deg) => (deg * Math.PI) / 180;
                 const createCarbonPattern = () => {
                     const pCanvas = document.createElement('canvas'); pCanvas.width = 8; pCanvas.height = 8; const pCtx = pCanvas.getContext('2d');

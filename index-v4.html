@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>NEON FIT V4 // QUARTIER GENERAL</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            void: '#020408',
+            'void-soft': '#0a0f14',
+            cyan: '#22d3ee',
+            magenta: '#c084fc',
+            amber: '#f59e0b',
+            lime: '#84cc16',
+            purple: '#a855f7',
+            emerald: '#10b981'
+          },
+          fontFamily: {
+            display: ['Orbitron', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+            body: ['Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    :root {
+      --cyan: #22d3ee;
+      --magenta: #c084fc;
+      --amber: #f59e0b;
+      --lime: #84cc16;
+      --purple: #a855f7;
+      --emerald: #10b981;
+      --void: #020408;
+    }
+    
+    html, body {
+      height: 100%;
+      overflow-x: hidden;
+      background: var(--void);
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      color: white;
+      min-height: 100dvh;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: calc(env(safe-area-inset-bottom) + 80px);
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    .font-display { font-family: 'Orbitron', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    
+    /* Glass Panel */
+    .glass-panel {
+      background: rgba(10, 15, 20, 0.9);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 24px;
+    }
+    
+    /* Progress bar */
+    .progress-bar {
+      height: 8px;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.1);
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.5s ease-out;
+    }
+    
+    /* Stat Card */
+    .stat-card {
+      background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 20px;
+      text-align: center;
+    }
+    
+    /* Mission Card */
+    .mission-card {
+      background: linear-gradient(135deg, rgba(34, 211, 238, 0.1), rgba(192, 132, 252, 0.05));
+      border: 1px solid rgba(34, 211, 238, 0.2);
+      border-radius: 24px;
+      padding: 20px;
+    }
+    
+    /* Heatmap */
+    .heatmap-container {
+      position: relative;
+      width: 200px;
+      height: 280px;
+      margin: 0 auto;
+    }
+    
+    .heatmap-muscle {
+      position: absolute;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .heatmap-muscle:active {
+      transform: scale(1.1);
+    }
+    
+    .heatmap-muscle.active {
+      filter: brightness(1.3);
+    }
+    
+    /* Muscle Legend */
+    .muscle-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+    }
+    
+    .muscle-tag {
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transition: all 0.15s;
+    }
+    
+    /* Launch Button */
+    .btn-launch {
+      min-height: 70px;
+      background: linear-gradient(135deg, var(--cyan), #06b6d4);
+      border-radius: 24px;
+      font-weight: 800;
+      font-size: 18px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      box-shadow: 0 0 60px rgba(34, 211, 238, 0.5), 0 8px 32px rgba(0, 0, 0, 0.4);
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+    
+    .btn-launch:active {
+      transform: scale(0.97);
+      box-shadow: 0 0 30px rgba(34, 211, 238, 0.3);
+    }
+    
+    /* Bottom Nav */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(10, 15, 20, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px;
+      color: rgba(255,255,255,0.4);
+      transition: color 0.15s;
+    }
+    
+    .nav-item.active {
+      color: var(--cyan);
+    }
+    
+    .nav-icon {
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+    
+    .nav-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    /* Rank Badge */
+    .rank-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: linear-gradient(135deg, rgba(192, 132, 252, 0.2), rgba(192, 132, 252, 0.05));
+      border: 1px solid rgba(192, 132, 252, 0.3);
+      border-radius: 12px;
+    }
+    
+    /* Streak */
+    .streak-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 12px;
+      background: linear-gradient(135deg, rgba(249, 115, 22, 0.2), rgba(249, 115, 22, 0.05));
+      border: 1px solid rgba(249, 115, 22, 0.3);
+      border-radius: 10px;
+    }
+    
+    /* Pulse animation */
+    @-webkit-keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    .pulse {
+      -webkit-animation: pulse 2s ease-in-out infinite;
+      animation: pulse 2s ease-in-out infinite;
+    }
+  </style>
+</head>
+
+<body>
+  
+  <!-- Main Content -->
+  <div class="px-4 py-4">
+    
+    <!-- Header -->
+    <header class="flex items-center justify-between mb-6">
+      <div class="rank-badge">
+        <span class="text-magenta font-display font-bold text-sm">COMMANDO</span>
+        <span class="text-white/40 text-xs">Niv. 23</span>
+      </div>
+      <div class="streak-badge">
+        <span class="text-lg">🔥</span>
+        <span class="font-mono font-bold text-amber">14</span>
+      </div>
+    </header>
+    
+    <!-- XP Progress -->
+    <div class="glass-panel p-4 mb-6">
+      <div class="flex items-center justify-between mb-2">
+        <div class="text-xs font-bold text-white/50 uppercase tracking-widest">Experience</div>
+        <div class="font-mono text-sm text-cyan">2,450 / 3,000 XP</div>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill bg-gradient-to-r from-cyan to-magenta" style="width: 82%;"></div>
+      </div>
+      <div class="text-xs text-white/40 text-right mt-2">550 XP jusqu'au rang ELITE</div>
+    </div>
+    
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-2 gap-4 mb-6">
+      <div class="stat-card">
+        <div class="text-3xl mb-1">📅</div>
+        <div class="font-mono font-bold text-2xl text-white">2</div>
+        <div class="text-xs text-white/50 uppercase">Semaine</div>
+        <div class="text-xs text-white/30">/4</div>
+      </div>
+      <div class="stat-card">
+        <div class="text-3xl mb-1">🏋️</div>
+        <div class="font-mono font-bold text-2xl text-white">45,200</div>
+        <div class="text-xs text-white/50 uppercase">kg</div>
+        <div class="text-xs text-white/30">volume hebdo</div>
+      </div>
+    </div>
+    
+    <!-- Heatmap Section -->
+    <div class="glass-panel p-5 mb-6">
+      <div class="text-xs font-bold text-white/50 uppercase tracking-widest text-center mb-4">Heatmap Musculaire</div>
+      
+      <div class="heatmap-container">
+        <!-- SVG Silhouette -->
+        <svg viewBox="0 0 200 280" class="w-full h-full">
+          <!-- Background glow -->
+          <defs>
+            <radialGradient id="bodyGlow">
+              <stop offset="0%" stop-color="rgba(34,211,238,0.1)"/>
+              <stop offset="100%" stop-color="transparent"/>
+            </radialGradient>
+          </defs>
+          <ellipse cx="100" cy="140" rx="80" ry="120" fill="url(#bodyGlow)"/>
+          
+          <!-- Body outline -->
+          <path d="M100,10 Q115,10 120,30 Q125,50 120,70 L130,70 Q145,75 150,90 Q155,110 145,130 L135,130 Q140,150 135,180 L130,220 Q125,250 115,270 L100,270 L85,270 Q75,250 70,220 L65,180 Q60,150 65,130 L55,130 Q45,110 50,90 Q55,75 70,70 L80,70 Q75,50 80,30 Q85,10 100,10" 
+                fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+          
+          <!-- Muscle zones (clickable) -->
+          <!-- Dos -->
+          <ellipse class="heatmap-muscle" id="muscle-dos" cx="100" cy="85" rx="25" ry="35" fill="rgba(34,211,238,0.4)" data-muscle="dos"/>
+          
+          <!-- Pecs -->
+          <ellipse class="heatmap-muscle" id="muscle-pecs" cx="85" cy="80" rx="12" ry="15" fill="rgba(192,132,252,0.2)" data-muscle="pecs"/>
+          <ellipse class="heatmap-muscle" id="muscle-pecs2" cx="115" cy="80" rx="12" ry="15" fill="rgba(192,132,252,0.2)" data-muscle="pecs"/>
+          
+          <!-- Epaules -->
+          <circle class="heatmap-muscle" id="muscle-epaules1" cx="60" cy="65" r="10" fill="rgba(249,115,22,0.3)" data-muscle="epaules"/>
+          <circle class="heatmap-muscle" id="muscle-epaules2" cx="140" cy="65" r="10" fill="rgba(249,115,22,0.3)" data-muscle="epaules"/>
+          
+          <!-- Bras -->
+          <ellipse class="heatmap-muscle" id="muscle-bras1" cx="55" cy="100" rx="8" ry="20" fill="rgba(168,85,247,0.3)" data-muscle="bras"/>
+          <ellipse class="heatmap-muscle" id="muscle-bras2" cx="145" cy="100" rx="8" ry="20" fill="rgba(168,85,247,0.3)" data-muscle="bras"/>
+          
+          <!-- Jambes -->
+          <ellipse class="heatmap-muscle" id="muscle-jambes1" cx="85" cy="200" rx="15" ry="50" fill="rgba(132,204,22,0.3)" data-muscle="jambes"/>
+          <ellipse class="heatmap-muscle" id="muscle-jambes2" cx="115" cy="200" rx="15" ry="50" fill="rgba(132,204,22,0.3)" data-muscle="jambes"/>
+          
+          <!-- Abdos -->
+          <ellipse class="heatmap-muscle" id="muscle-abdos" cx="100" cy="130" rx="15" ry="25" fill="rgba(16,185,129,0.2)" data-muscle="abdos"/>
+        </svg>
+      </div>
+      
+      <!-- Muscle Legend -->
+      <div class="muscle-legend mt-4">
+        <div class="muscle-tag bg-cyan/20 text-cyan border border-cyan/30">Dos 12/14</div>
+        <div class="muscle-tag bg-lime/20 text-lime border border-lime/30">Jambes 8/12</div>
+        <div class="muscle-tag bg-magenta/20 text-magenta border border-magenta/30">Pecs 4/12</div>
+        <div class="muscle-tag bg-amber/20 text-amber border border-amber/30">Epaules 6/10</div>
+        <div class="muscle-tag bg-purple/20 text-purple border border-purple/30">Bras 8/10</div>
+        <div class="muscle-tag bg-emerald/20 text-emerald border border-emerald/30">Abdos 4/8</div>
+      </div>
+      
+    </div>
+    
+    <!-- Next Mission -->
+    <div class="mission-card mb-6">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="w-2 h-2 rounded-full bg-cyan pulse"></span>
+        <span class="text-xs font-bold text-cyan uppercase tracking-widest">Prochaine Mission</span>
+      </div>
+      <h2 class="font-display font-bold text-xl text-white mb-1" id="next-workout">DOS + JAMBES LOURDES + BRAS</h2>
+      <div class="flex items-center gap-3 text-sm text-white/50 mb-4">
+        <span>⏱ 68 min</span>
+        <span>•</span>
+        <span>31 series</span>
+        <span>•</span>
+        <span class="text-cyan">Tempo 3-1-2</span>
+      </div>
+      
+      <!-- Progress bar -->
+      <div class="mb-3">
+        <div class="flex justify-between text-xs text-white/40 mb-1">
+          <span>Progression semaine</span>
+          <span>75%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill bg-gradient-to-r from-cyan to-emerald" style="width: 75%;"></div>
+        </div>
+      </div>
+      
+      <!-- Technique du bloc -->
+      <div class="flex items-center gap-2 text-xs text-white/50">
+        <span class="px-2 py-1 rounded bg-white/5 border border-white/10">Bloc 1</span>
+        <span>Tempo 3-1-2 • RPE 6-7</span>
+      </div>
+    </div>
+    
+    <!-- Launch Button -->
+    <button id="btn-launch" class="btn-launch w-full text-black font-display flex items-center justify-center gap-3 mb-6">
+      <span class="text-2xl">🎯</span>
+      <span>LANCER MISSION</span>
+    </button>
+    
+    <!-- Quick Actions -->
+    <div class="grid grid-cols-3 gap-3 mb-6">
+      <button class="glass-panel p-4 text-center" onclick="window.location.href='workouts-v4.html'">
+        <div class="text-2xl mb-1">📋</div>
+        <div class="text-xs text-white/50 uppercase">Programme</div>
+      </button>
+      <button class="glass-panel p-4 text-center" onclick="window.location.href='stats-v4.html'">
+        <div class="text-2xl mb-1">📊</div>
+        <div class="text-xs text-white/50 uppercase">Stats</div>
+      </button>
+      <button class="glass-panel p-4 text-center" onclick="window.location.href='badges-v4.html'">
+        <div class="text-2xl mb-1">🏆</div>
+        <div class="text-xs text-white/50 uppercase">Badges</div>
+      </button>
+    </div>
+    
+  </div>
+  
+  <!-- Bottom Navigation -->
+  <div class="bottom-nav">
+    <div class="flex">
+      <div class="nav-item active">
+        <span class="nav-icon">⬡</span>
+        <span class="nav-label">QG</span>
+      </div>
+      <div class="nav-item" onclick="window.location.href='workouts-v4.html'">
+        <span class="nav-icon">◎</span>
+        <span class="nav-label">OPS</span>
+      </div>
+      <div class="nav-item" onclick="window.location.href='stats-v4.html'">
+        <span class="nav-icon">◧</span>
+        <span class="nav-label">Stats</span>
+      </div>
+      <div class="nav-item" onclick="window.location.href='profile-v4.html'">
+        <span class="nav-icon">◯</span>
+        <span class="nav-label">ID</span>
+      </div>
+    </div>
+  </div>
+  
+  <script src="program-data.js"></script>
+  <script>
+    // ========== RANKS ==========
+    const RANKS = [
+      { name: 'RECRUE', minLevel: 1, maxLevel: 5, color: 'amber' },
+      { name: 'OPERATEUR', minLevel: 6, maxLevel: 10, color: 'white' },
+      { name: 'SPECIALISTE', minLevel: 11, maxLevel: 20, color: 'amber' },
+      { name: 'COMMANDO', minLevel: 21, maxLevel: 35, color: 'magenta' },
+      { name: 'ELITE', minLevel: 36, maxLevel: 50, color: 'cyan' },
+      { name: 'LEGENDE', minLevel: 51, maxLevel: 75, color: 'cyan' },
+      { name: 'TITAN', minLevel: 76, maxLevel: 100, color: 'magenta' }
+    ];
+    
+    function getRank(level) {
+      return RANKS.find(r => level >= r.minLevel && level <= r.maxLevel) || RANKS[0];
+    }
+    
+    // ========== LOAD DATA ==========
+    function loadDashboardData() {
+      const xp = parseInt(localStorage.getItem('hybrid_xp')) || 0;
+      const level = Math.floor(xp / 1000) + 1;
+      const currentLevelXP = xp % 1000;
+      const streak = parseInt(localStorage.getItem('neon_fit_streak')) || 0;
+      const week = parseInt(localStorage.getItem('hybrid_current_week')) || 1;
+      
+      // Update UI
+      const rank = getRank(level);
+      document.querySelector('.rank-badge .text-magenta').textContent = rank.name;
+      document.querySelector('.rank-badge .text-white\\/40').textContent = `Niv. ${level}`;
+      
+      // Streak
+      if (streak > 0) {
+        document.querySelector('.streak-badge .font-mono').textContent = streak;
+      }
+      
+      // Load next workout from program-data
+      if (window.programData && window.programData.program) {
+        const weekData = window.programData.program[`week${week}`];
+        if (weekData) {
+          // Find next workout day
+          const today = new Date().getDay();
+          let nextDay = 'dimanche';
+          if (today === 0 || today === 6) nextDay = 'dimanche';
+          else if (today >= 1 && today <= 2) nextDay = 'mardi';
+          else nextDay = 'vendredi';
+          
+          const workout = weekData[nextDay];
+          if (workout) {
+            document.getElementById('next-workout').textContent = workout.name;
+          }
+          
+          // Update technique
+          const blockInfo = weekData.technique || 'Tempo 3-1-2';
+          document.querySelector('.mission-card .text-cyan').textContent = blockInfo;
+        }
+      }
+    }
+    
+    // ========== HEATMAP INTERACTION ==========
+    document.querySelectorAll('.heatmap-muscle').forEach(muscle => {
+      muscle.addEventListener('click', () => {
+        const muscleName = muscle.dataset.muscle;
+        // Show muscle details (could expand to a modal)
+        muscle.classList.toggle('active');
+      });
+    });
+    
+    // ========== LAUNCH MISSION ==========
+    document.getElementById('btn-launch').addEventListener('click', () => {
+      const week = parseInt(localStorage.getItem('hybrid_current_week')) || 1;
+      window.location.href = `session-v4.html?week=${week}&day=dimanche`;
+    });
+    
+    // ========== INIT ==========
+    document.addEventListener('DOMContentLoaded', loadDashboardData);
+  </script>
+  
+</body>
+</html>

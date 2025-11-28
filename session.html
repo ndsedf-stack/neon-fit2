@@ -388,15 +388,55 @@
       opacity: 0.6;
     }
     
+    /* Timer circle animations */
+    @-webkit-keyframes timer-rotate {
+      from { -webkit-transform: rotate(0deg); transform: rotate(0deg); }
+      to { -webkit-transform: rotate(360deg); transform: rotate(360deg); }
+    }
+    @keyframes timer-rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    .timer-ring-rotate {
+      -webkit-transform-origin: center;
+      transform-origin: center;
+      -webkit-animation: timer-rotate 30s linear infinite;
+      animation: timer-rotate 30s linear infinite;
+    }
+    
+    .timer-ring-rotate-reverse {
+      -webkit-transform-origin: center;
+      transform-origin: center;
+      -webkit-animation: timer-rotate 20s linear infinite reverse;
+      animation: timer-rotate 20s linear infinite reverse;
+    }
+    
+    .timer-progress-ring {
+      filter: drop-shadow(0 0 8px rgba(34,211,238,0.6));
+      -webkit-transition: stroke-dashoffset 0.3s ease-out;
+      transition: stroke-dashoffset 0.3s ease-out;
+    }
+    
+    .timer-circle-svg {
+      filter: drop-shadow(0 0 20px rgba(34,211,238,0.2));
+    }
+    
     /* Rest overlay critical state */
     .rest-critical #rest-overlay-timer {
       color: #ef4444 !important;
+      text-shadow: 0 0 30px rgba(239,68,68,0.8), 0 0 60px rgba(239,68,68,0.4) !important;
       -webkit-animation: countdown-pulse 0.5s ease-in-out infinite;
       animation: countdown-pulse 0.5s ease-in-out infinite;
     }
     
     .rest-critical #rest-circle-progress {
       stroke: #ef4444 !important;
+      filter: drop-shadow(0 0 12px rgba(239,68,68,0.8)) !important;
+    }
+    
+    .rest-critical .timer-circle-svg {
+      filter: drop-shadow(0 0 30px rgba(239,68,68,0.4)) !important;
     }
     
     @supports (-webkit-touch-callout: none) {
@@ -439,27 +479,43 @@
     <!-- Content -->
     <div class="relative z-10 h-full flex flex-col items-center justify-center px-6 safe-area-padding">
       
-      <!-- Timer Circle - Glass Style -->
-      <div class="relative w-64 h-64 mb-6" style="filter: drop-shadow(0 0 30px rgba(34, 211, 238, 0.3));">
-        <svg width="100%" height="100%" viewBox="0 0 280 280">
+      <!-- Timer Circle - Premium with decorative rings -->
+      <div class="relative w-72 h-72 mb-6">
+        <svg width="100%" height="100%" viewBox="0 0 300 300" class="timer-circle-svg">
           <defs>
             <linearGradient id="timerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stop-color="var(--cyan)" />
               <stop offset="100%" stop-color="var(--magenta)" />
             </linearGradient>
+            <linearGradient id="glowGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="var(--cyan)" stop-opacity="0.3" />
+              <stop offset="100%" stop-color="var(--magenta)" stop-opacity="0.3" />
+            </linearGradient>
           </defs>
           
-          <!-- Background circle -->
-          <circle cx="140" cy="140" r="120" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="8" />
+          <!-- Outer decorative ring -->
+          <circle cx="150" cy="150" r="140" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1" />
           
-          <!-- Progress circle -->
-          <circle id="rest-circle-progress" cx="140" cy="140" r="120" fill="none" stroke="url(#timerGradient)" stroke-width="8" stroke-linecap="round" stroke-dasharray="753.98" stroke-dashoffset="0" transform="rotate(-90 140 140)" style="filter: drop-shadow(0 0 8px var(--cyan)); transition: stroke-dashoffset 0.1s linear;" />
+          <!-- Outer dashed ring - rotating -->
+          <circle cx="150" cy="150" r="135" fill="none" stroke="rgba(34,211,238,0.15)" stroke-width="1" stroke-dasharray="8 12" class="timer-ring-rotate" />
+          
+          <!-- Inner glow circle -->
+          <circle cx="150" cy="150" r="115" fill="none" stroke="url(#glowGradient)" stroke-width="20" opacity="0.3" />
+          
+          <!-- Background track -->
+          <circle cx="150" cy="150" r="115" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="10" />
+          
+          <!-- Progress circle - starts full, depletes to 0 -->
+          <circle id="rest-circle-progress" cx="150" cy="150" r="115" fill="none" stroke="url(#timerGradient)" stroke-width="10" stroke-linecap="round" stroke-dasharray="722.57" stroke-dashoffset="0" transform="rotate(-90 150 150)" class="timer-progress-ring" />
+          
+          <!-- Inner decorative ring -->
+          <circle cx="150" cy="150" r="95" fill="none" stroke="rgba(192,132,252,0.1)" stroke-width="1" stroke-dasharray="4 8" class="timer-ring-rotate-reverse" />
         </svg>
         
         <!-- Timer text -->
         <div class="absolute inset-0 flex flex-col items-center justify-center">
-          <span class="text-xs font-bold text-[var(--cyan)] uppercase tracking-[0.3em] mb-2">REPOS</span>
-          <span id="rest-overlay-timer" class="text-6xl font-hud font-black text-white drop-shadow-[0_0_20px_rgba(34,211,238,0.5)]">
+          <span class="text-xs font-bold text-[var(--cyan)] uppercase tracking-[0.3em] mb-2 opacity-80">REPOS</span>
+          <span id="rest-overlay-timer" class="text-6xl font-hud font-black text-white" style="text-shadow: 0 0 30px rgba(34,211,238,0.5), 0 0 60px rgba(34,211,238,0.3);">
             01:30
           </span>
         </div>
@@ -483,7 +539,7 @@
         
         <!-- Tempo Card -->
         <div class="glass-stat-card">
-          <span class="stat-value text-[var(--orange)]" id="rest-tempo-display">3-1-2</span>
+          <span class="stat-value text-[var(--orange)] text-lg whitespace-nowrap" id="rest-tempo-display">3-1-2</span>
           <span class="stat-label">TEMPO</span>
           <div class="stat-bar bg-[var(--orange)]" style="width: 100%"></div>
         </div>
@@ -896,7 +952,7 @@
       window._nextEx = isExDone; 
       let rem = duration; 
       const total = duration; 
-      const circumference = 753.98; // 2 * PI * 120
+      const circumference = 722.57; // 2 * PI * 115
       
       // Clear existing timer
       if (restTimer) clearInterval(restTimer); 

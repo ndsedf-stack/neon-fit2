@@ -388,36 +388,6 @@
       opacity: 0.6;
     }
     
-    /* Timer circle animations */
-    @-webkit-keyframes timer-rotate {
-      from { -webkit-transform: rotate(0deg); transform: rotate(0deg); }
-      to { -webkit-transform: rotate(360deg); transform: rotate(360deg); }
-    }
-    @keyframes timer-rotate {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-    
-    .timer-ring-outer {
-      -webkit-animation: timer-rotate 25s linear infinite;
-      animation: timer-rotate 25s linear infinite;
-    }
-    
-    .timer-ring-inner {
-      -webkit-animation: timer-rotate 18s linear infinite reverse;
-      animation: timer-rotate 18s linear infinite reverse;
-    }
-    
-    .timer-progress-ring {
-      filter: drop-shadow(0 0 10px rgba(34,211,238,0.7));
-      -webkit-transition: stroke-dashoffset 0.3s ease-out;
-      transition: stroke-dashoffset 0.3s ease-out;
-    }
-    
-    .timer-circle-svg {
-      filter: drop-shadow(0 0 25px rgba(34,211,238,0.3));
-    }
-    
     /* Rest overlay critical state */
     .rest-critical #rest-overlay-timer {
       color: #ef4444 !important;

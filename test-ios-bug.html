@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test iOS</title>
+  <style>
+    body { 
+      background: #000; 
+      padding: 20px; 
+    }
+    .test-opacity {
+      width: 300px;
+      height: 200px;
+      background-image: url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48');
+      background-size: cover;
+      opacity: 0.25 !important;
+      filter: blur(2px);
+      -webkit-filter: blur(2px);
+      margin: 20px 0;
+      border: 2px solid red;
+    }
+    .test-inline {
+      width: 300px;
+      height: 200px;
+      background-image: url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48');
+      background-size: cover;
+      margin: 20px 0;
+      border: 2px solid green;
+    }
+  </style>
+</head>
+<body>
+  <h1 style="color: white;">TEST 1: CSS opacity (rouge)</h1>
+  <div class="test-opacity"></div>
+  
+  <h1 style="color: white;">TEST 2: Inline opacity (vert)</h1>
+  <div class="test-inline" style="opacity: 0.25 !important; filter: blur(2px);"></div>
+  
+  <h1 style="color: white;">TEST 3: RGBA background (bleu)</h1>
+  <div style="width: 300px; height: 200px; background: rgba(100,100,100,0.25); border: 2px solid blue;"></div>
+</body>
+</html>

@@ -94,13 +94,14 @@ const StatsData = {
 
   getMusclesData: () => {
     const history = StatsData.getHistory();
-    const muscleVolumes = {};
-
-    Object.values(MUSCLE_MAPPING).forEach(m => {
-      if (!muscleVolumes[m.id]) {
-        muscleVolumes[m.id] = { id: m.id, name: m.name, color: m.color, volume: 0, sets: 0 };
-      }
-    });
+    const muscleVolumes = {
+      'm1': { id: 'm1', name: 'DOS', color: '#3b82f6', volume: 0, sets: 0 },
+      'm2': { id: 'm2', name: 'PECTORAUX', color: '#22d3ee', volume: 0, sets: 0 },
+      'm3': { id: 'm3', name: 'JAMBES', color: '#8b5cf6', volume: 0, sets: 0 },
+      'm4': { id: 'm4', name: 'ÉPAULES', color: '#d946ef', volume: 0, sets: 0 },
+      'm5': { id: 'm5', name: 'BRAS', color: '#f43f5e', volume: 0, sets: 0 },
+      'm6': { id: 'm6', name: 'ABDOS', color: '#10b981', volume: 0, sets: 0 }
+    };
 
     history.forEach(entry => {
       const weight = parseFloat(entry.weight) || 0;
@@ -140,7 +141,7 @@ const StatsData = {
       }
     });
 
-    return Object.values(muscleVolumes).filter(m => m.volume > 0 || m.sets > 0);
+    return Object.values(muscleVolumes);
   },
 
   getMusclesHUD: () => {
@@ -153,9 +154,9 @@ const StatsData = {
       sets: m.sets,
       volume: Math.round(m.volume),
       type: 'primary',
-      normalized: m.volume / maxVolume,
-      intensity: Math.min(10, 6 + (m.sets / 10)),
-      recovery: Math.max(0, 100 - (m.sets * 5))
+      normalized: maxVolume > 0 ? m.volume / maxVolume : 0.1,
+      intensity: m.sets > 0 ? Math.min(10, 6 + (m.sets / 10)) : 0,
+      recovery: m.sets > 0 ? Math.max(0, 100 - (m.sets * 5)) : 100
     }));
   },
 

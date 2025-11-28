@@ -303,6 +303,89 @@
             background: white; box-shadow: 0 0 6px white; border-radius: 2px;
         }
 
+        /* Superset Badge */
+        .superset-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            background: rgba(255, 45, 149, 0.1);
+            border: 1px solid rgba(255, 45, 149, 0.3);
+            border-radius: 6px;
+            font-size: 8px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #ff2d95;
+            margin-left: 8px;
+        }
+        .superset-icon {
+            width: 10px;
+            height: 10px;
+            color: #ff2d95;
+        }
+
+        /* Superset Connector */
+        .superset-pair {
+            position: relative;
+            margin-bottom: 12px;
+        }
+        .superset-pair .glass-card {
+            margin-bottom: 12px;
+        }
+        .superset-pair .glass-card:last-child {
+            margin-bottom: 24px;
+        }
+        .superset-connector {
+            position: absolute;
+            left: 10px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg, transparent, rgba(255, 45, 149, 0.3), transparent);
+            border-radius: 2px;
+        }
+
+        /* Exercise Details */
+        .ex-details {
+            display: flex;
+            gap: 16px;
+            padding: 12px 0;
+            margin-top: 12px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            flex-wrap: wrap;
+        }
+        .ex-detail {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .ex-detail-label {
+            font-size: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #64748b;
+            font-weight: 700;
+        }
+        .ex-detail-value {
+            font-family: var(--font-tech);
+            font-size: 13px;
+            font-weight: 600;
+            color: #cbd5e1;
+        }
+
+        /* Notes */
+        .ex-notes {
+            margin-top: 12px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border-left: 3px solid var(--cyan);
+            border-radius: 6px;
+            font-size: 11px;
+            line-height: 1.5;
+            color: #94a3b8;
+        }
+
         /* Start Button */
         .start-button {
             position: fixed;
@@ -436,8 +519,32 @@
         let workout;
         try {
             workout = programData.getWorkout(week, day);
+            
+            // ✅ VÉRIFICATION COMPLÈTE DE LA CONNEXION
+            console.log('✅ Workout loaded successfully!');
+            console.log('📊 Workout name:', workout.name);
+            console.log('⏱️  Duration:', workout.duration, 'min');
+            console.log('🔢 Total sets:', workout.totalSets);
+            console.log('💪 Number of exercises:', workout.exercises.length);
+            
+            // Log each exercise
+            workout.exercises.forEach((ex, idx) => {
+                console.log(`\n📝 Exercise ${idx + 1}:`, {
+                    name: ex.name,
+                    category: ex.category,
+                    sets: ex.sets,
+                    reps: ex.reps,
+                    weight: ex.weight,
+                    tempo: ex.tempo,
+                    rest: ex.rest,
+                    isSuperset: ex.isSuperset,
+                    supersetWith: ex.supersetWith,
+                    notes: ex.notes ? ex.notes.substring(0, 50) + '...' : 'N/A'
+                });
+            });
+            
         } catch (error) {
-            console.error('Error loading workout:', error);
+            console.error('❌ Error loading workout:', error);
             alert('Erreur: Impossible de charger les données de la séance');
         }
 
@@ -508,7 +615,17 @@
                 sets: ex.sets,
                 reps: ex.reps,
                 load: `${ex.weight}kg`,
-                stats: stats
+                stats: stats,
+                
+                // ✅ TOUTES LES DONNÉES DE PROGRAM-DATA
+                tempo: ex.tempo || '2-1-2',
+                rest: ex.rest || 60,
+                rpe: ex.rpe || workout.rpeTarget || '7',
+                notes: ex.notes || '',
+                isSuperset: ex.isSuperset || false,
+                supersetWith: ex.supersetWith || null,
+                category: ex.category,
+                muscle: ex.muscle
             };
         });
 
@@ -617,15 +734,62 @@
         function renderApp() {
             const list = document.getElementById('exercises-list');
             let html = '';
+            const processedSuperset = new Set();
 
             WORKOUT_DATA.forEach((ex, idx) => {
-                html += `
+                // Skip if already rendered as part of a superset
+                if (processedSuperset.has(idx)) return;
+
+                // Check if this is a superset
+                const isSupersetFirst = ex.isSuperset && ex.supersetWith;
+                const supersetPartner = isSupersetFirst 
+                    ? WORKOUT_DATA.find(e => e.name === ex.supersetWith)
+                    : null;
+                const supersetPartnerIdx = supersetPartner 
+                    ? WORKOUT_DATA.findIndex(e => e.name === ex.supersetWith)
+                    : -1;
+
+                // Start superset wrapper if needed
+                if (isSupersetFirst && supersetPartner) {
+                    html += `<div class="superset-pair">`;
+                    html += `<div class="superset-connector"></div>`;
+                }
+
+                // Render exercise card
+                html += renderExerciseCard(ex, isSupersetFirst ? 'A' : (ex.isSuperset ? 'B' : ''));
+
+                // Render superset partner
+                if (isSupersetFirst && supersetPartner) {
+                    html += renderExerciseCard(supersetPartner, 'B');
+                    html += `</div>`; // Close superset-pair
+                    processedSuperset.add(supersetPartnerIdx);
+                }
+            });
+
+            list.innerHTML = html;
+        }
+
+        function renderExerciseCard(ex, supersetLabel = '') {
+            const hasSupersetBadge = supersetLabel !== '';
+            
+            return `
                 <div class="glass-card">
                     <div class="ex-header">
                         <div class="ex-id-box">
                             <div class="ex-id">0${ex.id}</div>
                             <div>
-                                <div class="ex-name">${ex.name}</div>
+                                <div class="ex-name">
+                                    ${ex.name}
+                                    ${hasSupersetBadge ? `
+                                        <span class="superset-badge">
+                                            <svg class="superset-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M17 3v10l-5 5-5-5V3"/>
+                                                <path d="M12 18v3"/>
+                                            </svg>
+                                            SUPERSET ${supersetLabel}
+                                        </span>
+                                    ` : ''}
+                                </div>
                                 <div class="tags">
                                     ${ex.tags.map(t => `<span class="tag ${t.t}">${t.l}</span>`).join('')}
                                 </div>
@@ -639,6 +803,28 @@
                         ${renderGauge(ex.load, 'CHARGE', 140, true)}
                     </div>
 
+                    <!-- Exercise Details -->
+                    <div class="ex-details">
+                        <div class="ex-detail">
+                            <span class="ex-detail-label">TEMPO</span>
+                            <span class="ex-detail-value">${ex.tempo}</span>
+                        </div>
+                        <div class="ex-detail">
+                            <span class="ex-detail-label">REPOS</span>
+                            <span class="ex-detail-value">${ex.rest}s</span>
+                        </div>
+                        <div class="ex-detail">
+                            <span class="ex-detail-label">RPE</span>
+                            <span class="ex-detail-value">${ex.rpe}</span>
+                        </div>
+                    </div>
+
+                    ${ex.notes ? `
+                        <div class="ex-notes">
+                            💡 ${ex.notes}
+                        </div>
+                    ` : ''}
+
                     <div class="stats-zone">
                         <div class="icon-box">
                             <!-- Lightning SVG -->
@@ -651,10 +837,7 @@
                         </div>
                     </div>
                 </div>
-                `;
-            });
-
-            list.innerHTML = html;
+            `;
         }
 
         // --- INIT ---

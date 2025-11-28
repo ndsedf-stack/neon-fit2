@@ -528,9 +528,84 @@
             color: #f1f5f9;
             text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
         }
+        
+        /* ═══════════════════════════════════════════════════════════
+           RESPONSIVE - iPhone 15 Pro Max (430x932)
+           ═══════════════════════════════════════════════════════════ */
+        @media (max-width: 460px) {
+            .app-container {
+                padding-bottom: 100px;
+            }
+            .header {
+                padding: 32px 16px 16px;
+            }
+            .title-main {
+                font-size: 32px;
+            }
+            .glass-card {
+                margin: 0 12px 14px;
+                padding: 20px;
+                border-radius: 18px;
+            }
+            .gauges-row {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 8px;
+                padding: 16px 8px;
+            }
+            .gauge-wrapper {
+                flex: 0 0 calc(33.333% - 8px);
+                min-width: 90px;
+                max-width: 105px;
+            }
+            .metrics-row {
+                gap: 20px;
+                padding: 16px 0;
+                margin-left: -20px;
+                margin-right: -20px;
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+            .metric-value {
+                font-size: 18px;
+            }
+            .stats-zone {
+                padding: 16px;
+                gap: 12px;
+            }
+            .icon-box {
+                width: 44px;
+                height: 44px;
+            }
+            .icon-box svg {
+                width: 20px;
+                height: 20px;
+            }
+            .rail-label {
+                width: 44px;
+                font-size: 10px;
+            }
+            .rail-track {
+                height: 8px;
+            }
+            .ex-name {
+                font-size: 15px;
+            }
+            .ex-notes {
+                padding: 12px 14px;
+                font-size: 12px;
+            }
+            .start-button {
+                bottom: 20px;
+                left: 16px;
+                right: 16px;
+                padding: 16px;
+                font-size: 14px;
+            }
+        }
     </style>
-  <script src="program-data-v2.js?v=1764353000"></script>
-  <script src="app-v2.js?v=1764353000"></script>
+  <script src="program-data-v2.js?v=1764354000"></script>
+  <script src="app-v2.js?v=1764354000"></script>
   <script src="workout-history-v2.js"></script>
   <script src="cloud-sync.js"></script>
 </head>
@@ -703,13 +778,12 @@
         function renderGauge(value, label, max, isGlow, progress = null) {
             const num = parseFloat(String(value).match(/\d+/)?.[0] || 0);
             const pct = Math.min((num / max), 1);
-            const r = 44, strokeWidth = 6, C = 2 * Math.PI * r;
+            const r = 42, strokeWidth = 5, C = 2 * Math.PI * r;
             const offset = C - (pct * C), angle = (pct * 360);
             const strokeColor = isGlow ? '#22d3ee' : '#64748b';
             const dotColor = isGlow ? '#22d3ee' : '#94a3b8';
             const textColor = isGlow ? '#22d3ee' : '#f1f5f9';
-            const glowFilter = isGlow ? 'drop-shadow(0 0 8px rgba(34,211,238,0.6))' : 'none';
-            const uid = 'g' + Math.random().toString(36).substr(2,6);
+            const glowStyle = isGlow ? 'filter:drop-shadow(0 0 8px rgba(34,211,238,0.6))' : '';
             
             const hasProgress = progress !== null && progress.completed > 0;
             const progressPct = hasProgress ? Math.min(progress.completed / progress.target, 1) : 0;
@@ -719,14 +793,15 @@
             return `<div class="gauge-wrapper">
 <div class="gauge-svg-box">
 <svg viewBox="0 0 120 120" preserveAspectRatio="xMidYMid meet">
-<defs>
-<filter id="${uid}"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-</defs>
 <circle cx="60" cy="60" r="${r}" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="${strokeWidth}"/>
-<circle cx="60" cy="60" r="${r}" fill="none" stroke="${strokeColor}" stroke-width="${strokeWidth}" stroke-dasharray="${C}" stroke-dashoffset="${offset}" stroke-linecap="round" transform="rotate(-90 60 60)" style="filter:${glowFilter};transition:stroke-dashoffset 1s"/>
-${hasProgress ? `<circle cx="60" cy="60" r="${r+7}" fill="none" stroke="${pColor}" stroke-width="3" stroke-dasharray="${2*Math.PI*(r+7)}" stroke-dashoffset="${2*Math.PI*(r+7)*(1-progressPct)}" stroke-linecap="round" transform="rotate(-90 60 60)" style="filter:drop-shadow(0 0 6px ${pColor});opacity:0.85"/>` : ''}
-<circle cx="${60 + r * Math.cos((angle-90)*Math.PI/180)}" cy="${60 + r * Math.sin((angle-90)*Math.PI/180)}" r="5" fill="${dotColor}" style="filter:drop-shadow(0 0 6px ${dotColor})"/>
-<text x="60" y="60" text-anchor="middle" dominant-baseline="central" font-family="Chakra Petch, sans-serif" font-size="28" font-weight="900" fill="${textColor}" style="filter:${glowFilter}">${value}</text>
+<circle cx="60" cy="60" r="${r}" fill="none" stroke="${strokeColor}" stroke-width="${strokeWidth}" stroke-dasharray="${C}" stroke-dashoffset="${offset}" stroke-linecap="round" transform="rotate(-90 60 60)" style="${glowStyle};transition:stroke-dashoffset 1s"/>
+${hasProgress ? `<circle cx="60" cy="60" r="${r+7}" fill="none" stroke="${pColor}" stroke-width="2.5" stroke-dasharray="${2*Math.PI*(r+7)}" stroke-dashoffset="${2*Math.PI*(r+7)*(1-progressPct)}" stroke-linecap="round" transform="rotate(-90 60 60)" style="filter:drop-shadow(0 0 6px ${pColor});opacity:0.85"/>` : ''}
+<circle cx="${60 + r * Math.cos((angle-90)*Math.PI/180)}" cy="${60 + r * Math.sin((angle-90)*Math.PI/180)}" r="4" fill="${dotColor}" style="filter:drop-shadow(0 0 6px ${dotColor})"/>
+<g transform="translate(60,60)">
+<text x="0" y="0" text-anchor="middle" alignment-baseline="middle" style="font-family:Chakra Petch,sans-serif;font-size:24px;font-weight:900;fill:${textColor};${glowStyle}">
+<tspan dy="0.35em">${value}</tspan>
+</text>
+</g>
 </svg>
 ${hasProgress ? `<div class="gauge-badge" style="--badge-bg:${pColor}20;--badge-color:${pColor}">${progress.completed}/${progress.target}</div>` : ''}
 </div>

@@ -7,7 +7,7 @@
 # Fichiers de log
 *.log
 
-# Node modules (si vous en ajoutez plus tard)
+# Node modules
 node_modules/
 
 # Fichiers de build
@@ -17,7 +17,18 @@ build/
 # Fichiers d'environnement
 .env
 .env.local
+.env.*.local
 
-# Replit specific
-package.json
+# Replit specific (pas besoin pour Vercel/GitHub Pages)
+.cache/
+.config/
+.local/
+.upm/
+replit.md
+.replit
+
+# Screenshots et assets temporaires
+attached_assets/
+
+# Fichiers de lock (générés automatiquement)
 package-lock.json

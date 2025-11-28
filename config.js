@@ -1,9 +1,4 @@
-/**
- * NEON FIT - Configuration
- * Remplace ces valeurs par tes clés Supabase
- */
-
 window.NEONFIT_CONFIG = {
-  SUPABASE_URL: '',
-  SUPABASE_ANON_KEY: ''
+  SUPABASE_URL: 'https://olvfgusjcoesvomsyozs.supabase.co',
+  SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9sdmZndXNqY29lc3ZvbXN5b3pzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTQyODgsImV4cCI6MjA3OTkzMDI4OH0.ldlhlK43Ytf34hfmhxQG22Upc99HRwefCz25S7ZuR-Y'
 };

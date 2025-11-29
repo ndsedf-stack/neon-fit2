@@ -103,158 +103,178 @@
       display: flex;
       overflow-x: auto;
       scroll-snap-type: x mandatory;
-      padding: 0 16px;
-      gap: 8px;
+      padding: 0 12px;
+      gap: 6px;
       scrollbar-width: none;
-      margin-bottom: 12px;
-      -webkit-overflow-scrolling: touch; /* Scroll fluide iOS */
+      margin-bottom: 8px;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-x;
+      scroll-padding: 0 12px;
     }
     
     .timeline-container::-webkit-scrollbar { display: none; }
     
-    /* WEEK CHIPS */
+    /* Gradient fade edges for scroll indication */
+    .timeline-wrapper {
+      position: relative;
+    }
+    .timeline-wrapper::before,
+    .timeline-wrapper::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 20px;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .timeline-wrapper::before {
+      left: 0;
+      background: linear-gradient(to right, var(--void), transparent);
+    }
+    .timeline-wrapper::after {
+      right: 0;
+      background: linear-gradient(to left, var(--void), transparent);
+    }
+    
+    /* WEEK CHIPS - Compact for iPhone portrait */
     .week-chip { 
       scroll-snap-align: center;
       flex: 0 0 auto;
-      width: 56px;
-      height: 64px;
-      background: rgba(255,255,255,0.005);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-top: 1px solid rgba(255,255,255,0.15);
-      border-radius: 16px;
-      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      width: 42px;
+      height: 48px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      transition: all 0.3s ease;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      transform: translateZ(0); /* Hack iOS */
+      transform: translateZ(0);
       cursor: pointer;
-      box-shadow: 0 4px 20px -4px rgba(0,0,0,0.3);
       opacity: 0;
-      animation: slideInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      animation: fadeIn 0.4s ease forwards;
     }
     
-    .week-chip:nth-child(1) { animation-delay: 0.05s; }
-    .week-chip:nth-child(2) { animation-delay: 0.10s; }
-    .week-chip:nth-child(3) { animation-delay: 0.15s; }
-    .week-chip:nth-child(4) { animation-delay: 0.20s; }
-    .week-chip:nth-child(5) { animation-delay: 0.25s; }
-    .week-chip:nth-child(n+6) { animation-delay: 0.30s; }
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+    
+    .week-chip:nth-child(1) { animation-delay: 0.02s; }
+    .week-chip:nth-child(2) { animation-delay: 0.04s; }
+    .week-chip:nth-child(3) { animation-delay: 0.06s; }
+    .week-chip:nth-child(4) { animation-delay: 0.08s; }
+    .week-chip:nth-child(5) { animation-delay: 0.10s; }
+    .week-chip:nth-child(n+6) { animation-delay: 0.12s; }
     
     .week-chip:active { 
-      transform: scale(0.95);
+      transform: scale(0.92);
       transition: transform 0.1s;
     }
     
     .week-chip.active { 
-      background: rgba(34, 211, 238, 0.1);
+      background: rgba(34, 211, 238, 0.12);
       border-color: var(--cyan);
-      box-shadow: 0 0 30px rgba(34, 211, 238, 0.4), 0 8px 25px -4px rgba(0,0,0,0.5);
-      transform: scale(1.1);
+      box-shadow: 0 0 15px rgba(34, 211, 238, 0.3);
     }
     
     /* Media query pour éviter le hover sticky sur mobile */
     @media (hover: hover) {
         .week-chip:hover {
-            transform: translateY(-4px) scale(1.05);
-            box-shadow: 0 8px 30px -4px rgba(34, 211, 238, 0.3);
+            transform: translateY(-2px);
+            border-color: rgba(255,255,255,0.15);
         }
         .week-chip.active:hover {
-            transform: translateY(-4px) scale(1.12);
+            transform: translateY(-2px);
         }
     }
     
     .week-chip.deload { 
-      border-color: rgba(34, 197, 94, 0.4);
+      border-color: rgba(34, 197, 94, 0.3);
       color: #22c55e;
     }
     .week-chip.deload.active { 
       background: rgba(34, 197, 94, 0.1);
       border-color: #22c55e;
-      box-shadow: 0 0 30px rgba(34, 197, 94, 0.4);
+      box-shadow: 0 0 12px rgba(34, 197, 94, 0.25);
     }
     
     .week-chip.peak { 
-      border-color: rgba(168, 85, 247, 0.4);
+      border-color: rgba(168, 85, 247, 0.3);
       color: #a855f7;
     }
     .week-chip.peak.active { 
       background: rgba(168, 85, 247, 0.1);
       border-color: #a855f7;
-      box-shadow: 0 0 30px rgba(168, 85, 247, 0.4);
+      box-shadow: 0 0 12px rgba(168, 85, 247, 0.25);
     }
     
     /* ========== BLOCK INFO BANNER ========== */
     .block-info-banner {
-      background: rgba(255, 255, 255, 0.005);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 16px;
-      padding: 12px;
-      margin: 0 16px 12px;
-      transition: all 0.3s ease;
+      background: rgba(15, 30, 45, 0.4);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(148, 163, 184, 0.12);
+      border-radius: 14px;
+      padding: 10px 12px;
+      margin: 0 12px 8px;
+      transition: all 0.2s ease;
       cursor: pointer;
       opacity: 0;
-      animation: fadeInDown 0.6s ease-out 0.3s forwards;
+      animation: fadeIn 0.4s ease 0.2s forwards;
     }
     
     .block-info-banner:active { transform: scale(0.98); }
     
-    /* ========== GLASS CARDS ========== */
+    /* ========== GLASS CARDS - Lighter & More Transparent ========== */
     .glass-card {
-      background: rgba(255, 255, 255, 0.005);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-top: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 24px;
-      padding: 20px;
+      background: rgba(15, 30, 45, 0.45);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(148, 163, 184, 0.15);
+      border-radius: 18px;
+      padding: 16px;
       position: relative;
       overflow: hidden;
-      box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5);
-      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 4px 20px -8px rgba(0,0,0,0.3);
+      transition: all 0.3s ease;
       cursor: pointer;
       opacity: 0;
-      transform: translateY(30px);
-      animation: slideInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-      /* Fix Safari rendering artifacts */
+      transform: translateY(20px);
+      animation: slideInUp 0.5s ease forwards;
       -webkit-transform: translate3d(0,0,0);
     }
     
-    .glass-card:nth-child(1) { animation-delay: 0.4s; }
-    .glass-card:nth-child(2) { animation-delay: 0.5s; }
-    .glass-card:nth-child(3) { animation-delay: 0.6s; }
-    .glass-card:nth-child(4) { animation-delay: 0.7s; }
-    .glass-card:nth-child(5) { animation-delay: 0.8s; }
+    .glass-card:nth-child(1) { animation-delay: 0.15s; }
+    .glass-card:nth-child(2) { animation-delay: 0.2s; }
+    .glass-card:nth-child(3) { animation-delay: 0.25s; }
+    .glass-card:nth-child(4) { animation-delay: 0.3s; }
+    .glass-card:nth-child(5) { animation-delay: 0.35s; }
     
     .glass-card:active {
-      transform: translateY(-4px) scale(0.99);
+      transform: scale(0.98);
       transition: transform 0.1s;
     }
     
-    /* Card glow effect */
+    /* Subtle top highlight */
     .glass-card::before {
       content: '';
       position: absolute;
       top: 0;
-      left: 0;
-      right: 0;
+      left: 20%;
+      right: 20%;
       height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(34, 211, 238, 0.5), transparent);
-      opacity: 0;
-      transition: opacity 0.3s;
+      background: linear-gradient(90deg, transparent, rgba(34, 211, 238, 0.3), transparent);
+      opacity: 0.6;
     }
     
     @media (hover: hover) {
         .glass-card:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 20px 60px -10px rgba(34, 211, 238, 0.3);
-            border-color: rgba(34, 211, 238, 0.3);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px -10px rgba(34, 211, 238, 0.2);
+            border-color: rgba(34, 211, 238, 0.25);
         }
-        .glass-card:hover::before { opacity: 1; }
     }
     
     /* ========== BUTTONS ========== */
@@ -412,7 +432,9 @@
     </div>
     
     <!-- TIMELINE -->
-    <div class="timeline-container" id="timeline"></div>
+    <div class="timeline-wrapper">
+      <div class="timeline-container" id="timeline"></div>
+    </div>
     
     <!-- BLOCK INFO -->
     <div class="block-info-banner">
@@ -429,8 +451,8 @@
   </header>
   
   <!-- MAIN CONTENT -->
-  <!-- Padding top calculé pour passer sous le header qui est fixed -->
-  <main class="pt-[240px] px-4 space-y-4 relative z-10 pb-8">
+  <!-- Padding top calculé pour passer sous le header compact -->
+  <main class="pt-[200px] px-3 space-y-3 relative z-10 pb-8">
     <!-- ACHIEVEMENTS -->
     <section>
       <h2 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 pl-1">Succès Récents</h2>

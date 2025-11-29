@@ -189,16 +189,19 @@
       </div>
     </section>
 
-    <section class="animate-fade" style="animation-delay: 0.5s;" id="ai-insight-section" style="display: none;">
+    <section class="animate-fade" style="animation-delay: 0.5s;" id="ai-insight-section">
       <h3 class="text-xs font-bold text-white uppercase tracking-wider mb-3 flex items-center gap-2">
         <i data-lucide="bot" class="w-4 h-4 text-purple-400"></i>
         Coach IA
+        <span class="text-[8px] text-slate-500 ml-1">(gratuit)</span>
       </h3>
       
       <div class="insight-card card p-4">
-        <p class="text-sm text-slate-300 leading-relaxed" id="ai-insight">
-          Chargement des conseils...
-        </p>
+        <div id="ai-loading" class="flex items-center gap-2">
+          <div class="w-3 h-3 border-2 border-purple-400 border-t-transparent rounded-full animate-spin"></div>
+          <span class="text-sm text-slate-400">Analyse en cours...</span>
+        </div>
+        <p class="text-sm text-slate-300 leading-relaxed hidden" id="ai-insight"></p>
       </div>
     </section>
 
@@ -401,10 +404,75 @@
       document.getElementById('xp-next').textContent = nextRank.maxXP + ' pour ' + nextRank.name;
     }
 
+    function generateAICoaching(sessionData, totalSets, totalReps, totalVolume) {
+      var loadingEl = document.getElementById('ai-loading');
+      var insightEl = document.getElementById('ai-insight');
+      
+      var workoutName = sessionData.name || 'entraînement';
+      var duration = sessionData.duration || 45;
+      var volumeKg = (totalVolume / 1000).toFixed(1);
+      
+      var prompt = 'Tu es un coach fitness francais. Donne 1 conseil bref (2 phrases) pour un sportif apres une seance ' + workoutName + ' de ' + duration + ' min et ' + totalSets + ' series. Sois motivant.';
+      
+      var apiUrl = 'https://free-unoficial-gpt4o-mini-api-g70n.onrender.com/chat/?query=' + encodeURIComponent(prompt);
+      
+      fetch(apiUrl, {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' }
+      })
+      .then(function(response) {
+        return response.json();
+      })
+      .then(function(data) {
+        loadingEl.classList.add('hidden');
+        insightEl.classList.remove('hidden');
+        var text = (data && data.response) ? data.response : (data && data.message) ? data.message : null;
+        if (text && text.length > 10) {
+          insightEl.textContent = text;
+        } else {
+          showFallbackTip();
+        }
+      })
+      .catch(function(err) {
+        showFallbackTip();
+      });
+      
+      function showFallbackTip() {
+        var tips = [
+          'Excellente séance ! La progression vient de la constance. Récupère bien et prépare-toi pour la prochaine mission.',
+          'Bravo pour cet entraînement ! Le repos est aussi important que l\'effort. Hydrate-toi et dors bien ce soir.',
+          'Mission accomplie ! Chaque répétition te rapproche de tes objectifs. Continue sur cette dynamique.',
+          'Superbe travail ! N\'oublie pas tes protéines dans l\'heure qui suit pour optimiser la récupération.',
+          'Belle performance ! La régularité est la clé. Rendez-vous à la prochaine séance, soldat !'
+        ];
+        loadingEl.classList.add('hidden');
+        insightEl.classList.remove('hidden');
+        insightEl.textContent = tips[Math.floor(Math.random() * tips.length)];
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
       initIcons();
       createConfetti();
       loadSessionData();
+      
+      var sessionData = JSON.parse(localStorage.getItem('last_session_data') || '{}');
+      var history = JSON.parse(localStorage.getItem('neon_fit_workout_history') || '[]');
+      var todaySets = history.filter(function(h) {
+        var today = new Date().toDateString();
+        return new Date(h.date).toDateString() === today;
+      });
+      var totalSets = todaySets.length || 25;
+      var totalReps = 0;
+      var totalVolume = 0;
+      todaySets.forEach(function(set) {
+        var reps = parseInt(set.reps) || 0;
+        var weight = parseFloat(set.weight) || 0;
+        totalReps += reps;
+        totalVolume += reps * weight;
+      });
+      
+      generateAICoaching(sessionData, totalSets, totalReps, totalVolume);
     });
   </script>
 </body>

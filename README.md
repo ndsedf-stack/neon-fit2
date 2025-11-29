@@ -173,13 +173,395 @@ git push origin main
 
 ### stats.html - Statistiques React
 
-Widgets React avec visualisations :
-- **NeonTracker** - Jauge radiale (score, sessions, sets)
-- **WeeklyProgress** - Progression hebdomadaire
-- **MuscleMatrix** - Repartition musculaire HUD
-- **Bio-Metrics** - 6 groupes musculaires
-- **IntensityZones** - Force/Hypertrophie/Endurance
-- **MuscleTurbine** - Roue rotative des volumes
+Page React avec 22 composants de visualisation organises en sections :
+
+| Section | Couleur | Composants |
+|---------|---------|------------|
+| **Command Center** | Vert | 1 composant principal |
+| **Core Essentials** | Cyan | 8 composants essentiels |
+| **Premium Analytics** | Fuchsia | 10 composants avances |
+| **Extra** | Amber | 2 composants bonus |
+| **Legacy** | Gris | 2 composants heritage |
+
+---
+
+## 5.1 Architecture du Systeme de Stats
+
+### Fichiers lies aux statistiques
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        SOURCES DE DONNEES                        │
+├─────────────────────────────────────────────────────────────────┤
+│  localStorage                                                    │
+│  ├── neon_fit_workout_history  ← Historique des series          │
+│  ├── hybrid_xp                 ← Points XP totaux               │
+│  ├── hybrid_current_week       ← Semaine courante (1-26)        │
+│  ├── hybrid_streak             ← Jours consecutifs              │
+│  └── neon_fit_body_composition ← Poids, bodyfat, etc.           │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                     stats-data.js                                │
+│                   (Hub de donnees)                               │
+├─────────────────────────────────────────────────────────────────┤
+│  StatsData.getHistory()        → Array d'entrees workout        │
+│  StatsData.getXP()             → XP total (number)              │
+│  StatsData.getCurrentWeek()    → Semaine 1-26 (number)          │
+│  StatsData.getSummary()        → {score, sessions, sets, volume}│
+│  StatsData.getZonesData()      → Force/Hyper/Endurance          │
+│  StatsData.getMusclesData()    → 6 groupes musculaires          │
+│  StatsData.getMusclesHUD()     → Format HUD normalise           │
+│  StatsData.getWeeksData()      → 4 semaines pour radar          │
+│  StatsData.getDailyActivity()  → 7 derniers jours               │
+│  StatsData.getMorphologyData() → Push/Pull/Legs distribution    │
+│  StatsData.getBodyComposition()→ Poids, bodyfat, objectifs      │
+│  StatsData.getChallengesData() → Challenges actifs              │
+│  StatsData.exportAllData()     → JSON backup complet            │
+│  StatsData.importAllData()     → Restaurer backup               │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                        stats.html                                │
+│                  (22 Composants React)                           │
+├─────────────────────────────────────────────────────────────────┤
+│  <script src="stats-data.js">     ← Charge StatsData global     │
+│  <script type="text/babel">       ← Composants React            │
+│                                                                  │
+│  // Consommation dans un composant :                            │
+│  const summary = window.StatsData.getSummary();                 │
+│  const muscles = window.StatsData.getMusclesHUD();              │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Flux de donnees
+
+```
+session.html                    stats.html
+     │                               │
+     │  1. User complete une serie   │
+     │  ───────────────────────▶     │
+     │                               │
+     │  localStorage.setItem(        │
+     │    'neon_fit_workout_history',│
+     │    JSON.stringify(entries)    │
+     │  )                            │
+     │                               │
+     └───────────────────────────────┤
+                                     │
+                                     │  2. Stats lit les donnees
+                                     │
+                                     │  window.StatsData.getHistory()
+                                     │  → Parse localStorage
+                                     │  → Calcule aggregations
+                                     │  → Retourne donnees formatees
+                                     │
+                                     ▼
+                              [Composants React]
+```
+
+---
+
+## 5.2 Format des Donnees LocalStorage
+
+### neon_fit_workout_history (Array)
+
+Chaque entree represente une serie completee :
+
+```javascript
+{
+  "id": "uuid-unique",
+  "exercise": "Tirage vertical",
+  "weight": 60,
+  "reps": 10,
+  "targetReps": 10,
+  "week": 3,
+  "day": "lundi",
+  "muscle": ["dos"],           // Array de muscles cibles
+  "completedAt": "2024-11-29T14:30:00.000Z",
+  "date": "2024-11-29"
+}
+```
+
+### hybrid_xp (number)
+
+```javascript
+"12500"  // XP total accumule
+```
+
+### hybrid_current_week (number)
+
+```javascript
+"3"  // Semaine courante du programme (1-26)
+```
+
+### neon_fit_body_composition (object)
+
+```javascript
+{
+  "currentWeight": 74.5,
+  "startWeight": 80.2,
+  "goalWeight": 70.0,
+  "bodyFat": 14.2,
+  "height": 178,
+  "lastUpdate": "2024-11-29T12:00:00.000Z"
+}
+```
+
+---
+
+## 5.3 Les 22 Composants Stats
+
+### Organisation dans stats.html
+
+```jsx
+// Ordre d'affichage dans StatsPage :
+<CommandCenter />              // 1. Bouton START + systemes
+
+// ───── CORE ESSENTIALS ───── (cyan)
+<NeonTracker />                // 2. FIGHTER.HUD - Jauge circulaire
+<VolumeGauge />                // 3. HYPER.ENGINE - Turbine rotative
+<WeeklyProgress />             // 4. KINETIC.RADAR - 4 cercles concentriques
+<ConsistencyLog />             // 5. Calendrier de streaks
+<PowerMetrics />               // 6. Metriques de puissance
+<BioScanner />                 // 7. Scanner corporel
+<MorphologyAnalysis />         // 8. Analyse morphologique
+<MorphoTimeline />             // 9. Timeline evolution
+
+// ───── PREMIUM ANALYTICS ───── (fuchsia)
+<BioSynthetics />              // 10. Bio-donnees
+<RecoverySystem />             // 11. Systeme de recuperation
+<PowerCurve />                 // 12. Courbe de puissance
+<MuscleFatigue />              // 13. Fatigue musculaire
+<PerformanceRadar />           // 14. Radar performance
+<VolumeFlow />                 // 15. Flux de volume
+<SymmetryAnalysis />           // 16. Analyse symetrie
+<TrainingDensity />            // 17. Densite d'entrainement
+<ChallengeSystem />            // 18. Systeme de challenges
+<ActivityChart />              // 19. Graphique activite
+
+// ───── EXTRA ───── (amber)
+<IntensityZones />             // 20. Zones Force/Hyper/Endurance
+<MuscleHud />                  // 21. HUD musculaire visuel
+
+// ───── LEGACY ───── (gris)
+<MuscleWorkload />             // 22. Charge par muscle (ancien)
+```
+
+### Ajouter un nouveau composant
+
+1. **Creer le composant React dans stats.html** :
+
+```jsx
+const MonNouveauComposant = ({ data }) => {
+  // Ref pour animations RAF
+  const canvasRef = useRef(null);
+  const animRef = useRef(null);
+  
+  useEffect(() => {
+    // Animation loop avec requestAnimationFrame
+    const animate = () => {
+      // ... logique animation
+      animRef.current = requestAnimationFrame(animate);
+    };
+    animate();
+    
+    return () => cancelAnimationFrame(animRef.current);
+  }, []);
+  
+  return (
+    <div className="relative rounded-2xl p-4"
+         style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(20px)' }}>
+      {/* Header */}
+      <div className="flex items-center gap-2 mb-3">
+        <Cpu className="text-cyan-400" size={18} />
+        <span className="text-sm font-mono text-cyan-400">MON.COMPOSANT</span>
+      </div>
+      {/* Contenu */}
+      <canvas ref={canvasRef} />
+    </div>
+  );
+};
+```
+
+2. **Ajouter les donnees dans stats-data.js** (si besoin) :
+
+```javascript
+// Dans l'objet StatsData
+getMonNouveauData: () => {
+  const history = StatsData.getHistory();
+  // ... calculs
+  return { /* donnees formatees */ };
+},
+```
+
+3. **Integrer dans le rendu** :
+
+```jsx
+// Dans StatsPage, ajouter le composant a la bonne position
+<div className="animate-slideIn" style={{ animationDelay: '0.3s' }}>
+  <MonNouveauComposant data={window.StatsData.getMonNouveauData()} />
+</div>
+```
+
+### Modifier un composant existant
+
+1. Chercher le composant par son nom (ex: `VolumeGauge`)
+2. Modifier le JSX/CSS/logique
+3. Tester sur `/stats.html`
+
+### Supprimer un composant
+
+1. Supprimer le composant du rendu dans `StatsPage`
+2. Optionnellement supprimer la definition du composant
+3. Optionnellement supprimer la fonction de donnees dans `stats-data.js`
+
+---
+
+## 5.4 Mapping des Muscles
+
+Defini dans `stats-data.js` :
+
+```javascript
+const MUSCLE_MAPPING = {
+  // Mot-cle → ID muscle + couleur
+  'dos': { id: 'm1', name: 'DOS', color: '#3b82f6' },
+  'pectoraux': { id: 'm2', name: 'PECT', color: '#22d3ee' },
+  'pecs': { id: 'm2', name: 'PECT', color: '#22d3ee' },
+  'quadriceps': { id: 'm3', name: 'JAMB', color: '#8b5cf6' },
+  'jambes': { id: 'm3', name: 'JAMB', color: '#8b5cf6' },
+  'fessiers': { id: 'm3', name: 'JAMB', color: '#8b5cf6' },
+  'ischios': { id: 'm3', name: 'JAMB', color: '#8b5cf6' },
+  'épaules': { id: 'm4', name: 'ÉPAU', color: '#d946ef' },
+  'epaules': { id: 'm4', name: 'ÉPAU', color: '#d946ef' },
+  'biceps': { id: 'm5', name: 'BRAS', color: '#f43f5e' },
+  'triceps': { id: 'm5', name: 'BRAS', color: '#f43f5e' },
+  'avant-bras': { id: 'm5', name: 'BRAS', color: '#f43f5e' },
+  'abdos': { id: 'm6', name: 'ABDO', color: '#10b981' }
+};
+```
+
+Pour ajouter un nouveau muscle :
+1. Ajouter l'entree dans `MUSCLE_MAPPING`
+2. Ajouter un objet dans `muscleVolumes` de `getMusclesData()`
+3. Mettre a jour les composants visuels si necessaire
+
+---
+
+## 5.5 API StatsData Complete
+
+| Methode | Retour | Description |
+|---------|--------|-------------|
+| `getHistory()` | `Array<Entry>` | Toutes les series completees |
+| `getXP()` | `number` | XP total |
+| `getCurrentWeek()` | `number` | Semaine 1-26 |
+| `getZonesData()` | `Array<Zone>` | Force/Hypertrophie/Endurance avec % |
+| `getMusclesData()` | `Array<Muscle>` | Volume et sets par muscle |
+| `getMusclesHUD()` | `Array<HUDMuscle>` | Format normalise pour HUD |
+| `getWeeksData()` | `Array<Week>` | 4 semaines avec positions radar |
+| `getSummary()` | `Summary` | Score, sessions, sets, volume |
+| `getDailyActivity()` | `Array<Day>` | 7 derniers jours |
+| `getChallengesData()` | `Array<Challenge>` | Challenges avec progression |
+| `getBodyComposition()` | `BodyComp` | Poids, bodyfat, objectifs |
+| `setBodyComposition(data)` | `BodyComp` | Sauvegarder body comp |
+| `getMorphologyData()` | `Morphology` | Push/Pull/Legs distribution |
+| `exportAllData()` | `string` | JSON backup complet |
+| `importAllData(json)` | `{success, message}` | Restaurer depuis backup |
+| `downloadBackup()` | `void` | Telecharge fichier .json |
+| `triggerImport(callback)` | `void` | Ouvre dialogue import |
+
+### Types de retour
+
+```typescript
+// Entry (serie completee)
+{
+  id: string,
+  exercise: string,
+  weight: number,
+  reps: number,
+  targetReps: number,
+  week: number,
+  day: string,
+  muscle: string[],
+  completedAt: string,
+  date: string
+}
+
+// Summary
+{
+  score: number,        // 0-100
+  sessions: number,     // Total workouts
+  maxSessions: number,  // Target this week
+  sets: number,         // Total sets
+  maxSets: number,      // Target sets
+  volume: number,       // kg total
+  xp: number,
+  currentWeek: number,
+  totalWeeks: 26
+}
+
+// Zone
+{
+  id: 'force' | 'hyper' | 'endu',
+  label: string,
+  range: string,
+  percent: number,
+  sets: number,
+  color: string,
+  shadow: string
+}
+
+// Muscle
+{
+  id: string,
+  name: string,
+  color: string,
+  volume: number,
+  sets: number
+}
+```
+
+---
+
+## 5.6 Animations Haute Performance
+
+Pattern recommande pour les animations :
+
+```jsx
+const MonComposant = ({ value }) => {
+  const animatedValue = useRef(0);
+  const elementRef = useRef(null);
+  const animRef = useRef(null);
+  
+  useEffect(() => {
+    const animate = () => {
+      // Lerp smoothing (diff * 0.08)
+      const diff = value - animatedValue.current;
+      animatedValue.current += diff * 0.08;
+      
+      // Update DOM directement (pas de setState)
+      if (elementRef.current) {
+        elementRef.current.textContent = Math.round(animatedValue.current);
+      }
+      
+      animRef.current = requestAnimationFrame(animate);
+    };
+    
+    animate();
+    return () => cancelAnimationFrame(animRef.current);
+  }, [value]);
+  
+  return <span ref={elementRef}>0</span>;
+};
+```
+
+**Regles cles :**
+- Utiliser `useRef` pour les valeurs animees (pas `useState`)
+- Mettre a jour le DOM directement via `.textContent` ou `.setAttribute`
+- Lerp smoothing : `current += (target - current) * 0.08`
+- Toujours `cancelAnimationFrame` dans le cleanup
 
 ---
 

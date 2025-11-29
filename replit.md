@@ -30,7 +30,7 @@ node server/index.js
 ├── app-v2.js                 # Classic script version + Gamification
 ├── program-data.js           # ES6 module + window.programData
 ├── program-data-v2.js        # Classic script version (26 weeks)
-├── stats-data.js             # Stats aggregation
+├── stats-data.js             # Stats hub (StatsData API) → stats.html
 ├── starfield.js              # Animated starfield canvas (shared)
 ├── scramble-effect.js        # Text scramble animation
 │
@@ -169,6 +169,60 @@ window.APP_VERSION = 'timestamp';
 
 // sw.js
 const CACHE_VERSION = 'vtimestamp';
+```
+
+## Stats System Architecture
+
+### Fichiers lies
+
+```
+session.html → localStorage → stats-data.js → stats.html (React)
+```
+
+### StatsData API (stats-data.js)
+
+| Methode | Description |
+|---------|-------------|
+| `getHistory()` | Array de series completees |
+| `getSummary()` | {score, sessions, sets, volume, xp} |
+| `getZonesData()` | Force/Hypertrophie/Endurance % |
+| `getMusclesData()` | Volume par groupe musculaire |
+| `getMusclesHUD()` | Format normalise pour composants |
+| `getWeeksData()` | Donnees 4 semaines pour radar |
+| `getDailyActivity()` | 7 derniers jours |
+| `getChallengesData()` | Challenges actifs |
+| `exportAllData()` | JSON backup |
+| `importAllData(json)` | Restaurer backup |
+
+### 22 Composants Stats (stats.html)
+
+| Section | Couleur | Composants |
+|---------|---------|------------|
+| Command Center | Vert | 1 |
+| Core Essentials | Cyan | 8 |
+| Premium Analytics | Fuchsia | 10 |
+| Extra | Amber | 2 |
+| Legacy | Gris | 1 |
+
+### Ajouter un composant
+
+1. Creer composant React dans stats.html
+2. (Optionnel) Ajouter methode dans stats-data.js
+3. Inserer dans StatsPage au bon endroit
+
+### Format donnee workout (localStorage)
+
+```javascript
+{
+  id: "uuid",
+  exercise: "Tirage vertical",
+  weight: 60,
+  reps: 10,
+  week: 3,
+  day: "lundi",
+  muscle: ["dos"],
+  completedAt: "ISO-date"
+}
 ```
 
 ## See README.md for full documentation

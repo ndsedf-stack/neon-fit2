@@ -31,6 +31,8 @@ node server/index.js
 ├── program-data.js           # ES6 module + window.programData
 ├── program-data-v2.js        # Classic script version (26 weeks)
 ├── stats-data.js             # Stats aggregation
+├── starfield.js              # Animated starfield canvas (shared)
+├── scramble-effect.js        # Text scramble animation
 │
 ├── config.js                 # Supabase configuration
 ├── cloud-sync-supabase.js    # Cloud sync logic
@@ -57,6 +59,9 @@ node server/index.js
 
 ## Recent Changes (Nov 2024)
 
+- **Animated Starfield Background**: Canvas-based starfield with 250 stars moving upward, cyan/purple colored stars for cyberpunk aesthetic
+- **Ultra-Transparent Glass Cards**: All UI cards use extreme transparency (0.003-0.008 opacity) with 30px backdrop blur
+- **Shared starfield.js Module**: Reusable starfield canvas applied to all pages (index, workouts, briefing, debrief, session, stats)
 - New cleaner dashboard with protocol widget and quick stats
 - Debrief page with confetti animation and session summary
 - Session redirects to debrief.html on completion

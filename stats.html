@@ -185,7 +185,7 @@
             MessageSquare, Trash2, Download, AlertCircle, TrendingUp, TrendingDown,
             Layers, Clock, Battery, Fan, Disc, Dumbbell, Maximize2, RefreshCw, Cpu,
             RotateCcw, Power, Fingerprint, Hexagon, Crosshair, Scale, ScanLine,
-            Brain, Shield, AlertTriangle
+            Brain, Shield, AlertTriangle, Scan, ShieldCheck
         } from 'lucide-react';
 
         // --- REAL DATA FROM STATSDATA ---
@@ -436,6 +436,351 @@
                         </p>
                     </div>
 
+                </div>
+            );
+        };
+
+        // CONSISTENCY LOG (Temporal Frequency Spectrum)
+        const ConsistencyLog = () => {
+            // Get real workout history for the last 14 days
+            const getHistoryData = () => {
+                const history = JSON.parse(localStorage.getItem('neon_fit_workout_history') || '[]');
+                const now = new Date();
+                const days = [];
+                
+                for (let i = 13; i >= 0; i--) {
+                    const date = new Date(now);
+                    date.setDate(date.getDate() - i);
+                    const dateStr = date.toISOString().split('T')[0];
+                    
+                    // Find sessions for this day
+                    const daySessions = history.filter(h => {
+                        const sessionDate = new Date(h.completedAt || h.date).toISOString().split('T')[0];
+                        return sessionDate === dateStr;
+                    });
+                    
+                    // Calculate intensity based on volume
+                    const totalVolume = daySessions.reduce((sum, s) => {
+                        const sets = s.sets || [];
+                        return sum + sets.reduce((v, set) => v + (set.weight || 0) * (set.reps || 0), 0);
+                    }, 0);
+                    
+                    const intensity = daySessions.length > 0 ? Math.min(1, totalVolume / 5000) : 0;
+                    days.push({ date: dateStr, intensity, sessions: daySessions.length });
+                }
+                return days;
+            };
+            
+            const historyData = getHistoryData();
+            
+            // Calculate streak
+            const getStreak = () => {
+                let streak = 0;
+                const history = JSON.parse(localStorage.getItem('neon_fit_workout_history') || '[]');
+                if (history.length === 0) return 0;
+                
+                const now = new Date();
+                for (let i = 0; i < 365; i++) {
+                    const date = new Date(now);
+                    date.setDate(date.getDate() - i);
+                    const dateStr = date.toISOString().split('T')[0];
+                    
+                    const hasSession = history.some(h => {
+                        const sessionDate = new Date(h.completedAt || h.date).toISOString().split('T')[0];
+                        return sessionDate === dateStr;
+                    });
+                    
+                    if (hasSession || i === 0) {
+                        if (hasSession) streak++;
+                    } else {
+                        break;
+                    }
+                }
+                return streak;
+            };
+            
+            // Calculate stats
+            const activeDays = historyData.filter(d => d.intensity > 0).length;
+            const consistency = Math.round((activeDays / 14) * 100);
+            const frequency = (activeDays / 2).toFixed(1);
+            const totalSessions = window.StatsData ? window.StatsData.getSummary().sessions : 0;
+            const streak = getStreak();
+
+            return (
+                <div className="relative w-full max-w-md bg-[#020202] border border-white/10 rounded-3xl flex flex-col overflow-hidden group min-h-[400px] shadow-2xl">
+                    
+                    {/* HEADER */}
+                    <div className="bg-[#050505] px-6 py-4 border-b border-white/10 flex justify-between items-center z-10 relative">
+                        <div className="absolute inset-0 bg-green-900/5"></div>
+                        <div>
+                            <h2 className="font-display font-black text-white tracking-widest uppercase flex items-center gap-2 text-lg">
+                                <Calendar className="text-green-500" size={18} />
+                                TEMPORAL.LOG
+                            </h2>
+                            <p className="text-[10px] text-green-500/60 font-mono font-bold mt-1">FREQUENCY SPECTRUM</p>
+                        </div>
+                        <div className="flex items-center gap-1 px-3 py-1 rounded bg-green-900/20 border border-green-500/30 text-green-400 text-[10px] font-black uppercase tracking-wider animate-pulse">
+                            <Flame size={12} className="fill-current"/> {streak} DAY STREAK
+                        </div>
+                    </div>
+
+                    {/* BODY: WAVEFORM */}
+                    <div className="flex-1 bg-[#010101] p-6 flex flex-col justify-center">
+                        
+                        <div className="flex items-end justify-between h-[150px] gap-2">
+                            {historyData.map((day, i) => (
+                                <div key={i} className="flex-1 flex flex-col justify-end group cursor-pointer">
+                                    <div 
+                                        className={`w-full rounded-t-sm transition-all duration-500 hover:bg-white ${day.intensity > 0 ? 'bg-green-500 shadow-[0_0_15px_#22c55e]' : 'bg-[#111]'}`}
+                                        style={{ height: day.intensity > 0 ? `${Math.max(10, day.intensity * 100)}%` : '4px' }}
+                                    ></div>
+                                    <div className="text-[8px] text-gray-600 text-center mt-2 font-mono opacity-0 group-hover:opacity-100">
+                                        D{i+1}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        
+                        <div className="mt-6 flex justify-between text-xs font-bold text-white bg-[#0a0a0a] p-3 rounded-xl border border-white/5">
+                            <div className="text-center">
+                                <div className="text-[8px] text-gray-500 uppercase mb-1">Consist.</div>
+                                {consistency}%
+                            </div>
+                            <div className="text-center">
+                                <div className="text-[8px] text-gray-500 uppercase mb-1">Freq</div>
+                                {frequency}/wk
+                            </div>
+                            <div className="text-center">
+                                <div className="text-[8px] text-gray-500 uppercase mb-1">Total</div>
+                                {totalSessions}
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            );
+        };
+
+        // HYBRID CORE (Energy Systems - Strength vs Cardio)
+        const HybridCore = () => {
+            // Calculate strength vs cardio ratio from workout data
+            const getEnergyRatio = () => {
+                const history = JSON.parse(localStorage.getItem('neon_fit_workout_history') || '[]');
+                if (history.length === 0) return { strength: 65, cardio: 35 };
+                
+                let totalSets = 0;
+                let strengthSets = 0;
+                
+                history.forEach(workout => {
+                    const sets = workout.sets || [];
+                    sets.forEach(set => {
+                        totalSets++;
+                        const reps = set.reps || 10;
+                        // Force (1-5 reps) = pure strength, Hyper (6-12) = mixed, Endurance (15+) = cardio
+                        if (reps <= 5) strengthSets += 1;
+                        else if (reps <= 12) strengthSets += 0.7;
+                        else strengthSets += 0.3;
+                    });
+                });
+                
+                if (totalSets === 0) return { strength: 65, cardio: 35 };
+                const strengthPct = Math.round((strengthSets / totalSets) * 100);
+                return { strength: strengthPct, cardio: 100 - strengthPct };
+            };
+            
+            const { strength: strengthPct, cardio: cardioPct } = getEnergyRatio();
+
+            return (
+                <div className="relative w-full max-w-md bg-[#020202] border border-white/10 rounded-3xl flex flex-col overflow-hidden min-h-[400px] shadow-2xl">
+                    
+                    {/* HEADER */}
+                    <div className="bg-[#050505] px-6 py-4 border-b border-white/10 flex justify-between items-center z-10 relative">
+                        <div className="absolute inset-0 bg-orange-900/5"></div>
+                        <div>
+                            <h2 className="font-display font-black text-white tracking-widest uppercase flex items-center gap-2 text-lg">
+                                <Zap className="text-orange-500" size={18} />
+                                HYBRID.ENGINE
+                            </h2>
+                            <p className="text-[10px] text-orange-500/60 font-mono font-bold mt-1">ENERGY SYSTEMS</p>
+                        </div>
+                        <div className="px-2 py-1 rounded border border-orange-500/30 text-[10px] font-black uppercase bg-orange-500/10 text-orange-400">
+                            V8 DUAL CORE
+                        </div>
+                    </div>
+
+                    {/* BODY: PISTON ENGINE */}
+                    <div className="flex-1 bg-[#010101] p-6 flex flex-col justify-center overflow-hidden relative">
+                        
+                        {/* Background Gears (Subtle) */}
+                        <div className="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none">
+                            <div className="w-[300px] h-[300px] border-[20px] border-dashed border-white rounded-full animate-[spin_60s_linear_infinite]"></div>
+                        </div>
+
+                        <div className="flex items-end justify-center gap-6 h-[240px] mb-6">
+                            
+                            {/* Piston 1: Strength (Orange) */}
+                            <div className="flex-1 flex flex-col justify-end relative group h-full">
+                                <div className="relative z-10 flex flex-col items-center mb-2">
+                                    <Dumbbell className="text-orange-500 mb-1" size={24}/>
+                                    <span className="text-2xl font-black text-white">{strengthPct}%</span>
+                                    <span className="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Anaerobic</span>
+                                </div>
+                                <div 
+                                    className="w-full bg-orange-600/20 rounded-t-xl border-t-2 border-orange-500 relative overflow-hidden transition-all duration-1000"
+                                    style={{ height: `${strengthPct}%` }}
+                                >
+                                    <div className="absolute inset-0 bg-orange-500/10 animate-pulse"></div>
+                                </div>
+                            </div>
+
+                            {/* Piston 2: Cardio (Cyan) */}
+                            <div className="flex-1 flex flex-col justify-end relative group h-full">
+                                <div className="relative z-10 flex flex-col items-center mb-2">
+                                    <Heart className="text-cyan-500 mb-1" size={24}/>
+                                    <span className="text-2xl font-black text-white">{cardioPct}%</span>
+                                    <span className="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Aerobic</span>
+                                </div>
+                                <div 
+                                    className="w-full bg-cyan-600/20 rounded-t-xl border-t-2 border-cyan-500 relative overflow-hidden transition-all duration-1000"
+                                    style={{ height: `${cardioPct}%` }}
+                                >
+                                    <div className="absolute inset-0 bg-cyan-500/10 animate-pulse"></div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        {/* Balance Bar */}
+                        <div className="relative h-8 bg-[#0a0a0a] rounded-lg border border-white/5 flex items-center px-2">
+                            <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gray-700"></div>
+                            <div 
+                                className="absolute top-1 bottom-1 w-1 bg-white shadow-[0_0_10px_white] transition-all duration-1000"
+                                style={{left: `${strengthPct}%`}}
+                            ></div>
+                            
+                            <span className="text-[9px] font-mono text-orange-500 z-10 ml-2 font-bold">POWER</span>
+                            <div className="flex-1"></div>
+                            <span className="text-[9px] font-mono text-cyan-500 z-10 mr-2 font-bold">ENDURANCE</span>
+                        </div>
+
+                    </div>
+                </div>
+            );
+        };
+
+        // INJURY MAP (Bio Armor - Structural Integrity)
+        const InjuryMap = () => {
+            const [selected, setSelected] = useState(null);
+            
+            // Get body zones status from real muscle data
+            const getBodyZones = () => {
+                const muscleData = window.StatsData ? window.StatsData.getMusclesHUD() : [];
+                
+                const getZoneStatus = (muscleNames) => {
+                    const relevantMuscles = muscleData.filter(m => 
+                        muscleNames.some(name => m.name.toUpperCase().includes(name))
+                    );
+                    if (relevantMuscles.length === 0) return 'optimal';
+                    
+                    const avgIntensity = relevantMuscles.reduce((sum, m) => sum + (m.intensity || 0), 0) / relevantMuscles.length;
+                    const avgRecovery = relevantMuscles.reduce((sum, m) => sum + (m.recovery || 100), 0) / relevantMuscles.length;
+                    
+                    if (avgRecovery < 40 || avgIntensity > 80) return 'risk';
+                    if (avgRecovery < 70 || avgIntensity > 60) return 'strain';
+                    return 'optimal';
+                };
+                
+                return [
+                    { id: 'chest', label: 'PECTORAL PLATE', status: getZoneStatus(['PECS', 'PECTORAUX']) },
+                    { id: 'abs', label: 'CORE REACTOR', status: getZoneStatus(['ABDOS', 'CORE']) },
+                    { id: 'shoulders', label: 'DELT GUARDS', status: getZoneStatus(['ÉPAULES', 'DELTS']) },
+                    { id: 'arms', label: 'ARM SERVOS', status: getZoneStatus(['BRAS', 'BICEPS', 'TRICEPS']) },
+                    { id: 'legs', label: 'LEG PISTONS', status: getZoneStatus(['JAMBES', 'JAMB', 'LEGS']) },
+                    { id: 'back', label: 'DORSAL ARRAY', status: getZoneStatus(['DOS', 'BACK']) },
+                ];
+            };
+            
+            const bodyZones = getBodyZones();
+            const selectedZone = selected || bodyZones[0];
+            
+            const getStatusColor = (status) => {
+                if (status === 'risk') return '#ef4444';
+                if (status === 'strain') return '#eab308';
+                return '#22c55e';
+            };
+
+            // Overall integrity
+            const riskCount = bodyZones.filter(z => z.status === 'risk').length;
+            const strainCount = bodyZones.filter(z => z.status === 'strain').length;
+            const integrity = Math.round(((bodyZones.length - riskCount * 2 - strainCount) / bodyZones.length) * 100);
+
+            return (
+                <div className="relative w-full max-w-md bg-[#020202] border border-white/10 rounded-3xl flex flex-col overflow-hidden group min-h-[500px] shadow-2xl">
+                    
+                    {/* HEADER */}
+                    <div className="bg-[#050505] px-6 py-4 border-b border-white/10 flex justify-between items-center z-10 relative">
+                        <div className="absolute inset-0 bg-red-900/5"></div>
+                        <div>
+                            <h2 className="font-display font-black text-white tracking-widest uppercase flex items-center gap-2 text-lg">
+                                <Scan className="text-red-500" size={18} />
+                                BIO.ARMOR
+                            </h2>
+                            <p className="text-[10px] text-red-500/60 font-mono font-bold mt-1">STRUCTURAL INTEGRITY</p>
+                        </div>
+                        <div className="flex items-center gap-1 px-2 py-1 rounded border border-red-500/30 text-[10px] font-black uppercase bg-red-500/10 text-red-400">
+                            <Activity size={10} className="fill-current animate-pulse"/> {integrity}%
+                        </div>
+                    </div>
+
+                    {/* BODY: ZONE LIST */}
+                    <div className="flex-1 bg-[#010101] p-6 flex flex-col">
+                        
+                        {/* Zone Grid */}
+                        <div className="grid grid-cols-2 gap-3 mb-6">
+                            {bodyZones.map((zone) => (
+                                <div 
+                                    key={zone.id}
+                                    onClick={() => setSelected(zone)}
+                                    className={`p-4 rounded-xl border cursor-pointer transition-all duration-300 ${
+                                        selectedZone.id === zone.id 
+                                            ? 'bg-white/5 border-white/20 scale-105' 
+                                            : 'bg-[#0a0a0a] border-white/5 hover:border-white/10'
+                                    }`}
+                                >
+                                    <div className="flex items-center justify-between mb-2">
+                                        <span className="text-[10px] font-bold text-gray-400 uppercase">{zone.label}</span>
+                                        {zone.status === 'risk' ? (
+                                            <AlertTriangle size={12} className="text-red-500"/>
+                                        ) : zone.status === 'strain' ? (
+                                            <AlertTriangle size={12} className="text-yellow-500"/>
+                                        ) : (
+                                            <ShieldCheck size={12} className="text-green-500"/>
+                                        )}
+                                    </div>
+                                    <div className="h-1.5 w-full bg-gray-800 rounded-full overflow-hidden">
+                                        <div 
+                                            className={`h-full transition-all duration-500 ${
+                                                zone.status === 'risk' ? 'bg-red-500' : 
+                                                zone.status === 'strain' ? 'bg-yellow-500' : 'bg-green-500'
+                                            }`} 
+                                            style={{width: zone.status === 'optimal' ? '100%' : zone.status === 'strain' ? '60%' : '30%'}}
+                                        ></div>
+                                    </div>
+                                    <div className="mt-2 text-right text-[8px] font-mono uppercase" style={{color: getStatusColor(zone.status)}}>
+                                        {zone.status}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        
+                        {/* Status Legend */}
+                        <div className="flex justify-center gap-4 text-[9px] font-mono">
+                            <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-green-500"></div> OPTIMAL</div>
+                            <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-yellow-500"></div> STRAIN</div>
+                            <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-red-500"></div> RISK</div>
+                        </div>
+
+                    </div>
                 </div>
             );
         };
@@ -1839,6 +2184,9 @@
                             <div className="animate-slideIn" style={{ animationDelay: '0.8s' }}><BioSynthetics /></div>
                             <div className="animate-slideIn" style={{ animationDelay: '0.9s' }}><ChallengeSystem /></div>
                             <div className="animate-slideIn" style={{ animationDelay: '1.0s' }}><CommandCenter /></div>
+                            <div className="animate-slideIn" style={{ animationDelay: '1.1s' }}><ConsistencyLog /></div>
+                            <div className="animate-slideIn" style={{ animationDelay: '1.2s' }}><HybridCore /></div>
+                            <div className="animate-slideIn" style={{ animationDelay: '1.3s' }}><InjuryMap /></div>
                         </div>
                     </main>
 

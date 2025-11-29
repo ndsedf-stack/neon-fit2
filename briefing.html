@@ -795,11 +795,13 @@
         document.getElementById('stat-sets').textContent = workout.totalSets;
         document.getElementById('stat-xp').textContent = workout.totalSets * 50;
 
-        const canvas = document.getElementById('starfield');
-        const ctx = canvas.getContext('2d');
+        const canvas = document.getElementById('starfield-canvas');
+        if (!canvas) { console.warn('Starfield canvas not found'); }
+        const ctx = canvas ? canvas.getContext('2d') : null;
         let stars = [];
 
         function initStars() {
+            if (!canvas || !ctx) return;
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             stars = [];
@@ -816,6 +818,7 @@
         }
 
         function animateStars() {
+            if (!canvas || !ctx) return;
             ctx.clearRect(0,0,canvas.width, canvas.height);
             stars.forEach(s => {
                 s.y -= s.speed;

@@ -186,7 +186,8 @@
             Layers, Clock, Battery, Fan, Disc, Dumbbell, Maximize2, RefreshCw, Cpu,
             RotateCcw, Power, Fingerprint, Hexagon, Crosshair, Scale, ScanLine,
             Brain, Shield, AlertTriangle, Scan, ShieldCheck, ScanFace, Camera, History,
-            Loader2, Sparkles, Award, QrCode, Star, Droplets
+            Loader2, Sparkles, Award, QrCode, Star, Droplets, Sword, Moon, Sun,
+            Share2, Hourglass, Waves, Flag, MapPin
         } from 'lucide-react';
 
         // --- REAL DATA FROM STATSDATA ---
@@ -1133,6 +1134,390 @@
 
                     <div className="bg-[#050505] p-3 text-center border-t border-white/10">
                         <div className="text-[9px] font-mono text-gray-600 uppercase tracking-[0.3em]">NEON FITNESS SYNDICATE</div>
+                    </div>
+                </div>
+            );
+        };
+
+        // POWER METRICS (Strength Arsenal)
+        const PowerMetrics = () => {
+            const [selectedLift, setSelectedLift] = useState(null);
+            const [animate, setAnimate] = useState(false);
+
+            const getLiftsData = () => {
+                const history = JSON.parse(localStorage.getItem('neon_fit_workout_history') || '[]');
+                const totalVolume = history.reduce((sum, w) => {
+                    const sets = w.sets || [];
+                    return sum + sets.reduce((v, s) => v + (s.weight || 0) * (s.reps || 0), 0);
+                }, 0);
+                const baseLevel = Math.min(95, 50 + Math.floor(totalVolume / 5000));
+                return [
+                    { name: 'BENCH PRESS', oneRM: 100 + Math.floor(totalVolume / 10000), trend: '+2.5', level: baseLevel },
+                    { name: 'SQUAT', oneRM: 130 + Math.floor(totalVolume / 8000), trend: '+5', level: Math.min(95, baseLevel + 8) },
+                    { name: 'DEADLIFT', oneRM: 160 + Math.floor(totalVolume / 6000), trend: '+5', level: Math.min(95, baseLevel + 12) },
+                ];
+            };
+
+            const lifts = getLiftsData();
+            const activeLift = selectedLift || lifts[0];
+
+            useEffect(() => {
+                setAnimate(false);
+                const timer = setTimeout(() => setAnimate(true), 50);
+                return () => clearTimeout(timer);
+            }, [activeLift]);
+
+            return (
+                <div className="relative w-full max-w-md bg-[#0a0a0a] border border-white/10 rounded-3xl flex flex-col overflow-hidden min-h-[450px] shadow-2xl group">
+                    <div className="bg-[#0f0f0f] px-6 py-4 border-b border-white/10 flex justify-between items-center z-10 relative">
+                        <div className="absolute inset-0 bg-yellow-900/5"></div>
+                        <div>
+                            <h2 className="font-display font-black text-white tracking-widest uppercase flex items-center gap-2 text-lg">
+                                <Sword className="text-yellow-500" size={18} />
+                                POWER.ARSENAL
+                            </h2>
+                            <p className="text-[10px] text-yellow-600 font-mono font-bold mt-1">STRENGTH METRICS</p>
+                        </div>
+                        <div className="flex items-center gap-1 bg-yellow-900/20 px-2 py-1 rounded border border-yellow-500/30">
+                            <Trophy size={10} className="text-yellow-400" />
+                            <span className="text-[10px] font-bold text-yellow-400">ELITE</span>
+                        </div>
+                    </div>
+
+                    <div className="flex-1 bg-[#050505] p-6 flex flex-col gap-6 relative">
+                        <div className="flex gap-2 bg-[#111] p-1 rounded-lg border border-white/5">
+                            {lifts.map(lift => (
+                                <button key={lift.name} onClick={() => setSelectedLift(lift)}
+                                    className={`flex-1 py-2 rounded text-[9px] font-bold uppercase transition-all tracking-wider ${activeLift.name === lift.name ? 'bg-yellow-500 text-black shadow-[0_0_10px_#eab308]' : 'text-gray-500 hover:text-white'}`}>
+                                    {lift.name.split(' ')[0]}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="text-center py-6 relative border border-white/5 rounded-2xl bg-[#0a0a0a] overflow-hidden">
+                            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#eab308_1px,transparent_1px)] [background-size:10px_10px]"></div>
+                            <div className="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none">
+                                <Target size={160} className="text-yellow-500 animate-[spin_60s_linear_infinite]"/>
+                            </div>
+                            <div className="relative z-10">
+                                <div className="text-[10px] text-gray-500 font-mono tracking-[0.2em] mb-2 uppercase">Projected Max</div>
+                                <div className="text-7xl font-black text-white tracking-tighter drop-shadow-xl flex justify-center items-baseline">
+                                    {activeLift.oneRM}<span className="text-xl text-gray-600 ml-1">kg</span>
+                                </div>
+                                <div className="inline-flex items-center gap-2 mt-4 px-3 py-1 bg-green-900/20 rounded border border-green-500/20">
+                                    <TrendingUp size={12} className="text-green-400"/>
+                                    <span className="text-xs font-bold text-green-400">{activeLift.trend} kg</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <div className="flex justify-between text-[9px] font-mono text-gray-500 uppercase">
+                                <span>Power Level</span>
+                                <span className="text-yellow-500">{activeLift.level}%</span>
+                            </div>
+                            <div className="flex gap-1 h-6 bg-[#111] p-1 rounded border border-white/5">
+                                {Array.from({length: 20}).map((_, i) => (
+                                    <div key={i} className={`flex-1 rounded-sm transition-all duration-500 ${i < (activeLift.level / 5) && animate ? 'bg-yellow-500 shadow-[0_0_5px_#eab308]' : 'bg-[#222]'}`}
+                                        style={{ transitionDelay: `${i * 20}ms`, opacity: i < (activeLift.level / 5) ? 1 : 0.2 }}></div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="bg-[#111] p-3 rounded border border-white/5 flex justify-between items-center">
+                                <span className="text-[9px] text-gray-500 font-bold uppercase">Sets/Wk</span>
+                                <span className="text-white font-bold">12</span>
+                            </div>
+                            <div className="bg-[#111] p-3 rounded border border-white/5 flex justify-between items-center">
+                                <span className="text-[9px] text-gray-500 font-bold uppercase">Frequency</span>
+                                <span className="text-white font-bold">2x</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // SEASON TRACK (Campaign Trajectory)
+        const SeasonTrack = () => {
+            const getCurrentPhase = () => {
+                const week = parseInt(localStorage.getItem('hybrid_current_week') || '1');
+                if (week <= 5) return 0;
+                if (week <= 11) return 1;
+                if (week <= 17) return 2;
+                return 3;
+            };
+            const currentPhase = getCurrentPhase();
+            const week = parseInt(localStorage.getItem('hybrid_current_week') || '1');
+
+            const phases = [
+                { id: 1, label: 'HYPERTROPHY', color: 'text-cyan-400', bar: 'bg-cyan-500', status: currentPhase > 0 ? 'done' : currentPhase === 0 ? 'active' : 'locked' },
+                { id: 2, label: 'STRENGTH', color: 'text-fuchsia-400', bar: 'bg-fuchsia-500', status: currentPhase > 1 ? 'done' : currentPhase === 1 ? 'active' : 'locked' },
+                { id: 3, label: 'PEAKING', color: 'text-yellow-400', bar: 'bg-yellow-500', status: currentPhase > 2 ? 'done' : currentPhase === 2 ? 'active' : 'locked' },
+                { id: 4, label: 'DELOAD', color: 'text-green-400', bar: 'bg-green-500', status: currentPhase === 3 ? 'active' : 'locked' },
+            ];
+
+            return (
+                <div className="relative w-full max-w-md bg-[#020202] border border-white/10 rounded-3xl flex flex-col overflow-hidden group min-h-[400px] shadow-2xl">
+                    <div className="bg-[#050505] px-6 py-4 border-b border-white/10 flex justify-between items-center z-10 relative">
+                        <div>
+                            <h2 className="font-display font-black text-white tracking-widest uppercase flex items-center gap-2 text-lg">
+                                <Calendar className="text-white" size={18} />
+                                CAMPAIGN
+                            </h2>
+                            <p className="text-[10px] text-gray-500 font-mono font-bold mt-1">SEASON 2024 TRAJECTORY</p>
+                        </div>
+                        <div className="px-2 py-1 rounded border border-white/20 text-[10px] font-black uppercase bg-white/5 text-white">
+                            WEEK {week}
+                        </div>
+                    </div>
+
+                    <div className="flex-1 bg-[#010101] relative overflow-hidden flex flex-col items-center justify-center p-8">
+                        <div className="relative w-full h-[300px] flex flex-col items-center gap-4">
+                            <div className="absolute left-[24px] top-4 bottom-4 w-[2px] bg-gray-800 z-0"></div>
+                            <div className="absolute left-[24px] top-4 w-[2px] bg-gradient-to-b from-cyan-500 to-fuchsia-500 z-0 shadow-[0_0_10px_#d946ef] transition-all duration-1000" style={{height: `${(currentPhase + 1) * 25}%`}}></div>
+
+                            {phases.map((phase, i) => {
+                                const isActive = phase.status === 'active';
+                                const isDone = phase.status === 'done';
+                                return (
+                                    <div key={phase.id} className={`w-full flex items-center gap-4 z-10 transition-all duration-500 ${isActive ? 'scale-105 translate-x-2' : 'opacity-60'}`}>
+                                        <div className={`w-12 h-12 rounded-full border-2 flex items-center justify-center bg-[#0a0a0a] ${isActive ? 'border-white shadow-[0_0_20px_rgba(255,255,255,0.3)]' : isDone ? 'border-gray-600' : 'border-gray-800'}`}>
+                                            <div className={`text-lg font-black ${isDone ? 'text-gray-500' : isActive ? phase.color : 'text-gray-800'}`}>
+                                                {isDone ? '✓' : i + 1}
+                                            </div>
+                                        </div>
+                                        <div className={`flex-1 border p-3 rounded-xl backdrop-blur-sm ${isActive ? 'border-white/30 bg-white/5' : 'border-white/5 bg-transparent'}`}>
+                                            <div className="flex justify-between items-center">
+                                                <span className={`text-xs font-black tracking-widest ${phase.color}`}>{phase.label}</span>
+                                                {isActive && <span className="text-[8px] font-mono text-white bg-white/20 px-1 rounded animate-pulse">CURRENT</span>}
+                                            </div>
+                                            <div className="mt-2 h-1 w-full bg-gray-800 rounded-full overflow-hidden">
+                                                {isActive && <div className={`h-full ${phase.bar} w-[65%]`}></div>}
+                                                {isDone && <div className="h-full bg-gray-600 w-full"></div>}
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // SLEEP CYCLE (Neural Recharge)
+        const SleepCycle = () => {
+            const getSleepData = () => {
+                const history = JSON.parse(localStorage.getItem('neon_fit_workout_history') || '[]');
+                const sessions = history.length;
+                const quality = Math.min(95, 70 + Math.floor(sessions / 2));
+                return { quality, hours: 7.5, wakeTime: "06:30", latency: 12 };
+            };
+            const data = getSleepData();
+
+            return (
+                <div className="relative w-full max-w-md bg-[#020202] border border-white/10 rounded-3xl flex flex-col overflow-hidden group min-h-[450px] shadow-2xl">
+                    <div className="bg-[#050505] px-6 py-4 border-b border-white/10 flex justify-between items-center z-10 relative">
+                        <div className="absolute inset-0 bg-indigo-900/5"></div>
+                        <div>
+                            <h2 className="font-display font-black text-white tracking-widest uppercase flex items-center gap-2 text-lg">
+                                <Moon className="text-indigo-500" size={18} />
+                                NEURAL.RECHARGE
+                            </h2>
+                            <p className="text-[10px] text-indigo-500/60 font-mono font-bold mt-1">CIRCADIAN RHYTHM</p>
+                        </div>
+                        <div className="flex items-center gap-1 px-2 py-1 rounded border border-indigo-500/30 text-[10px] font-black uppercase bg-indigo-500/10 text-indigo-400">
+                            <Battery size={10} className="fill-current"/> {data.quality}%
+                        </div>
+                    </div>
+
+                    <div className="flex-1 bg-[#010101] relative flex flex-col items-center justify-center p-6">
+                        <div className="relative w-64 h-64">
+                            <div className="absolute inset-0 rounded-full border border-white/5"></div>
+                            <svg className="absolute inset-0 w-full h-full rotate-[-90deg]" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="45" fill="none" stroke="#1a1a1a" strokeWidth="8" />
+                                <circle cx="50" cy="50" r="45" fill="none" stroke="#6366f1" strokeWidth="8" strokeDasharray="90 300" strokeDashoffset="-200" strokeLinecap="round" className="drop-shadow-[0_0_10px_rgba(99,102,241,0.5)]" />
+                                <circle cx="50" cy="50" r="45" fill="none" stroke="#4338ca" strokeWidth="8" strokeDasharray="30 300" strokeDashoffset="-230" strokeLinecap="round" />
+                            </svg>
+
+                            <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                <div className="text-[9px] text-gray-500 font-mono uppercase mb-1">Duration</div>
+                                <div className="text-4xl font-black text-white tracking-tighter">{data.hours}<span className="text-lg text-gray-600">h</span></div>
+                                <div className="text-xs text-indigo-400 font-bold mt-1 flex items-center gap-1">
+                                    <Activity size={10}/> RESTORED
+                                </div>
+                            </div>
+
+                            <div className="absolute inset-0 animate-[spin_60s_linear_infinite]">
+                                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-3">
+                                    <div className="w-6 h-6 bg-[#020202] border border-indigo-500 rounded-full flex items-center justify-center shadow-[0_0_15px_#6366f1]">
+                                        <Moon size={12} className="text-indigo-400"/>
+                                    </div>
+                                </div>
+                                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-3">
+                                    <div className="w-6 h-6 bg-[#020202] border border-yellow-500 rounded-full flex items-center justify-center">
+                                        <Sun size={12} className="text-yellow-400"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-8 mt-8 w-full">
+                            <div className="text-center">
+                                <div className="text-[9px] text-gray-500 uppercase font-mono mb-1">Wake Up</div>
+                                <div className="text-xl font-bold text-white flex items-center justify-center gap-2">
+                                    <Clock size={14} className="text-yellow-500"/> {data.wakeTime}
+                                </div>
+                            </div>
+                            <div className="text-center">
+                                <div className="text-[9px] text-gray-500 uppercase font-mono mb-1">Latency</div>
+                                <div className="text-xl font-bold text-white flex items-center justify-center gap-2">
+                                    <Activity size={14} className="text-indigo-500"/> {data.latency}m
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // SYNERGY LINK (Indirect Stimulation)
+        const SynergyLink = () => {
+            const getMuscleStimulation = () => {
+                const summary = window.StatsData ? window.StatsData.getSummary() : { totalSets: 0 };
+                return [
+                    { name: 'TRICEPS', pct: 65, angle: 0 },
+                    { name: 'DELTS', pct: 40, angle: 120 },
+                    { name: 'CHEST', pct: 100, angle: 240 },
+                ];
+            };
+            const muscles = getMuscleStimulation();
+
+            return (
+                <div className="relative w-full max-w-md bg-[#020202] border border-white/10 rounded-3xl flex flex-col overflow-hidden group min-h-[450px] shadow-2xl">
+                    <div className="bg-[#050505] px-6 py-4 border-b border-white/10 flex justify-between items-center z-10 relative">
+                        <div className="absolute inset-0 bg-teal-900/5"></div>
+                        <div>
+                            <h2 className="font-display font-black text-white tracking-widest uppercase flex items-center gap-2 text-lg">
+                                <Share2 className="text-teal-500" size={18} />
+                                SYNERGY.NET
+                            </h2>
+                            <p className="text-[10px] text-teal-500/60 font-mono font-bold mt-1">INDIRECT STIMULATION</p>
+                        </div>
+                    </div>
+
+                    <div className="flex-1 bg-[#010101] relative flex flex-col items-center justify-center p-6">
+                        <div className="relative w-[280px] h-[280px] flex items-center justify-center">
+                            <div className="absolute z-20 flex flex-col items-center justify-center w-24 h-24 rounded-full bg-black border-4 border-teal-500 shadow-[0_0_30px_rgba(20,184,166,0.4)]">
+                                <span className="text-[10px] font-bold text-teal-400 uppercase tracking-widest mb-1">PRIMARY</span>
+                                <span className="text-xl font-black text-white leading-none">BENCH</span>
+                            </div>
+
+                            <div className="absolute inset-0">
+                                {muscles.map((m, i) => (
+                                    <div key={m.name} className="absolute top-1/2 left-1/2 w-[100px] h-1 bg-gradient-to-r from-teal-500 to-transparent origin-left" style={{transform: `rotate(${m.angle}deg)`}}></div>
+                                ))}
+                            </div>
+
+                            <div className="absolute top-2 left-1/2 -translate-x-1/2 bg-[#0a0a0a] border border-teal-500/50 p-2 rounded-lg text-center min-w-[80px]">
+                                <div className="text-[9px] text-gray-500 font-bold uppercase">{muscles[0].name}</div>
+                                <div className="text-lg font-black text-white">{muscles[0].pct}%</div>
+                            </div>
+                            <div className="absolute bottom-8 right-2 bg-[#0a0a0a] border border-teal-500/50 p-2 rounded-lg text-center min-w-[80px]">
+                                <div className="text-[9px] text-gray-500 font-bold uppercase">{muscles[1].name}</div>
+                                <div className="text-lg font-black text-white">{muscles[1].pct}%</div>
+                            </div>
+                            <div className="absolute bottom-8 left-2 bg-[#0a0a0a] border border-teal-500/50 p-2 rounded-lg text-center min-w-[80px]">
+                                <div className="text-[9px] text-gray-500 font-bold uppercase">{muscles[2].name}</div>
+                                <div className="text-lg font-black text-white">{muscles[2].pct}%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // TEMPORAL ENGINE (Chronos Gate)
+        const TemporalEngine = () => {
+            const [pulse, setPulse] = useState(0);
+            useEffect(() => {
+                const interval = setInterval(() => setPulse(p => (p + 0.1)), 50);
+                return () => clearInterval(interval);
+            }, []);
+
+            const getTemporalData = () => {
+                const history = JSON.parse(localStorage.getItem('neon_fit_workout_history') || '[]');
+                const totalDuration = history.reduce((sum, w) => sum + (w.duration || 45), 0);
+                const avgRest = 90;
+                return { tut: Math.floor(totalDuration * 0.6), avgRest, density: totalDuration > 200 ? 'High' : 'Medium' };
+            };
+            const data = getTemporalData();
+
+            return (
+                <div className="relative w-full max-w-md bg-[#050005] border border-white/10 rounded-3xl flex flex-col overflow-hidden min-h-[500px] shadow-2xl group">
+                    <div className="bg-[#0f050f] px-6 py-4 border-b border-white/10 flex justify-between items-center z-10 relative">
+                        <div className="absolute inset-0 bg-purple-900/5"></div>
+                        <div>
+                            <h2 className="font-display font-black text-white tracking-widest uppercase flex items-center gap-2 text-lg">
+                                <Clock className="text-purple-500" size={18} />
+                                CHRONOS.GATE
+                            </h2>
+                            <p className="text-[10px] text-purple-500/60 font-mono font-bold mt-1">TEMPORAL EFFICIENCY</p>
+                        </div>
+                        <div className="px-2 py-1 rounded border border-purple-500/30 text-[10px] font-black uppercase bg-purple-500/10 text-purple-400 animate-pulse">
+                            ACTIVE
+                        </div>
+                    </div>
+
+                    <div className="flex-1 bg-[#050005] relative flex flex-col items-center justify-center p-6 overflow-hidden">
+                        <div className="relative w-[240px] h-[240px] flex items-center justify-center">
+                            <div className="absolute inset-0 rounded-full border-2 border-dashed border-purple-900/40 animate-[spin_20s_linear_infinite]"></div>
+                            <div className="absolute inset-4 rounded-full border-4 border-purple-500/20 border-t-purple-500 animate-[spin_10s_linear_infinite_reverse]"></div>
+                            <div className="absolute inset-8 rounded-full border border-cyan-500/30 animate-[spin_5s_linear_infinite]">
+                                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2 h-2 bg-cyan-400 rounded-full shadow-[0_0_10px_#06b6d4]"></div>
+                            </div>
+
+                            <div className="absolute inset-16 rounded-full bg-[#1a051a] border border-purple-500 flex flex-col items-center justify-center shadow-[0_0_40px_rgba(168,85,247,0.3)] z-10">
+                                <div className="text-[8px] text-gray-400 font-mono uppercase mb-1">TUT TOTAL</div>
+                                <div className="text-3xl font-black text-white tracking-tighter">{data.tut}<span className="text-sm text-purple-500">m</span></div>
+                            </div>
+                        </div>
+
+                        <div className="w-full mt-6 relative z-10">
+                            <div className="flex justify-between items-center mb-2 px-2">
+                                <div className="flex items-center gap-2 text-[10px] font-bold text-gray-500 uppercase">
+                                    <Waves size={12} /> Circadian Phase
+                                </div>
+                                <span className="text-[9px] text-green-400 bg-green-900/20 px-1 rounded border border-green-500/20">SYNCED</span>
+                            </div>
+                            <div className="h-10 w-full bg-[#0a0a0a] rounded-lg border border-white/5 relative overflow-hidden flex items-end px-1 gap-0.5">
+                                {Array.from({length: 30}).map((_, i) => {
+                                    const h = 30 + Math.sin(i * 0.4 + pulse) * 20 + Math.random() * 10;
+                                    return <div key={i} className="flex-1 bg-purple-500/40 rounded-t-sm transition-all duration-75" style={{ height: `${h}%` }}></div>;
+                                })}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="bg-[#0f050f] border-t border-white/10 p-5">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="flex items-center gap-3 p-2 bg-white/5 rounded border border-white/5">
+                                <Hourglass size={18} className="text-cyan-400"/>
+                                <div>
+                                    <div className="text-lg font-bold text-white leading-none">{data.avgRest}s</div>
+                                    <div className="text-[8px] text-gray-500 uppercase tracking-wider">Avg Rest</div>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-3 p-2 bg-white/5 rounded border border-white/5">
+                                <Zap size={18} className="text-yellow-400"/>
+                                <div>
+                                    <div className="text-lg font-bold text-white leading-none">{data.density}</div>
+                                    <div className="text-[8px] text-gray-500 uppercase tracking-wider">Density</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             );
@@ -2543,6 +2928,11 @@
                             <div className="animate-slideIn" style={{ animationDelay: '1.4s' }}><MorphoTimeline /></div>
                             <div className="animate-slideIn" style={{ animationDelay: '1.5s' }}><NutritionFuel /></div>
                             <div className="animate-slideIn" style={{ animationDelay: '1.6s' }}><PilotProfile /></div>
+                            <div className="animate-slideIn" style={{ animationDelay: '1.7s' }}><PowerMetrics /></div>
+                            <div className="animate-slideIn" style={{ animationDelay: '1.8s' }}><SeasonTrack /></div>
+                            <div className="animate-slideIn" style={{ animationDelay: '1.9s' }}><SleepCycle /></div>
+                            <div className="animate-slideIn" style={{ animationDelay: '2.0s' }}><SynergyLink /></div>
+                            <div className="animate-slideIn" style={{ animationDelay: '2.1s' }}><TemporalEngine /></div>
                         </div>
                     </main>
 

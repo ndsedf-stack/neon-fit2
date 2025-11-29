@@ -210,8 +210,9 @@ const StatsData = {
     const totalSets = history.length;
     const totalVolume = history.reduce((sum, e) => sum + ((parseFloat(e.weight) || 0) * (parseInt(e.reps) || 0)), 0);
 
-    const maxSets = Math.max(totalSets, 60);
-    const maxSessions = Math.max(uniqueWorkouts, 5);
+    // Fixed targets for realistic progress display
+    const maxSets = 248;      // Target: ~248 sets for a full program cycle
+    const maxSessions = 12;   // Target: 12 sessions per month
     const score = totalSets > 0 ? Math.min(100, Math.round((totalSets / maxSets) * 100)) : 0;
 
     return {

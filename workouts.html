@@ -35,6 +35,58 @@
     
     .font-display { font-family: 'Orbitron', sans-serif; }
     
+    /* ========== STARFIELD BACKGROUND ========== */
+    .starfield {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    .stars {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        radial-gradient(1px 1px at 20px 30px, rgba(255,255,255,0.4), transparent),
+        radial-gradient(1px 1px at 40px 70px, rgba(255,255,255,0.3), transparent),
+        radial-gradient(1px 1px at 50px 160px, rgba(255,255,255,0.2), transparent),
+        radial-gradient(1px 1px at 90px 40px, rgba(255,255,255,0.35), transparent),
+        radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.25), transparent),
+        radial-gradient(1.5px 1.5px at 160px 120px, rgba(34,211,238,0.4), transparent),
+        radial-gradient(1px 1px at 200px 50px, rgba(255,255,255,0.3), transparent),
+        radial-gradient(1px 1px at 220px 150px, rgba(255,255,255,0.2), transparent),
+        radial-gradient(1px 1px at 280px 90px, rgba(255,255,255,0.35), transparent),
+        radial-gradient(1.5px 1.5px at 320px 200px, rgba(168,85,247,0.3), transparent),
+        radial-gradient(1px 1px at 350px 60px, rgba(255,255,255,0.25), transparent),
+        radial-gradient(1px 1px at 380px 180px, rgba(255,255,255,0.3), transparent),
+        radial-gradient(1px 1px at 420px 30px, rgba(255,255,255,0.2), transparent);
+      background-size: 450px 250px;
+      animation: twinkle 8s ease-in-out infinite alternate;
+    }
+    
+    .stars-2 {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        radial-gradient(1px 1px at 70px 110px, rgba(255,255,255,0.3), transparent),
+        radial-gradient(1px 1px at 110px 20px, rgba(255,255,255,0.25), transparent),
+        radial-gradient(1.5px 1.5px at 180px 180px, rgba(34,211,238,0.35), transparent),
+        radial-gradient(1px 1px at 240px 140px, rgba(255,255,255,0.2), transparent),
+        radial-gradient(1px 1px at 300px 40px, rgba(255,255,255,0.35), transparent),
+        radial-gradient(1px 1px at 360px 100px, rgba(255,255,255,0.25), transparent),
+        radial-gradient(1.5px 1.5px at 400px 160px, rgba(168,85,247,0.25), transparent);
+      background-size: 500px 220px;
+      animation: twinkle 10s ease-in-out infinite alternate-reverse;
+    }
+    
+    @keyframes twinkle {
+      0% { opacity: 0.4; }
+      100% { opacity: 0.8; }
+    }
+    
     /* ========== AMBIENT EFFECTS ========== */
     .ambient-glow {
       position: fixed;
@@ -42,19 +94,24 @@
       height: 400px;
       border-radius: 50%;
       filter: blur(120px);
-      opacity: 0.08;
+      opacity: 0.06;
       pointer-events: none;
       z-index: 0;
     }
     
-    .ambient-cyan { background: var(--cyan); top: -100px; right: -100px; }
-    .ambient-purple { background: var(--purple); bottom: 20%; left: -150px; }
+    .ambient-cyan { background: var(--cyan); top: -100px; right: -100px; animation: ambientFloat 15s ease-in-out infinite; }
+    .ambient-purple { background: var(--purple); bottom: 20%; left: -150px; animation: ambientFloat 18s ease-in-out infinite reverse; }
+    
+    @keyframes ambientFloat {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(30px, 20px); }
+    }
     
     .grain {
       position: fixed;
       inset: 0;
       background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-      opacity: 0.02;
+      opacity: 0.015;
       pointer-events: none;
       z-index: 1000;
     }
@@ -466,14 +523,14 @@
     }
     
     .metric-card {
-      background: rgba(255, 255, 255, 0.03);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 12px;
-      padding: 10px 6px;
+      background: rgba(255, 255, 255, 0.015);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 14px;
+      padding: 12px 6px;
       text-align: center;
-      transition: all 0.3s ease;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
       position: relative;
       overflow: hidden;
     }
@@ -482,30 +539,91 @@
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 50%);
+      background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, transparent 60%);
       pointer-events: none;
     }
     
-    .metric-card:hover {
-      background: rgba(255, 255, 255, 0.05);
-      border-color: rgba(34, 211, 238, 0.2);
-      transform: translateY(-2px);
+    .metric-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 30%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(34,211,238,0.3), transparent);
+      opacity: 0;
+      transition: all 0.4s ease;
     }
     
-    .metric-icon {
-      margin-bottom: 4px;
-      opacity: 0.9;
+    .metric-card:hover {
+      background: rgba(255, 255, 255, 0.03);
+      border-color: rgba(34, 211, 238, 0.15);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+    
+    .metric-card:hover::after {
+      opacity: 1;
+      width: 60%;
+    }
+    
+    .metric-icon-wrap {
+      width: 28px;
+      height: 28px;
+      margin: 0 auto 6px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    
+    .metric-icon-wrap.duration {
+      background: rgba(34, 211, 238, 0.1);
+      animation: iconPulse 3s ease-in-out infinite;
+    }
+    
+    .metric-icon-wrap.series {
+      background: rgba(34, 211, 238, 0.1);
+      animation: iconPulse 3s ease-in-out infinite 0.5s;
+    }
+    
+    .metric-icon-wrap.rpe {
+      background: rgba(236, 72, 153, 0.1);
+      animation: iconPulseRpe 2.5s ease-in-out infinite;
+    }
+    
+    .metric-icon-wrap.xp {
+      background: rgba(34, 197, 94, 0.1);
+      animation: iconPulseXp 2s ease-in-out infinite;
+    }
+    
+    @keyframes iconPulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 rgba(34, 211, 238, 0); }
+      50% { transform: scale(1.05); box-shadow: 0 0 15px rgba(34, 211, 238, 0.2); }
+    }
+    
+    @keyframes iconPulseRpe {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); box-shadow: 0 0 12px rgba(236, 72, 153, 0.25); }
+    }
+    
+    @keyframes iconPulseXp {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 rgba(34, 197, 94, 0); }
+      50% { transform: scale(1.1); box-shadow: 0 0 18px rgba(34, 197, 94, 0.3); }
     }
     
     .metric-value {
       font-family: 'Orbitron', sans-serif;
-      font-size: 16px;
+      font-size: 17px;
       font-weight: 700;
       color: #fff;
+      line-height: 1;
     }
     
-    .metric-value.rpe { color: var(--pink); }
-    .metric-value.xp { color: var(--green); text-shadow: 0 0 10px rgba(34, 197, 94, 0.4); }
+    .metric-value.rpe { color: var(--pink); text-shadow: 0 0 12px rgba(236, 72, 153, 0.4); }
+    .metric-value.xp { color: var(--green); text-shadow: 0 0 15px rgba(34, 197, 94, 0.5); }
     
     .metric-label {
       font-size: 7px;
@@ -513,7 +631,7 @@
       color: #64748b;
       letter-spacing: 0.8px;
       text-transform: uppercase;
-      margin-top: 2px;
+      margin-top: 4px;
     }
     
     /* ========== ANALYTICS ========== */
@@ -627,6 +745,7 @@
       height: 10px;
       background: var(--cyan);
       border-radius: 2px;
+      box-shadow: 0 0 8px var(--cyan);
     }
     
     .missions-title {
@@ -641,37 +760,82 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 12px 14px;
-      background: rgba(255, 255, 255, 0.015);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.04);
-      border-radius: 14px;
-      margin-bottom: 8px;
+      padding: 14px 16px;
+      background: rgba(255, 255, 255, 0.008);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      border-radius: 16px;
+      margin-bottom: 10px;
       cursor: pointer;
-      transition: all 0.25s ease;
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      overflow: hidden;
     }
     
-    .mission-item:active { transform: scale(0.98); }
+    .mission-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+    }
+    
+    .mission-item::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.02) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    
+    .mission-item:active { transform: scale(0.97); }
+    
     .mission-item:hover { 
-      background: rgba(255, 255, 255, 0.03); 
-      border-color: rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.02);
+      border-color: rgba(34, 211, 238, 0.1);
+      transform: translateX(4px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(34, 211, 238, 0.05);
     }
     
     .mission-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
+      position: relative;
+      transition: all 0.3s ease;
     }
     
-    .mission-icon.cyan { background: rgba(34, 211, 238, 0.1); border: 1px solid rgba(34, 211, 238, 0.2); }
-    .mission-icon.pink { background: rgba(236, 72, 153, 0.1); border: 1px solid rgba(236, 72, 153, 0.2); }
-    .mission-icon.purple { background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.2); }
-    .mission-icon.amber { background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2); }
+    .mission-item:hover .mission-icon {
+      transform: scale(1.05);
+    }
+    
+    .mission-icon.cyan { 
+      background: rgba(34, 211, 238, 0.08); 
+      border: 1px solid rgba(34, 211, 238, 0.15);
+      box-shadow: 0 0 20px rgba(34, 211, 238, 0.08);
+    }
+    .mission-icon.pink { 
+      background: rgba(236, 72, 153, 0.08); 
+      border: 1px solid rgba(236, 72, 153, 0.15);
+      box-shadow: 0 0 20px rgba(236, 72, 153, 0.08);
+    }
+    .mission-icon.purple { 
+      background: rgba(168, 85, 247, 0.08); 
+      border: 1px solid rgba(168, 85, 247, 0.15);
+      box-shadow: 0 0 20px rgba(168, 85, 247, 0.08);
+    }
+    .mission-icon.amber { 
+      background: rgba(245, 158, 11, 0.08); 
+      border: 1px solid rgba(245, 158, 11, 0.15);
+      box-shadow: 0 0 20px rgba(245, 158, 11, 0.08);
+    }
     
     .mission-body { flex: 1; min-width: 0; }
     
@@ -770,6 +934,12 @@
 </head>
 
 <body>
+  <!-- STARFIELD -->
+  <div class="starfield">
+    <div class="stars"></div>
+    <div class="stars-2"></div>
+  </div>
+  
   <!-- AMBIENT -->
   <div class="ambient-glow ambient-cyan"></div>
   <div class="ambient-glow ambient-purple"></div>
@@ -838,22 +1008,30 @@
         
         <div class="metrics-grid">
           <div class="metric-card">
-            <i data-lucide="clock" class="w-4 h-4 text-cyan-400 metric-icon"></i>
+            <div class="metric-icon-wrap duration">
+              <i data-lucide="timer" class="w-4 h-4 text-cyan-400"></i>
+            </div>
             <div class="metric-value" id="hero-duration">68m</div>
             <div class="metric-label">Durée</div>
           </div>
           <div class="metric-card">
-            <i data-lucide="layers" class="w-4 h-4 text-cyan-400 metric-icon"></i>
+            <div class="metric-icon-wrap series">
+              <i data-lucide="layers-3" class="w-4 h-4 text-cyan-400"></i>
+            </div>
             <div class="metric-value" id="hero-sets">31</div>
             <div class="metric-label">Séries</div>
           </div>
           <div class="metric-card">
-            <i data-lucide="gauge" class="w-4 h-4 text-pink-400 metric-icon"></i>
+            <div class="metric-icon-wrap rpe">
+              <i data-lucide="flame" class="w-4 h-4 text-pink-400"></i>
+            </div>
             <div class="metric-value rpe" id="hero-rpe">6-7</div>
             <div class="metric-label">RPE</div>
           </div>
           <div class="metric-card">
-            <i data-lucide="zap" class="w-4 h-4 text-green-400 metric-icon"></i>
+            <div class="metric-icon-wrap xp">
+              <i data-lucide="sparkles" class="w-4 h-4 text-green-400"></i>
+            </div>
             <div class="metric-value xp" id="hero-xp">+620</div>
             <div class="metric-label">XP</div>
           </div>

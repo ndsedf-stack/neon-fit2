@@ -89,7 +89,19 @@ async function startServer() {
     }
   });
 
-  app.use(express.static(path.join(__dirname, '..')));
+  app.use((req, res, next) => {
+    if (req.path.endsWith('.html') || req.path === '/') {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+    }
+    next();
+  });
+
+  app.use(express.static(path.join(__dirname, '..'), {
+    etag: false,
+    lastModified: false
+  }));
 
   app.use((req, res, next) => {
     if (req.path.startsWith('/api/')) {

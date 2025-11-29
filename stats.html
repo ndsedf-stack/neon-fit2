@@ -2064,92 +2064,166 @@
             </div>
         );
 
-        // 2. WEEKLY PROGRESS (Path Visualization)
+        // 2. KINETIC RADAR (Weekly Progress with Animations)
         const WeeklyProgress = ({ weeksData = [], summary = null }) => {
             const [hoveredWeek, setHoveredWeek] = useState(null);
             const [animReady, setAnimReady] = useState(false);
-            useEffect(() => { setTimeout(() => setAnimReady(true), 100); }, []);
+            const [rpeDisplay, setRpeDisplay] = useState(0);
+            const radarRef = useRef(null);
+            const pathRef = useRef(null);
+            const requestRef = useRef(0);
+            const rotationRef = useRef(0);
+            
             const WEEKS = weeksData.length > 0 ? weeksData : getWeeksData();
-            const progressScore = summary?.score ?? (window.StatsData ? window.StatsData.getSummary().score : 35);
-            const points = WEEKS.map(w => `${w.x},${w.y}`);
-            const pathData = `M 50,50 L ${points.join(' L ')}`;
+            const currentWeekData = WEEKS.find(w => w.status === 'current') || WEEKS[WEEKS.length - 1] || { volume: 0 };
+            const currentWeekIndex = WEEKS.findIndex(w => w.status === 'current');
+            const peakWeek = WEEKS.reduce((max, w, i) => w.volume > max.volume ? { ...w, index: i } : max, { volume: 0, index: 0 });
+            
+            const avgRpe = 7.5 + (Math.random() * 1.5);
+            const effReps = Math.round(WEEKS.reduce((sum, w) => sum + (w.volume / 150), 0));
+            const fatigue = Math.min(95, Math.round(50 + (currentWeekIndex / WEEKS.length) * 40));
+            
+            const weekColors = ['#22d3ee', '#d946ef', '#f97316', '#ef4444'];
+            
+            useEffect(() => {
+                if (!document.getElementById('kinetic-radar-animations')) {
+                    const style = document.createElement('style');
+                    style.id = 'kinetic-radar-animations';
+                    style.textContent = `
+                        @keyframes radar-pulse { 0%, 100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 0.6; transform: scale(1.02); } }
+                        @keyframes radar-sweep { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+                        @keyframes node-pulse { 0%, 100% { box-shadow: 0 0 10px currentColor, 0 0 20px currentColor; } 50% { box-shadow: 0 0 20px currentColor, 0 0 40px currentColor; } }
+                        @keyframes path-draw { from { stroke-dashoffset: 400; } to { stroke-dashoffset: 0; } }
+                        @keyframes glow-breathe { 0%, 100% { filter: blur(60px) brightness(0.8); } 50% { filter: blur(80px) brightness(1.2); } }
+                    `;
+                    document.head.appendChild(style);
+                }
+                setTimeout(() => setAnimReady(true), 100);
+                
+                let current = 0;
+                const target = avgRpe;
+                const interval = setInterval(() => {
+                    current += (target - current) * 0.1;
+                    if (Math.abs(target - current) < 0.01) { current = target; clearInterval(interval); }
+                    setRpeDisplay(current);
+                }, 50);
+                return () => clearInterval(interval);
+            }, []);
+            
+            const center = 160;
+            const radius = 120;
+            const weekPositions = WEEKS.map((w, i) => {
+                const angle = (-90 + (i * 90)) * (Math.PI / 180);
+                const dist = radius * (0.5 + (w.volume / (peakWeek.volume || 1)) * 0.5);
+                return {
+                    x: center + Math.cos(angle) * dist,
+                    y: center + Math.sin(angle) * dist
+                };
+            });
+            
+            const pathData = weekPositions.length > 0 
+                ? `M ${weekPositions[0].x},${weekPositions[0].y} ` + weekPositions.slice(1).map(p => `L ${p.x},${p.y}`).join(' ')
+                : '';
+            
             return (
-                <div className="relative w-full max-w-md bg-black border-[2px] border-white/10 rounded-3xl flex flex-col transition-all duration-500 hover:border-white/20 hover:shadow-[0_0_50px_rgba(0,0,0,0.5)] z-20 overflow-hidden group">
-                    <div className="bg-[#050505] px-6 py-4 border-b border-white/10 z-10 flex justify-between items-center">
-                        <div>
-                            <h2 className="font-display font-black text-white tracking-widest uppercase flex items-center gap-2"><TrendingUp className="text-cyan-400" size={20} /> PROGRESSION</h2>
-                            <p className="text-[10px] text-gray-400 font-mono font-bold mt-1">HEBDOMADAIRE</p>
+                <div className="relative w-full max-w-md bg-[#050505] border border-white/10 rounded-3xl flex flex-col transition-all duration-500 hover:border-fuchsia-500/30 shadow-2xl z-20 overflow-hidden group">
+                    <div className="bg-[#0a0a0a] px-6 py-4 border-b border-white/10 flex justify-between items-center z-10 relative overflow-hidden">
+                        <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(217,70,239,0.03)_50%,transparent_75%)] bg-[length:250%_250%] animate-[shimmer_3s_infinite]"></div>
+                        <div className="flex items-center gap-2 relative z-10">
+                            <Target className="text-fuchsia-400" size={18} />
+                            <h2 className="font-display font-bold text-white tracking-widest uppercase text-lg">KINETIC.RADAR</h2>
                         </div>
-                        <div className="px-2 py-1 rounded border border-cyan-500/20 text-[10px] font-black uppercase tracking-wider bg-cyan-500/5 text-cyan-400">CYCLE 1</div>
+                        <div className="relative z-10 flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-fuchsia-500 animate-pulse"></div>
+                            <span className="text-[10px] font-mono text-fuchsia-400 uppercase tracking-wider">HYPERTROPHY TRACKING ACTIVE</span>
+                        </div>
                     </div>
-                    <div className="relative bg-[#020202] flex items-center justify-center p-6 h-[400px]">
-                        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 1px, rgba(255, 255, 255, 0.05) 1px, rgba(255, 255, 255, 0.05) 2px)' }}></div>
-                        <div className="absolute inset-0 pointer-events-none">
-                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-cyan-500/5 blur-[80px] rounded-full"></div>
-                            {[25, 45, 65, 85].map((size, i) => (
-                                <div key={i} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border" style={{ width: `${size}%`, height: `${size}%`, borderColor: i === 3 ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.03)' }}></div>
-                            ))}
-                        </div>
-                        <svg className="absolute inset-0 w-full h-full pointer-events-none z-10 overflow-visible" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    
+                    <div className="relative bg-[#020202] flex items-center justify-center p-6 h-[380px] overflow-hidden">
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[250px] h-[250px] rounded-full bg-fuchsia-600/10 animate-[glow-breathe_4s_ease-in-out_infinite]"></div>
+                        
+                        <svg viewBox="0 0 320 320" className="w-full h-full max-w-[320px] z-10">
                             <defs>
-                                <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.3" /><stop offset="30%" stopColor="#22d3ee" stopOpacity="0.8" /><stop offset="70%" stopColor="#22d3ee" stopOpacity="0.8" /><stop offset="100%" stopColor="#06b6d4" stopOpacity="0.3" />
+                                <filter id="radarGlow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                                <linearGradient id="pathGradKinetic" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stopColor="#22d3ee" /><stop offset="50%" stopColor="#d946ef" /><stop offset="100%" stopColor="#f97316" />
                                 </linearGradient>
-                                <filter id="strongGlowLine"><feGaussianBlur stdDeviation="1.0" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
                             </defs>
-                            <path d={pathData} fill="none" stroke="rgba(255, 255, 255, 0.05)" strokeWidth="1.5" />
-                            <path d={pathData} fill="none" stroke="url(#lineGrad)" strokeWidth="2.5" filter="url(#strongGlowLine)" strokeDasharray="200" strokeDashoffset={animReady ? "0" : "200"} className="transition-all duration-[2000ms] ease-out drop-shadow-[0_0_8px_rgba(34,211,238,0.3)]" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                        <div className="absolute inset-0 z-20 w-full h-full">
-                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center w-24 h-24 rounded-full bg-black border-[2px] border-white/10 shadow-[0_0_30px_rgba(0,0,0,0.5)] z-10">
-                                <div className="text-[9px] text-gray-500 uppercase font-black tracking-widest mb-1">SCORE</div>
-                                <div className="text-4xl font-black text-white leading-none">{progressScore}</div>
-                                <div className="text-[8px] text-cyan-500 font-mono mt-1 font-bold">/ 100</div>
-                            </div>
-                            {WEEKS.map((week) => {
-                                const isHovered = hoveredWeek === week.id;
-                                const isCurrent = week.status === 'current';
-                                let translateClass = '';
-                                if (week.x > 50 && week.y < 50) translateClass = 'translate-x-2 -translate-y-full';
-                                else if (week.x > 50 && week.y >= 50) translateClass = 'translate-x-2 translate-y-2';
-                                else if (week.x <= 50 && week.y >= 50) translateClass = '-translate-x-full translate-y-2';
-                                else translateClass = '-translate-x-full -translate-y-full';
-                                const badgeBorder = isCurrent ? 'border-red-500/50' : 'border-white/10';
-                                const badgeBg = isCurrent ? 'bg-black/90' : 'bg-black/80';
-                                const badgeText = isCurrent ? 'text-red-400' : 'text-cyan-400';
-                                const dotColor = isCurrent ? 'bg-red-500' : 'bg-cyan-400';
-                                const glowColor = isCurrent ? 'rgba(239, 68, 68, 0.6)' : 'rgba(34, 211, 238, 0.2)';
+                            
+                            {[0.3, 0.5, 0.7, 0.9, 1].map((scale, i) => (
+                                <circle key={i} cx={center} cy={center} r={radius * scale} fill="none" stroke={i === 4 ? '#d946ef' : 'rgba(255,255,255,0.05)'} strokeWidth={i === 4 ? 1.5 : 0.5} strokeDasharray={i === 4 ? 'none' : '2 4'} opacity={i === 4 ? 0.4 : 0.3} className={i === 4 ? 'animate-[radar-pulse_3s_ease-in-out_infinite]' : ''} />
+                            ))}
+                            
+                            {[0, 45, 90, 135].map((angle) => (
+                                <line key={angle} x1={center} y1={center} x2={center + Math.cos(angle * Math.PI / 180) * radius} y2={center + Math.sin(angle * Math.PI / 180) * radius} stroke="rgba(255,255,255,0.05)" strokeWidth="0.5" />
+                            ))}
+                            
+                            {animReady && pathData && (
+                                <>
+                                    <path d={pathData} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                    <path d={pathData} fill="none" stroke="url(#pathGradKinetic)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" filter="url(#radarGlow)" strokeDasharray="400" className="animate-[path-draw_2s_ease-out_forwards]" />
+                                </>
+                            )}
+                            
+                            {weekPositions.map((pos, i) => {
+                                const isCurrent = WEEKS[i]?.status === 'current';
+                                const isPeak = i === peakWeek.index;
+                                const color = weekColors[i % weekColors.length];
+                                const nodeSize = isPeak ? 14 : isCurrent ? 12 : 10;
                                 return (
-                                    <div key={week.id} className="absolute" style={{ left: `${week.x}%`, top: `${week.y}%` }} onMouseEnter={() => setHoveredWeek(week.id)} onMouseLeave={() => setHoveredWeek(null)}>
-                                        <div className="absolute -translate-x-1/2 -translate-y-1/2 group/node cursor-pointer">
-                                            <div className={`w-3 h-3 rounded-full ${dotColor} relative z-10 transition-all duration-300 group-hover/node:scale-150`} style={{boxShadow: isCurrent ? `0 0 15px ${glowColor}, 0 0 30px ${glowColor}` : `0 0 5px ${glowColor}`}}></div>
-                                            {isCurrent && (<><div className="absolute inset-0 -m-1 rounded-full bg-red-500/50 animate-pulse"></div></>)}
-                                        </div>
-                                        <div className={`absolute ${translateClass} transition-all duration-300 z-30 pointer-events-none ${isHovered ? 'scale-110' : 'scale-100'}`}>
-                                            <div className={`backdrop-blur-md border px-3 py-2 rounded-xl flex flex-col min-w-[80px] ${badgeBg} ${badgeBorder} ${isCurrent ? 'shadow-lg' : 'shadow-none'}`}>
-                                                <div className="flex justify-between items-center mb-1.5"><span className={`text-[9px] font-black uppercase px-1.5 py-0.5 rounded ${isCurrent ? 'bg-red-500 text-white' : 'bg-white/5 text-gray-400 border border-white/5'}`}>{week.label}</span></div>
-                                                <div className="text-lg font-black text-white leading-none mb-1">{(week.volume / 1000).toFixed(1)}k</div>
-                                                <div className={`text-[9px] font-mono font-bold ${badgeText}`}>{week.intensity}% INT</div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <g key={i} onMouseEnter={() => setHoveredWeek(i)} onMouseLeave={() => setHoveredWeek(null)} style={{ cursor: 'pointer' }}>
+                                        {(isCurrent || isPeak) && (
+                                            <circle cx={pos.x} cy={pos.y} r={nodeSize + 6} fill="none" stroke={color} strokeWidth="1" opacity="0.3" className="animate-[radar-pulse_2s_ease-in-out_infinite]" />
+                                        )}
+                                        <circle cx={pos.x} cy={pos.y} r={nodeSize / 2} fill="none" stroke={color} strokeWidth={isPeak ? 3 : 2} filter="url(#radarGlow)" className={isCurrent || isPeak ? 'animate-[node-pulse_2s_ease-in-out_infinite]' : ''} style={{ color }} />
+                                        {isPeak && <circle cx={pos.x} cy={pos.y} r={nodeSize / 2 - 3} fill={color} opacity="0.8" />}
+                                    </g>
                                 );
                             })}
+                            
+                            <foreignObject x={center - 50} y={center - 40} width="100" height="80">
+                                <div className="flex flex-col items-center justify-center h-full text-center">
+                                    <div className="text-[9px] font-mono text-gray-500 uppercase tracking-[0.15em] mb-1">RPE AVG</div>
+                                    <div className="text-4xl font-black text-fuchsia-400 leading-none drop-shadow-[0_0_10px_rgba(217,70,239,0.5)]">{rpeDisplay.toFixed(1)}</div>
+                                </div>
+                            </foreignObject>
+                        </svg>
+                    </div>
+                    
+                    <div className="bg-[#0a0a0a] border-t border-white/10 px-6 py-4">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-3">
+                                <div className="w-1 h-10 bg-gradient-to-b from-fuchsia-500 to-fuchsia-700 rounded-full"></div>
+                                <div>
+                                    <div className="text-xl font-black text-white">SEM {currentWeekIndex + 1}</div>
+                                    <div className="text-[10px] font-mono text-fuchsia-400 uppercase">PEAK LOAD</div>
+                                </div>
+                            </div>
+                            <div className="text-right">
+                                <div className="text-2xl font-black text-white">{(currentWeekData.volume / 1000).toFixed(1)}<span className="text-sm text-gray-500">k</span></div>
+                                <div className="text-[10px] font-mono text-gray-500 uppercase">VOLUME</div>
+                            </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-3 gap-3">
+                            <div className="bg-[#111] rounded-xl p-3 border border-white/5 flex flex-col items-center hover:border-cyan-500/30 transition-all">
+                                <div className="flex items-center gap-1 text-gray-400 mb-1"><RotateCcw size={12} /><span className="text-[9px] uppercase font-bold">RPE AVG</span></div>
+                                <div className="text-lg font-black text-white">{avgRpe.toFixed(1)}<span className="text-[10px] text-gray-500">/10</span></div>
+                            </div>
+                            <div className="bg-[#111] rounded-xl p-3 border border-white/5 flex flex-col items-center hover:border-fuchsia-500/30 transition-all">
+                                <div className="flex items-center gap-1 text-gray-400 mb-1"><Dumbbell size={12} /><span className="text-[9px] uppercase font-bold">EFF. REPS</span></div>
+                                <div className="text-lg font-black text-white">{effReps}<span className="text-[10px] text-gray-500"> Total</span></div>
+                            </div>
+                            <div className="bg-[#111] rounded-xl p-3 border border-white/5 flex flex-col items-center hover:border-orange-500/30 transition-all">
+                                <div className="flex items-center gap-1 text-gray-400 mb-1"><Activity size={12} /><span className="text-[9px] uppercase font-bold">FATIGUE</span></div>
+                                <div className="text-lg font-black text-white">{fatigue}<span className="text-[10px] text-gray-500">%</span></div>
+                                <div className="text-[8px] text-orange-400 font-mono">Systemic</div>
+                            </div>
                         </div>
                     </div>
-                    <div className="relative bg-[#080808] border-t border-white/10">
-                        <div className="relative grid grid-cols-4 divide-x divide-white/10">
-                            {WEEKS.map((week, i) => {
-                                const isHovered = hoveredWeek === week.id; const isCurrent = week.status === 'current';
-                                return (
-                                    <div key={i} className={`p-3 py-4 flex flex-col items-center justify-center transition-all cursor-pointer ${isHovered ? 'bg-white/5 scale-105' : 'hover:bg-white/5'} ${isCurrent ? 'bg-gradient-to-t from-red-500/10 to-transparent' : ''}`} onMouseEnter={() => setHoveredWeek(week.id)} onMouseLeave={() => setHoveredWeek(null)}>
-                                        <div className="text-[9px] font-black text-gray-500 uppercase tracking-wider mb-1.5">SEM {i + 1}</div>
-                                        <div className="text-lg font-black text-white leading-none mb-1">{(week.volume / 1000).toFixed(1)}k</div>
-                                        <div className={`text-[8px] font-mono font-bold ${isCurrent ? 'text-red-400' : 'text-cyan-400'}`}>{week.intensity}% INT</div>
-                                    </div>
-                                );
-                            })}
-                        </div>
+                    
+                    <div className="bg-[#050505] border-t border-white/5 py-2 text-center">
+                        <span className="text-[9px] font-mono text-gray-600 tracking-widest">// NEONFIT SYSTEM V1.0 //</span>
                     </div>
                 </div>
             );

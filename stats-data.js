@@ -358,6 +358,35 @@ const StatsData = {
     };
   },
 
+getDailyActivity: () => {
+    const history = StatsData.getHistory();
+    const days = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+    const result = [];
+    
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toDateString();
+      const dayName = days[date.getDay()];
+      
+      const daySets = history.filter(h => {
+        const hDate = h.completedAt || h.date;
+        return hDate && new Date(hDate).toDateString() === dateStr;
+      });
+      
+      const volume = daySets.reduce((sum, s) => sum + ((parseFloat(s.weight) || 0) * (parseInt(s.reps) || 0)), 0);
+      const sets = daySets.length;
+      
+      result.push({
+        day: dayName,
+        volume: Math.round(volume),
+        sets,
+        active: sets > 0
+      });
+    }
+    return result;
+  },
+
   getChallengesData: () => {
     const summary = StatsData.getSummary();
     const history = StatsData.getHistory();

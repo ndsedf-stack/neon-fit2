@@ -74,7 +74,7 @@
     <!-- 6. STATS DATA MODULE -->
     <script src="stats-data.js"></script>
 
-    <!-- 7. DEMO DATA GENERATOR (4 weeks simulation) -->
+    <!-- 7. DEMO DATA GENERATOR (realistic 2 weeks simulation) -->
     <script>
     (function() {
         const DEMO_STORAGE_KEY = 'neon_fit_workout_history';
@@ -82,51 +82,45 @@
         
         // Only generate demo data if no real data exists
         if (!existingData || JSON.parse(existingData).length === 0) {
-            console.log('[NEON FIT] Generating 4 weeks demo data...');
+            console.log('[NEON FIT] Generating realistic demo data (2 weeks)...');
             
             const exercises = [
-                // Week 1-4 exercises based on program-data
                 // DIMANCHE: DOS + JAMBES + BRAS
-                { name: "Trap Bar Deadlift", muscle: "dos", baseWeight: 75 },
-                { name: "Goblet Squat", muscle: "jambes", baseWeight: 25 },
-                { name: "Leg Press", muscle: "jambes", baseWeight: 110 },
-                { name: "Lat Pulldown", muscle: "dos", baseWeight: 60 },
-                { name: "Seated Row", muscle: "dos", baseWeight: 55 },
-                { name: "Incline Curl", muscle: "biceps", baseWeight: 10 },
-                { name: "Triceps Pushdown", muscle: "triceps", baseWeight: 25 },
+                { name: "Trap Bar Deadlift", muscle: ["dos", "jambes"], baseWeight: 75 },
+                { name: "Goblet Squat", muscle: ["jambes"], baseWeight: 25 },
+                { name: "Leg Press", muscle: ["jambes"], baseWeight: 110 },
+                { name: "Lat Pulldown", muscle: ["dos"], baseWeight: 60 },
+                { name: "Seated Row", muscle: ["dos"], baseWeight: 55 },
+                { name: "Incline Curl", muscle: ["biceps"], baseWeight: 10 },
                 
                 // MARDI: PECTORAUX + ÉPAULES
-                { name: "Incline Dumbbell Press", muscle: "pectoraux", baseWeight: 28 },
-                { name: "Machine Chest Press", muscle: "pectoraux", baseWeight: 50 },
-                { name: "Cable Fly", muscle: "pectoraux", baseWeight: 15 },
-                { name: "Shoulder Press", muscle: "épaules", baseWeight: 20 },
-                { name: "Lateral Raise", muscle: "épaules", baseWeight: 8 },
-                { name: "Rear Delt Fly", muscle: "épaules", baseWeight: 10 },
+                { name: "Incline Dumbbell Press", muscle: ["pectoraux"], baseWeight: 28 },
+                { name: "Machine Chest Press", muscle: ["pectoraux"], baseWeight: 50 },
+                { name: "Shoulder Press", muscle: ["épaules"], baseWeight: 20 },
+                { name: "Lateral Raise", muscle: ["épaules"], baseWeight: 8 },
                 
                 // VENDREDI: FULL BODY
-                { name: "Romanian Deadlift", muscle: "jambes", baseWeight: 60 },
-                { name: "Bulgarian Split Squat", muscle: "jambes", baseWeight: 12 },
-                { name: "Pull-ups", muscle: "dos", baseWeight: 0 },
-                { name: "Dips", muscle: "pectoraux", baseWeight: 0 },
-                { name: "Face Pull", muscle: "épaules", baseWeight: 20 }
+                { name: "Romanian Deadlift", muscle: ["jambes", "dos"], baseWeight: 60 },
+                { name: "Pull-ups", muscle: ["dos", "biceps"], baseWeight: 0 },
+                { name: "Dips", muscle: ["pectoraux", "triceps"], baseWeight: 0 }
             ];
             
             const demoHistory = [];
             const days = ['dimanche', 'mardi', 'vendredi'];
             
-            for (let week = 1; week <= 4; week++) {
+            // Only 2 weeks of demo data for realistic progress display
+            for (let week = 1; week <= 2; week++) {
                 days.forEach((day, dayIndex) => {
-                    // Select exercises for this day
                     const dayExercises = day === 'dimanche' 
-                        ? exercises.slice(0, 7)
+                        ? exercises.slice(0, 6)
                         : day === 'mardi' 
-                            ? exercises.slice(7, 13)
-                            : exercises.slice(13);
+                            ? exercises.slice(6, 10)
+                            : exercises.slice(10);
                     
                     dayExercises.forEach(ex => {
-                        const setsCount = Math.floor(Math.random() * 2) + 3; // 3-4 sets
+                        const setsCount = 3; // Fixed 3 sets per exercise
                         for (let set = 1; set <= setsCount; set++) {
-                            const reps = Math.floor(Math.random() * 5) + 8; // 8-12 reps
+                            const reps = Math.floor(Math.random() * 4) + 8; // 8-11 reps
                             const weight = ex.baseWeight + (week * 2.5) + (Math.random() * 5 - 2.5);
                             
                             demoHistory.push({
@@ -136,9 +130,9 @@
                                 day: day,
                                 set: set,
                                 reps: reps,
-                                weight: Math.round(weight * 2) / 2, // Round to 0.5
+                                weight: Math.round(weight * 2) / 2,
                                 targetReps: reps,
-                                completedAt: new Date(Date.now() - ((4 - week) * 7 + (2 - dayIndex) * 2) * 24 * 60 * 60 * 1000).toISOString()
+                                completedAt: new Date(Date.now() - ((2 - week) * 7 + (2 - dayIndex) * 2) * 24 * 60 * 60 * 1000).toISOString()
                             });
                         }
                     });
@@ -146,9 +140,9 @@
             }
             
             localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(demoHistory));
-            localStorage.setItem('hybrid_xp', '4500');
-            localStorage.setItem('hybrid_current_week', '4');
-            localStorage.setItem('hybrid_streak', '12');
+            localStorage.setItem('hybrid_xp', '2200');
+            localStorage.setItem('hybrid_current_week', '2');
+            localStorage.setItem('hybrid_streak', '6');
             
             console.log('[NEON FIT] Demo data generated:', demoHistory.length, 'sets');
         }

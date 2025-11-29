@@ -12,6 +12,7 @@
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
   <script src="config.js"></script>
   <script src="stats-data.js"></script>
+  <script src="scramble-effect.js"></script>
 
   <style>
     :root {
@@ -451,10 +452,24 @@
       }
     }
 
+    function initScrambleEffects() {
+      if (!window.ScrambleEffect) return;
+      var title = document.querySelector('h1.text-4xl');
+      var subtitle = document.querySelector('.text-cyan-400.text-lg');
+      var workoutName = document.getElementById('workout-name');
+      var rankDisplay = document.getElementById('rank-display');
+      
+      if (title) ScrambleEffect.scramble(title, { delay: 100, speed: 30 });
+      if (subtitle) ScrambleEffect.scramble(subtitle, { delay: 250, speed: 25 });
+      if (workoutName) ScrambleEffect.scramble(workoutName, { delay: 400, speed: 25 });
+      if (rankDisplay) ScrambleEffect.scramble(rankDisplay, { delay: 550, speed: 35 });
+    }
+    
     document.addEventListener('DOMContentLoaded', function() {
       initIcons();
       createConfetti();
       loadSessionData();
+      setTimeout(initScrambleEffects, 200);
       
       var sessionData = JSON.parse(localStorage.getItem('last_session_data') || '{}');
       var history = JSON.parse(localStorage.getItem('neon_fit_workout_history') || '[]');

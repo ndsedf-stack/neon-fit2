@@ -16,6 +16,7 @@
   <script src="app-v2.js?v=1764354000"></script>
   <script src="cloud-sync-supabase.js"></script>
   <script src="stats-data.js"></script>
+  <script src="scramble-effect.js"></script>
 
   <style>
     :root {
@@ -754,11 +755,31 @@
       document.getElementById('details-modal').classList.remove('open');
     };
 
+    function initScrambleEffects() {
+      if (!window.ScrambleEffect) return;
+      const protocolTitle = document.getElementById('protocol-title');
+      const protocolSubtitle = document.getElementById('protocol-subtitle');
+      const rankDisplay = document.getElementById('rank-display');
+      if (protocolTitle && protocolTitle.textContent !== 'LOADING') {
+        ScrambleEffect.scramble(protocolTitle, { delay: 100 });
+      }
+      if (protocolSubtitle && protocolSubtitle.textContent !== '...') {
+        ScrambleEffect.scramble(protocolSubtitle, { delay: 300, speed: 25 });
+      }
+      if (rankDisplay) {
+        ScrambleEffect.scramble(rankDisplay, { delay: 50, speed: 35 });
+      }
+    }
+
     // Attendre que tout soit chargé
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initDashboard);
+      document.addEventListener('DOMContentLoaded', function() {
+        initDashboard();
+        setTimeout(initScrambleEffects, 200);
+      });
     } else {
       initDashboard();
+      setTimeout(initScrambleEffects, 200);
     }
 
     // Cloud Sync auto-initializes via cloud-sync-supabase.js

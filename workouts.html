@@ -10,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
   <script src="program-data-v2.js"></script>
+  <script src="scramble-effect.js"></script>
   
   <style>
     :root { 
@@ -1284,9 +1285,23 @@
       }
     }
     
+    function initScrambleEffects() {
+      if (!window.ScrambleEffect) return;
+      const blockName = document.getElementById('block-name');
+      const headerTitle = document.querySelector('.header-title');
+      const heroDay = document.getElementById('hero-day');
+      const heroWorkout = document.getElementById('hero-workout');
+      
+      if (headerTitle) ScrambleEffect.scramble(headerTitle, { delay: 0, speed: 25 });
+      if (blockName) ScrambleEffect.scramble(blockName, { delay: 150, speed: 30 });
+      if (heroDay) ScrambleEffect.scramble(heroDay, { delay: 300, speed: 35 });
+      if (heroWorkout) ScrambleEffect.scramble(heroWorkout, { delay: 450, speed: 25 });
+    }
+    
     document.addEventListener('DOMContentLoaded', () => {
       init();
       waitForData();
+      setTimeout(initScrambleEffects, 100);
     });
   </script>
 </body>

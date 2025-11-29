@@ -12,6 +12,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
     <script src="cloud-sync-supabase.js"></script>
+    <script src="scramble-effect.js"></script>
     
     <!-- 2. FONTS (Orbitron for HUD, Inter for UI) -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -747,6 +748,17 @@
                     setTimeout(() => setLoading(false), 2800),
                 ];
                 return () => timeouts.forEach(clearTimeout);
+            }, [loading]);
+            
+            // Scramble Effect on title after loading
+            useEffect(() => {
+                if (loading) return;
+                if (window.ScrambleEffect) {
+                    const title = document.querySelector('h1.font-display');
+                    const footer = document.querySelector('footer .font-mono');
+                    if (title) window.ScrambleEffect.scramble(title, { delay: 100, speed: 25 });
+                    if (footer) window.ScrambleEffect.scramble(footer, { delay: 300, speed: 20 });
+                }
             }, [loading]);
 
             if (loading) {

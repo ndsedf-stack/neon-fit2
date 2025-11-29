@@ -11,6 +11,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="scramble-effect.js"></script>
   
   <style>
     :root { 
@@ -968,10 +969,26 @@
     }
     
     // ========================================
+    // SCRAMBLE EFFECT
+    // ========================================
+    
+    function initScrambleEffects() {
+      if (!window.ScrambleEffect) return;
+      const workoutName = document.getElementById('workout-name');
+      const exName = document.getElementById('ex-name');
+      const setsInfo = document.getElementById('sets-info');
+      
+      if (workoutName) ScrambleEffect.scramble(workoutName, { delay: 50, speed: 30 });
+      if (exName) ScrambleEffect.scramble(exName, { delay: 200, speed: 25 });
+      if (setsInfo) ScrambleEffect.scramble(setsInfo, { delay: 350, speed: 35 });
+    }
+    
+    // ========================================
     // START APP
     // ========================================
     
     init();
+    setTimeout(initScrambleEffects, 100);
   </script>
 </body>
 </html>

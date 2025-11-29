@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700;800;900&family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="scramble-effect.js"></script>
     <style>
         :root {
             --void: #020408;
@@ -937,10 +938,26 @@ ${renderRail('endur', 'ENDUR', ex.stats.e)}
             }).join('');
         }
 
+        function initScrambleEffects() {
+            if (!window.ScrambleEffect) return;
+            const title = document.querySelector('.title-main');
+            const subTitle = document.querySelector('.title-sub');
+            const weekBadge = document.querySelector('.week-badge');
+            const exNames = document.querySelectorAll('.ex-name');
+            
+            if (title) ScrambleEffect.scramble(title, { delay: 100, speed: 30 });
+            if (subTitle) ScrambleEffect.scramble(subTitle, { delay: 300, speed: 25 });
+            if (weekBadge) ScrambleEffect.scramble(weekBadge, { delay: 200, speed: 40 });
+            exNames.forEach((el, i) => {
+                ScrambleEffect.scramble(el, { delay: 400 + (i * 80), speed: 25 });
+            });
+        }
+        
         window.addEventListener('load', () => {
             initStars();
             animateStars();
             renderApp();
+            setTimeout(initScrambleEffects, 150);
             window.addEventListener('resize', initStars);
         });
     </script>

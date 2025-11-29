@@ -13,6 +13,7 @@
     <script src="config.js"></script>
     <script src="cloud-sync-supabase.js"></script>
     <script src="scramble-effect.js"></script>
+    <script src="starfield.js"></script>
     
     <!-- 2. FONTS (Orbitron for HUD, Inter for UI) -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -90,6 +91,7 @@
     </style>
 </head>
 <body>
+    <canvas id="starfield-canvas" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;"></canvas>
     <div id="root"></div>
 
     <!-- APPLICATION LOGIC -->

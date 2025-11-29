@@ -12,6 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
   <script src="scramble-effect.js"></script>
+  <script src="starfield.js"></script>
   
   <style>
     :root { 
@@ -339,13 +340,12 @@
       transform: scale(0.97);
     }
     
-    /* Glass Stat Card - Matching App Style */
+    /* Glass Stat Card - Ultra Transparent */
     .glass-stat-card {
-      background: rgba(255, 255, 255, 0.02);
-      -webkit-backdrop-filter: blur(12px);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.003);
+      -webkit-backdrop-filter: blur(30px);
+      backdrop-filter: blur(30px);
+      border: 1px solid rgba(255, 255, 255, 0.02);
       border-radius: 16px;
       padding: 12px 8px;
       display: flex;
@@ -353,6 +353,7 @@
       align-items: center;
       position: relative;
       overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     }
     
     .stat-value {
@@ -406,6 +407,7 @@
 </head>
 
 <body>
+  <canvas id="starfield-canvas" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;"></canvas>
   <script>document.addEventListener("touchstart", function(){}, {passive: true});</script>
   
   <!-- XP Flash Animation - Toast style en haut -->

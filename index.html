@@ -17,6 +17,7 @@
   <script src="cloud-sync-supabase.js"></script>
   <script src="stats-data.js"></script>
   <script src="scramble-effect.js"></script>
+  <script src="starfield.js"></script>
 
   <style>
     :root {
@@ -111,22 +112,23 @@
     .touch-pop:active { transform: scale(0.98); transition: transform 0.1s; }
     
     .glass-card {
-      background: rgba(255, 255, 255, 0.005);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.003);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+      border: 1px solid rgba(255,255,255,0.02);
+      border-top: 1px solid rgba(255, 255, 255, 0.04);
       border-radius: 24px;
       position: relative;
       overflow: hidden;
-      box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
       transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     
     .glass-card:hover {
-      transform: translateY(-6px) scale(1.01);
-      box-shadow: 0 20px 60px -10px rgba(34, 211, 238, 0.2);
-      border-color: rgba(34, 211, 238, 0.2);
+      transform: translateY(-4px) scale(1.005);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+      border-color: rgba(34, 211, 238, 0.08);
+      background: rgba(255, 255, 255, 0.01);
     }
     
     .glass-card::before {
@@ -136,7 +138,7 @@
       left: 0;
       right: 0;
       height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(34, 211, 238, 0.5), transparent);
+      background: linear-gradient(90deg, transparent, rgba(34, 211, 238, 0.2), transparent);
       opacity: 0;
       transition: opacity 0.3s;
     }
@@ -232,10 +234,10 @@
 <body class="antialiased pb-32">
   <script>document.addEventListener("touchstart", function(){}, true);</script>
   
+  <canvas id="starfield-canvas" style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none;"></canvas>
   <div class="grain-overlay"></div>
   <div class="nebula cyan"></div>
   <div class="nebula purple"></div>
-  <canvas id="starfield" style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none;"></canvas>
   
   <header class="fixed top-0 w-full z-50 bg-[#020408]/95 backdrop-blur-xl border-b border-white/5 pt-safe px-4 pb-3 shadow-lg">
     <div class="flex justify-between items-center mb-2">

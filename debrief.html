@@ -13,6 +13,7 @@
   <script src="config.js"></script>
   <script src="stats-data.js"></script>
   <script src="scramble-effect.js"></script>
+  <script src="starfield.js"></script>
 
   <style>
     :root {
@@ -43,11 +44,12 @@
     }
     
     .card {
-      background: rgba(255, 255, 255, 0.02);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255, 255, 255, 0.003);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+      border: 1px solid rgba(255,255,255,0.02);
       border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     }
     
     @keyframes fadeInUp {
@@ -117,6 +119,7 @@
 </head>
 
 <body class="pb-24">
+  <canvas id="starfield-canvas" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;"></canvas>
   <div id="confetti-container"></div>
   
   <main class="relative z-10 px-4 pt-6 space-y-5 max-w-lg mx-auto">

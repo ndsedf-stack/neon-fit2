@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="format-detection" content="telephone=no">
-  
   <title>NEON FIT // OPÉRATIONS</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700;800;900&family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -18,56 +16,91 @@
     :root { 
       --void: #020408;
       --cyan: #22d3ee;
-      --cyan-dim: #06b6d4;
       --purple: #c084fc;
-      --magenta: #ff2d95;
     }
     
-    * { 
-      box-sizing: border-box; 
-      margin: 0; 
-      padding: 0; 
-      -webkit-tap-highlight-color: transparent;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     
     body { 
       background-color: var(--void);
       font-family: 'Inter', sans-serif;
       color: #f8fafc;
-      overflow-x: hidden;
-      min-height: 100vh;
       min-height: 100dvh;
-      touch-action: manipulation;
       padding-bottom: calc(20px + env(safe-area-inset-bottom));
     }
     
     .font-hud { font-family: 'Chakra Petch', sans-serif; }
     
+    /* ========== GRAIN OVERLAY ========== */
     .grain-overlay {
       position: fixed;
       inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
-      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.025;
       pointer-events: none;
       z-index: 999;
-      mix-blend-mode: screen;
+    }
+    
+    /* ========== ANIMATIONS ========== */
+    @keyframes subtlePulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    
+    @keyframes glowPulse {
+      0%, 100% { box-shadow: 0 0 15px rgba(34, 211, 238, 0.3); }
+      50% { box-shadow: 0 0 25px rgba(34, 211, 238, 0.5); }
+    }
+    
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-3px); }
+    }
+    
+    .animate-slide-up {
+      animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
     
     /* ========== HEADER ========== */
     .header-bar {
-      padding: max(12px, env(safe-area-inset-top)) 20px 16px;
+      padding: max(14px, env(safe-area-inset-top)) 20px 12px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
     
-    /* ========== TIMELINE PREMIUM ========== */
+    .net-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .net-dot {
+      width: 6px;
+      height: 6px;
+      background: #22c55e;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #22c55e;
+      animation: subtlePulse 2s ease-in-out infinite;
+    }
+    
+    /* ========== TIMELINE ========== */
     .timeline-scroll {
       display: flex;
       overflow-x: auto;
       scroll-snap-type: x mandatory;
-      padding: 0 20px 16px;
-      gap: 8px;
+      padding: 12px 20px;
+      gap: 10px;
       scrollbar-width: none;
       -webkit-overflow-scrolling: touch;
     }
@@ -77,9 +110,9 @@
     .week-chip {
       scroll-snap-align: center;
       flex: 0 0 auto;
-      width: 52px;
-      height: 52px;
-      background: rgba(255,255,255,0.03);
+      width: 50px;
+      height: 54px;
+      background: linear-gradient(145deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
       border: 1px solid rgba(255,255,255,0.08);
       border-radius: 12px;
       display: flex;
@@ -94,9 +127,9 @@
     .week-chip:active { transform: scale(0.92); }
     
     .week-chip.active {
-      background: rgba(34, 211, 238, 0.15);
+      background: linear-gradient(145deg, rgba(34, 211, 238, 0.15) 0%, rgba(34, 211, 238, 0.05) 100%);
       border-color: var(--cyan);
-      box-shadow: 0 0 20px rgba(34, 211, 238, 0.3);
+      animation: glowPulse 2s ease-in-out infinite;
     }
     
     .week-chip.active .week-num {
@@ -104,155 +137,193 @@
       text-shadow: 0 0 10px var(--cyan);
     }
     
-    .week-chip.deload {
-      border-color: rgba(34, 197, 94, 0.4);
-    }
-    .week-chip.deload.active {
-      background: rgba(34, 197, 94, 0.15);
-      border-color: #22c55e;
-      box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
-    }
-    .week-chip.deload .week-label,
-    .week-chip.deload .week-num { color: #22c55e; }
-    
-    .week-chip.peak {
-      border-color: rgba(168, 85, 247, 0.4);
-    }
-    .week-chip.peak.active {
-      background: rgba(168, 85, 247, 0.15);
-      border-color: #a855f7;
-      box-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
-    }
-    .week-chip.peak .week-label,
-    .week-chip.peak .week-num { color: #a855f7; }
-    
-    .week-chip.completed::after {
+    .week-chip.active::after {
       content: '';
       position: absolute;
       bottom: 6px;
-      width: 6px;
-      height: 6px;
+      width: 4px;
+      height: 4px;
       background: var(--cyan);
       border-radius: 50%;
       box-shadow: 0 0 6px var(--cyan);
     }
     
-    .week-label {
-      font-size: 8px;
-      font-weight: 700;
-      color: #64748b;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+    .week-chip.deload { border-color: rgba(34, 197, 94, 0.4); }
+    .week-chip.deload .week-label, .week-chip.deload .week-num { color: #22c55e; }
+    .week-chip.deload.active { 
+      background: linear-gradient(145deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.05) 100%);
+      border-color: #22c55e;
+      box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
     }
     
-    .week-num {
+    .week-chip.peak { border-color: rgba(168, 85, 247, 0.4); }
+    .week-chip.peak .week-label, .week-chip.peak .week-num { color: #a855f7; }
+    .week-chip.peak.active {
+      background: linear-gradient(145deg, rgba(168, 85, 247, 0.15) 0%, rgba(168, 85, 247, 0.05) 100%);
+      border-color: #a855f7;
+      box-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
+    }
+    
+    .week-label { font-size: 7px; font-weight: 700; color: #64748b; text-transform: uppercase; }
+    .week-num { font-family: 'Chakra Petch', sans-serif; font-size: 18px; font-weight: 800; color: #e2e8f0; }
+    
+    /* ========== BLOCK HEADER ========== */
+    .block-header {
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    
+    .block-title {
       font-family: 'Chakra Petch', sans-serif;
-      font-size: 18px;
-      font-weight: 800;
-      color: #e2e8f0;
-      line-height: 1;
-    }
-    
-    /* ========== BLOCK TITLE ========== */
-    .block-title-section {
-      padding: 0 20px 20px;
-    }
-    
-    .block-main-title {
-      font-family: 'Chakra Petch', sans-serif;
-      font-size: 28px;
+      font-size: 24px;
       font-weight: 900;
       color: #fff;
       text-transform: uppercase;
       letter-spacing: 1px;
     }
     
-    .block-subtitle {
+    .block-meta {
       display: flex;
       align-items: center;
       gap: 8px;
       margin-top: 4px;
     }
     
-    .block-subtitle::before {
+    .block-meta::before {
       content: '//';
       color: var(--cyan);
       font-weight: 700;
     }
     
-    .block-subtitle-text {
-      font-size: 11px;
+    .block-meta-text {
+      font-size: 10px;
       font-weight: 600;
       color: var(--cyan);
       text-transform: uppercase;
-      letter-spacing: 0.15em;
+      letter-spacing: 0.12em;
+    }
+    
+    .sys-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      background: rgba(34, 211, 238, 0.08);
+      border: 1px solid rgba(34, 211, 238, 0.2);
+      border-radius: 8px;
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    .sys-badge-text {
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
     }
     
     /* ========== HERO MISSION CARD ========== */
     .hero-mission {
-      margin: 0 16px 20px;
+      margin: 0 16px 16px;
       border-radius: 24px;
       overflow: hidden;
       position: relative;
-      min-height: 280px;
-      background: linear-gradient(135deg, rgba(15,23,42,0.9) 0%, rgba(15,23,42,0.7) 100%);
-      border: 1px solid rgba(255,255,255,0.1);
+      cursor: pointer;
+      opacity: 0;
+      animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
     }
+    
+    .hero-mission:active { transform: scale(0.98); }
     
     .hero-mission-bg {
       position: absolute;
       inset: 0;
       background: url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80') center/cover;
-      opacity: 0.3;
-      filter: grayscale(30%);
+      opacity: 0.35;
+      filter: grayscale(20%) brightness(0.9);
+      transition: all 0.5s ease;
+    }
+    
+    .hero-mission:hover .hero-mission-bg { opacity: 0.45; transform: scale(1.02); }
+    
+    .hero-mission-gradient {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(2,4,8,0.3) 0%, rgba(2,4,8,0.8) 100%);
     }
     
     .hero-mission-content {
       position: relative;
       z-index: 2;
       padding: 20px;
-      height: 100%;
+      min-height: 260px;
       display: flex;
       flex-direction: column;
+    }
+    
+    .hero-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
     }
     
     .priority-badge {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 6px 12px;
-      background: rgba(0,0,0,0.5);
-      border: 1px solid rgba(34, 211, 238, 0.3);
-      border-radius: 20px;
-      width: fit-content;
-      margin-bottom: 16px;
+      padding: 5px 10px;
+      background: rgba(0,0,0,0.6);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      border-radius: 16px;
     }
     
     .priority-dot {
       width: 6px;
       height: 6px;
-      background: #22c55e;
+      background: #f59e0b;
       border-radius: 50%;
-      box-shadow: 0 0 8px #22c55e;
-      animation: blink 2s infinite;
-    }
-    
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
+      box-shadow: 0 0 8px #f59e0b;
+      animation: subtlePulse 1.5s ease-in-out infinite;
     }
     
     .priority-text {
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 700;
-      color: #94a3b8;
+      color: #fbbf24;
       text-transform: uppercase;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.08em;
     }
     
-    .hero-day-title {
+    .settings-btn {
+      width: 36px;
+      height: 36px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+    
+    .settings-btn:active {
+      background: rgba(34, 211, 238, 0.2);
+      border-color: var(--cyan);
+    }
+    
+    .hero-center {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 16px 0;
+    }
+    
+    .hero-day {
       font-family: 'Chakra Petch', sans-serif;
-      font-size: 42px;
+      font-size: 38px;
       font-weight: 900;
       color: #fff;
       text-transform: uppercase;
@@ -261,143 +332,121 @@
       line-height: 1;
     }
     
-    .hero-workout-name {
+    .hero-workout-row {
       display: flex;
       align-items: center;
       gap: 8px;
       margin-top: 8px;
     }
     
-    .hero-workout-name::before {
-      content: '';
+    .hero-workout-bar {
       width: 3px;
-      height: 20px;
+      height: 18px;
       background: var(--cyan);
       border-radius: 2px;
       box-shadow: 0 0 10px var(--cyan);
     }
     
-    .hero-workout-text {
-      font-size: 14px;
+    .hero-workout-name {
+      font-size: 13px;
       font-weight: 600;
       color: var(--cyan);
       text-transform: uppercase;
       letter-spacing: 0.1em;
     }
     
-    .hero-nav-btn {
-      position: absolute;
-      right: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 40px;
-      height: 40px;
-      background: rgba(255,255,255,0.1);
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.3s ease;
+    .hero-technique {
+      display: inline-flex;
+      margin-top: 12px;
+      padding: 4px 10px;
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(34, 211, 238, 0.3);
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      width: fit-content;
     }
     
-    .hero-nav-btn:active {
-      background: rgba(34, 211, 238, 0.2);
-      border-color: var(--cyan);
-    }
-    
+    /* ========== HERO METRICS ========== */
     .hero-metrics {
-      margin-top: auto;
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 10px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
     }
     
     .hero-metric {
-      background: rgba(15, 23, 42, 0.8);
+      background: rgba(15, 23, 42, 0.85);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 16px;
-      padding: 16px 12px;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 12px 8px;
       text-align: center;
       transition: all 0.3s ease;
     }
     
-    .hero-metric:active {
-      transform: scale(0.95);
-    }
-    
-    .hero-metric.start-btn {
-      background: linear-gradient(135deg, rgba(34,211,238,0.2) 0%, rgba(34,211,238,0.1) 100%);
+    .hero-metric:hover {
       border-color: rgba(34, 211, 238, 0.3);
-      cursor: pointer;
-    }
-    
-    .hero-metric.start-btn:active {
-      background: linear-gradient(135deg, rgba(34,211,238,0.3) 0%, rgba(34,211,238,0.2) 100%);
+      background: rgba(15, 23, 42, 0.95);
     }
     
     .metric-icon {
       color: var(--cyan);
-      margin-bottom: 6px;
+      margin-bottom: 4px;
+      filter: drop-shadow(0 0 4px rgba(34, 211, 238, 0.4));
     }
     
     .metric-value {
       font-family: 'Chakra Petch', sans-serif;
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 800;
       color: #fff;
     }
     
     .metric-label {
-      font-size: 9px;
+      font-size: 8px;
       font-weight: 600;
       color: #64748b;
       text-transform: uppercase;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.08em;
       margin-top: 2px;
     }
     
-    /* ========== ANALYTIQUE SECTION ========== */
-    .section-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 0 20px;
-      margin-bottom: 12px;
+    .metric-rpe {
+      color: #ec4899;
     }
     
-    .section-title-bar {
-      width: 3px;
-      height: 14px;
-      background: var(--cyan);
-      border-radius: 2px;
+    .metric-xp {
+      color: #22c55e;
+      text-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
     }
     
-    .section-title-text {
-      font-size: 11px;
-      font-weight: 700;
-      color: #64748b;
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
-    }
-    
-    .analytics-grid {
+    /* ========== ANALYTICS GRID ========== */
+    .analytics-section {
+      padding: 0 16px 16px;
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
-      padding: 0 16px 20px;
+      opacity: 0;
+      animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
     }
     
     .analytics-card {
       background: rgba(255,255,255,0.02);
       border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 20px;
-      padding: 20px;
+      border-radius: 18px;
+      padding: 16px;
       position: relative;
       overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    
+    .analytics-card:hover {
+      border-color: rgba(34, 211, 238, 0.2);
+      background: rgba(255,255,255,0.03);
     }
     
     .analytics-card::before {
@@ -407,62 +456,53 @@
       left: 0;
       right: 0;
       height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(34,211,238,0.2), transparent);
+      background: linear-gradient(90deg, transparent, rgba(34,211,238,0.15), transparent);
     }
     
     .analytics-label {
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 700;
       color: #64748b;
       text-transform: uppercase;
       letter-spacing: 0.1em;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
     
     .analytics-value {
       font-family: 'Chakra Petch', sans-serif;
-      font-size: 32px;
+      font-size: 28px;
       font-weight: 900;
       color: #fff;
-      line-height: 1;
     }
     
     .analytics-unit {
-      font-size: 14px;
+      font-size: 12px;
       font-weight: 600;
       color: #64748b;
-      margin-left: 2px;
     }
     
     .analytics-change {
       display: flex;
       align-items: center;
       gap: 4px;
-      margin-top: 8px;
-      font-size: 11px;
+      margin-top: 6px;
+      font-size: 10px;
       font-weight: 600;
       color: #22c55e;
     }
     
     .analytics-icon {
       position: absolute;
-      right: 16px;
+      right: 14px;
       top: 50%;
       transform: translateY(-50%);
-      width: 40px;
-      height: 40px;
-      background: rgba(255,255,255,0.03);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #475569;
+      color: #334155;
     }
     
     .analytics-bar {
-      margin-top: 12px;
-      height: 4px;
-      background: rgba(255,255,255,0.05);
+      margin-top: 10px;
+      height: 3px;
+      background: rgba(255,255,255,0.06);
       border-radius: 2px;
       overflow: hidden;
     }
@@ -471,104 +511,189 @@
       height: 100%;
       background: linear-gradient(90deg, var(--cyan), #22c55e);
       border-radius: 2px;
-      transition: width 1s ease;
+      animation: shimmer 2s linear infinite;
+      background-size: 200% 100%;
     }
     
     /* ========== OTHER MISSIONS ========== */
-    .other-missions {
+    .missions-section {
       padding: 0 16px 100px;
     }
     
-    .mission-row {
+    .section-header {
       display: flex;
       align-items: center;
-      gap: 16px;
-      padding: 16px;
-      background: rgba(255,255,255,0.02);
-      border: 1px solid rgba(255,255,255,0.05);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    
+    .section-bar {
+      width: 3px;
+      height: 12px;
+      background: var(--cyan);
+      border-radius: 2px;
+    }
+    
+    .section-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+    
+    .mission-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+      border: 1px solid rgba(255,255,255,0.06);
       border-radius: 16px;
       margin-bottom: 10px;
       cursor: pointer;
       transition: all 0.3s ease;
+      opacity: 0;
+      animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
     
-    .mission-row:active {
-      transform: scale(0.98);
-      background: rgba(255,255,255,0.04);
-    }
+    .mission-card:nth-child(1) { animation-delay: 0.25s; }
+    .mission-card:nth-child(2) { animation-delay: 0.3s; }
+    .mission-card:nth-child(3) { animation-delay: 0.35s; }
+    .mission-card:nth-child(4) { animation-delay: 0.4s; }
     
-    .mission-day-badge {
+    .mission-card:active { transform: scale(0.98); }
+    .mission-card:hover { border-color: rgba(255,255,255,0.12); background: rgba(255,255,255,0.04); }
+    
+    .mission-icon {
       width: 44px;
       height: 44px;
-      background: rgba(34,211,238,0.1);
-      border: 1px solid rgba(34,211,238,0.2);
       border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-family: 'Chakra Petch', sans-serif;
-      font-size: 11px;
-      font-weight: 800;
+      flex-shrink: 0;
+    }
+    
+    .mission-icon.cyan { background: rgba(34,211,238,0.12); border: 1px solid rgba(34,211,238,0.25); color: var(--cyan); }
+    .mission-icon.pink { background: rgba(236,72,153,0.12); border: 1px solid rgba(236,72,153,0.25); color: #ec4899; }
+    .mission-icon.purple { background: rgba(168,85,247,0.12); border: 1px solid rgba(168,85,247,0.25); color: #a855f7; }
+    .mission-icon.amber { background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.25); color: #f59e0b; }
+    
+    .mission-content { flex: 1; min-width: 0; }
+    
+    .mission-top {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+    
+    .mission-technique {
+      font-size: 9px;
+      font-weight: 700;
       color: var(--cyan);
       text-transform: uppercase;
+      padding: 2px 6px;
+      background: rgba(34,211,238,0.1);
+      border: 1px solid rgba(34,211,238,0.2);
+      border-radius: 4px;
     }
     
-    .mission-day-badge.pink {
-      background: rgba(236,72,153,0.1);
-      border-color: rgba(236,72,153,0.2);
-      color: #ec4899;
-    }
-    
-    .mission-day-badge.purple {
-      background: rgba(168,85,247,0.1);
-      border-color: rgba(168,85,247,0.2);
-      color: #a855f7;
-    }
-    
-    .mission-day-badge.amber {
-      background: rgba(245,158,11,0.1);
-      border-color: rgba(245,158,11,0.2);
-      color: #f59e0b;
-    }
-    
-    .mission-info {
-      flex: 1;
+    .mission-day {
+      font-size: 9px;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
     }
     
     .mission-name {
       font-family: 'Chakra Petch', sans-serif;
-      font-size: 14px;
-      font-weight: 700;
+      font-size: 15px;
+      font-weight: 800;
       color: #fff;
       text-transform: uppercase;
     }
     
-    .mission-meta {
-      font-size: 11px;
-      color: #64748b;
-      margin-top: 2px;
+    .mission-stats {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
     }
     
-    .mission-arrow {
+    .mission-stat {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .mission-stat-label {
+      font-size: 8px;
+      font-weight: 600;
       color: #475569;
+      text-transform: uppercase;
+    }
+    
+    .mission-stat-value {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: #e2e8f0;
+    }
+    
+    .mission-rpe {
+      margin-left: auto;
+      text-align: right;
+    }
+    
+    .mission-rpe-value {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 16px;
+      font-weight: 800;
+      color: #ec4899;
+    }
+    
+    .mission-rpe-label {
+      font-size: 8px;
+      font-weight: 600;
+      color: #475569;
+      text-transform: uppercase;
+    }
+    
+    .mission-eye {
+      width: 36px;
+      height: 36px;
+      background: rgba(34,211,238,0.1);
+      border: 1px solid rgba(34,211,238,0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--cyan);
+      flex-shrink: 0;
+      transition: all 0.3s ease;
+    }
+    
+    .mission-card:hover .mission-eye {
+      background: rgba(34,211,238,0.2);
+      box-shadow: 0 0 15px rgba(34,211,238,0.3);
     }
   </style>
 </head>
 
-<body class="antialiased">
+<body>
   <div class="grain-overlay"></div>
   
   <!-- HEADER -->
   <div class="header-bar">
     <div>
-      <h1 class="font-hud text-xl font-black text-white tracking-wider">OPÉRATIONS</h1>
-      <div class="flex items-center gap-2 mt-1">
-        <div class="w-2 h-2 rounded-full bg-green-500" style="box-shadow: 0 0 8px #22c55e;"></div>
-        <span class="text-[10px] font-bold text-green-400 uppercase tracking-wider">Online</span>
+      <h1 class="font-hud text-lg font-black text-white tracking-wider">OPÉRATIONS</h1>
+      <div class="net-status">
+        <div class="net-dot"></div>
+        <span class="text-[9px] font-bold text-green-400 uppercase tracking-widest">NET_LINK_ACTIVE</span>
       </div>
     </div>
-    <button onclick="window.location.href='index.html'" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
-      <i data-lucide="trophy" class="w-5 h-5 text-amber-400"></i>
+    <button onclick="window.location.href='index.html'" class="w-9 h-9 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+      <i data-lucide="trophy" class="w-4 h-4 text-amber-400"></i>
     </button>
   </div>
   
@@ -580,62 +705,73 @@
     <div class="week-chip"><span class="week-label">SEM</span><span class="week-num">4</span></div>
     <div class="week-chip"><span class="week-label">SEM</span><span class="week-num">5</span></div>
     <div class="week-chip deload"><span class="week-label">DELOAD</span><span class="week-num">6</span></div>
-    <div class="week-chip"><span class="week-label">SEM</span><span class="week-num">7</span></div>
   </div>
   
-  <!-- BLOCK TITLE -->
-  <div class="block-title-section">
-    <h2 class="block-main-title" id="block-name">FONDATIONS</h2>
-    <div class="block-subtitle">
-      <span class="block-subtitle-text" id="block-info">BLOC 1 • VOLUME & TECHNIQUE</span>
+  <!-- BLOCK HEADER -->
+  <div class="block-header">
+    <div>
+      <h2 class="block-title" id="block-name">FONDATIONS</h2>
+      <div class="block-meta">
+        <span class="block-meta-text" id="block-info">BLOC 1 • VOLUME & TECHNIQUE</span>
+      </div>
+    </div>
+    <div class="sys-badge">
+      <i data-lucide="cpu" class="w-3.5 h-3.5 text-cyan-400"></i>
+      <span class="sys-badge-text">SYS.READY</span>
     </div>
   </div>
   
-  <!-- HERO MISSION CARD -->
+  <!-- HERO MISSION -->
   <div class="hero-mission" id="hero-mission">
     <div class="hero-mission-bg"></div>
+    <div class="hero-mission-gradient"></div>
     <div class="hero-mission-content">
-      <div class="priority-badge">
-        <div class="priority-dot"></div>
-        <span class="priority-text">Priorité Alpha</span>
+      <div class="hero-top">
+        <div class="priority-badge">
+          <div class="priority-dot"></div>
+          <span class="priority-text">Priorité Alpha</span>
+        </div>
+        <button class="settings-btn" id="hero-next-btn">
+          <i data-lucide="settings" class="w-4 h-4 text-white/70"></i>
+        </button>
       </div>
       
-      <h3 class="hero-day-title" id="hero-day">DIMANCHE</h3>
-      <div class="hero-workout-name">
-        <span class="hero-workout-text" id="hero-workout">DOS + JAMBES</span>
+      <div class="hero-center">
+        <h3 class="hero-day" id="hero-day">DIMANCHE</h3>
+        <div class="hero-workout-row">
+          <div class="hero-workout-bar"></div>
+          <span class="hero-workout-name" id="hero-workout">DOS + JAMBES</span>
+        </div>
+        <div class="hero-technique" id="hero-technique">TEMPO 3-1-2</div>
       </div>
-      
-      <button class="hero-nav-btn" id="hero-next-btn">
-        <i data-lucide="chevron-right" class="w-5 h-5 text-white"></i>
-      </button>
       
       <div class="hero-metrics">
         <div class="hero-metric">
-          <i data-lucide="clock" class="w-5 h-5 metric-icon"></i>
+          <i data-lucide="clock" class="w-4 h-4 metric-icon"></i>
           <div class="metric-value" id="hero-duration">68m</div>
           <div class="metric-label">Durée</div>
         </div>
         <div class="hero-metric">
-          <i data-lucide="zap" class="w-5 h-5 metric-icon"></i>
-          <div class="metric-value" id="hero-density">89%</div>
-          <div class="metric-label">Densité</div>
+          <i data-lucide="layers" class="w-4 h-4 metric-icon"></i>
+          <div class="metric-value" id="hero-sets">31</div>
+          <div class="metric-label">Séries</div>
         </div>
-        <div class="hero-metric start-btn" id="hero-start-btn">
-          <i data-lucide="play" class="w-5 h-5 metric-icon"></i>
-          <div class="metric-value">START</div>
-          <div class="metric-label">Lancer</div>
+        <div class="hero-metric">
+          <i data-lucide="gauge" class="w-4 h-4 metric-icon" style="color: #ec4899;"></i>
+          <div class="metric-value metric-rpe" id="hero-rpe">6-7</div>
+          <div class="metric-label">RPE</div>
+        </div>
+        <div class="hero-metric">
+          <i data-lucide="zap" class="w-4 h-4 metric-icon" style="color: #22c55e;"></i>
+          <div class="metric-value metric-xp" id="hero-xp">+620</div>
+          <div class="metric-label">XP</div>
         </div>
       </div>
     </div>
   </div>
   
-  <!-- ANALYTIQUE -->
-  <div class="section-title">
-    <div class="section-title-bar"></div>
-    <span class="section-title-text">Analytique</span>
-  </div>
-  
-  <div class="analytics-grid">
+  <!-- ANALYTICS -->
+  <div class="analytics-section">
     <div class="analytics-card">
       <div class="analytics-label">Meilleur Perf</div>
       <div>
@@ -644,7 +780,7 @@
       </div>
       <div class="analytics-change">
         <i data-lucide="trending-up" class="w-3 h-3"></i>
-        <span id="perf-change">+2.5% vs Sem 3</span>
+        <span>+2.5% vs Sem 3</span>
       </div>
       <div class="analytics-icon">
         <i data-lucide="trophy" class="w-5 h-5"></i>
@@ -658,28 +794,30 @@
         <span class="analytics-unit">T</span>
       </div>
       <div class="analytics-bar">
-        <div class="analytics-bar-fill" id="volume-bar" style="width: 75%;"></div>
+        <div class="analytics-bar-fill" style="width: 75%;"></div>
       </div>
       <div class="analytics-icon">
-        <span class="text-2xl font-hud font-black text-slate-600">#</span>
+        <span class="font-hud text-xl font-black">#</span>
       </div>
     </div>
   </div>
   
   <!-- OTHER MISSIONS -->
-  <div class="section-title">
-    <div class="section-title-bar"></div>
-    <span class="section-title-text">Autres Missions</span>
+  <div class="missions-section">
+    <div class="section-header">
+      <div class="section-bar"></div>
+      <span class="section-title">Autres Missions</span>
+    </div>
+    <div id="other-missions"></div>
   </div>
-  
-  <div class="other-missions" id="other-missions"></div>
 
   <script>
     let currentWeek = 1;
     let currentDayIndex = 0;
     const days = ['dimanche', 'mardi', 'vendredi', 'maison'];
-    const dayLabels = { 'dimanche': 'DIM', 'mardi': 'MAR', 'vendredi': 'VEN', 'maison': 'MAI' };
-    const dayColors = { 'dimanche': '', 'mardi': 'pink', 'vendredi': 'purple', 'maison': 'amber' };
+    const dayLabels = { 'dimanche': 'DIMANCHE', 'mardi': 'MARDI', 'vendredi': 'VENDREDI', 'maison': 'MAISON' };
+    const dayIcons = { 'dimanche': 'zap', 'mardi': 'dumbbell', 'vendredi': 'activity', 'maison': 'home' };
+    const dayColors = { 'dimanche': 'cyan', 'mardi': 'pink', 'vendredi': 'purple', 'maison': 'amber' };
     
     function initIcons() {
       if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -691,20 +829,16 @@
       renderTimeline();
       renderContent(currentWeek);
       
-      document.getElementById('hero-start-btn').onclick = () => {
+      document.getElementById('hero-mission').onclick = (e) => {
+        if (e.target.closest('.settings-btn')) return;
         const day = days[currentDayIndex];
         window.location.href = `briefing.html?week=${currentWeek}&day=${day}`;
       };
       
-      document.getElementById('hero-next-btn').onclick = () => {
+      document.getElementById('hero-next-btn').onclick = (e) => {
+        e.stopPropagation();
         currentDayIndex = (currentDayIndex + 1) % days.length;
         updateHeroCard(currentWeek);
-      };
-      
-      document.getElementById('hero-mission').onclick = (e) => {
-        if (e.target.closest('.hero-metric') || e.target.closest('.hero-nav-btn')) return;
-        const day = days[currentDayIndex];
-        window.location.href = `briefing.html?week=${currentWeek}&day=${day}`;
       };
     }
     
@@ -734,11 +868,7 @@
         };
         
         const label = isDeload ? 'DELOAD' : (isPeak ? 'PEAK' : 'SEM');
-        chip.innerHTML = `
-          <span class="week-label">${label}</span>
-          <span class="week-num">${i}</span>
-        `;
-        
+        chip.innerHTML = `<span class="week-label">${label}</span><span class="week-num">${i}</span>`;
         container.appendChild(chip);
       }
       
@@ -750,14 +880,12 @@
     
     function renderContent(week) {
       const weekData = programData.getWeek(week);
-      
       const blockName = programData.info.blockTechniques[`block${weekData.block}`]?.name || "FONDATIONS";
       document.getElementById('block-name').textContent = blockName.toUpperCase();
       document.getElementById('block-info').textContent = `BLOC ${weekData.block} • ${weekData.technique}`;
       
       updateHeroCard(week);
       renderOtherMissions(week);
-      updateAnalytics(week);
       initIcons();
     }
     
@@ -772,13 +900,13 @@
         return;
       }
       
-      const dayName = day.charAt(0).toUpperCase() + day.slice(1);
-      document.getElementById('hero-day').textContent = dayName.toUpperCase();
+      document.getElementById('hero-day').textContent = dayLabels[day];
       document.getElementById('hero-workout').textContent = workout.name;
+      document.getElementById('hero-technique').textContent = weekData.technique.split('+')[0];
       document.getElementById('hero-duration').textContent = workout.duration + 'm';
-      
-      const density = Math.min(100, Math.round((workout.totalSets / workout.duration) * 100 / 1.2));
-      document.getElementById('hero-density').textContent = density + '%';
+      document.getElementById('hero-sets').textContent = workout.totalSets;
+      document.getElementById('hero-rpe').textContent = weekData.rpeTarget;
+      document.getElementById('hero-xp').textContent = '+' + (workout.totalSets * 20);
       
       initIcons();
     }
@@ -794,55 +922,44 @@
         const workout = weekData[day];
         if (!workout) return;
         
-        const row = document.createElement('div');
-        row.className = 'mission-row';
-        row.onclick = () => window.location.href = `briefing.html?week=${week}&day=${day}`;
+        const card = document.createElement('div');
+        card.className = 'mission-card';
+        card.onclick = () => window.location.href = `briefing.html?week=${week}&day=${day}`;
         
-        row.innerHTML = `
-          <div class="mission-day-badge ${dayColors[day]}">${dayLabels[day]}</div>
-          <div class="mission-info">
-            <div class="mission-name">${workout.name}</div>
-            <div class="mission-meta">${workout.duration}m • ${workout.totalSets} séries</div>
+        card.innerHTML = `
+          <div class="mission-icon ${dayColors[day]}">
+            <i data-lucide="${dayIcons[day]}" class="w-5 h-5"></i>
           </div>
-          <i data-lucide="chevron-right" class="w-5 h-5 mission-arrow"></i>
+          <div class="mission-content">
+            <div class="mission-top">
+              <span class="mission-technique">${weekData.technique.split('+')[0]}</span>
+              <span class="mission-day">${dayLabels[day]}</span>
+            </div>
+            <div class="mission-name">${workout.name}</div>
+            <div class="mission-stats">
+              <div class="mission-stat">
+                <span class="mission-stat-label">Durée</span>
+                <span class="mission-stat-value">${workout.duration}m</span>
+              </div>
+              <div class="mission-stat">
+                <span class="mission-stat-label">Séries</span>
+                <span class="mission-stat-value">${workout.totalSets}</span>
+              </div>
+            </div>
+          </div>
+          <div class="mission-rpe">
+            <div class="mission-rpe-value">${weekData.rpeTarget}</div>
+            <div class="mission-rpe-label">RPE</div>
+          </div>
+          <div class="mission-eye">
+            <i data-lucide="eye" class="w-4 h-4"></i>
+          </div>
         `;
         
-        container.appendChild(row);
+        container.appendChild(card);
       });
       
       initIcons();
-    }
-    
-    function updateAnalytics(week) {
-      try {
-        const history = JSON.parse(localStorage.getItem('neon_fit_workout_history') || '[]');
-        const weekHistory = history.filter(h => h.week === week);
-        
-        let maxWeight = 0;
-        let totalVolume = 0;
-        
-        history.forEach(session => {
-          if (session.exercises) {
-            session.exercises.forEach(ex => {
-              if (ex.sets) {
-                ex.sets.forEach(set => {
-                  if (set.weight > maxWeight) maxWeight = set.weight;
-                  totalVolume += (set.weight || 0) * (set.reps || 0);
-                });
-              }
-            });
-          }
-        });
-        
-        if (maxWeight > 0) {
-          document.getElementById('best-perf').textContent = maxWeight;
-        }
-        
-        const volumeT = (totalVolume / 1000).toFixed(0);
-        if (totalVolume > 0) {
-          document.getElementById('weekly-volume').textContent = volumeT;
-        }
-      } catch(e) {}
     }
     
     function waitForData() {

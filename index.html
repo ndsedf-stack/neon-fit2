@@ -433,7 +433,7 @@
   </div>
 
   <script>
-    const canvas = document.getElementById('starfield');
+    const canvas = document.getElementById('starfield-canvas');
     const ctx = canvas.getContext('2d');
     let stars = [];
     
@@ -739,7 +739,8 @@
         });
       });
       
-      if (window.initIcons) initIcons();
+      // Initialize Lucide icons for dynamically added content
+      if (window.lucide) lucide.createIcons();
     }
 
     window.openDetails = function(day) {
@@ -773,16 +774,25 @@
       }
     }
 
-    // Attendre que tout soit chargé
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', function() {
-        initDashboard();
-        setTimeout(initScrambleEffects, 200);
-      });
-    } else {
-      initDashboard();
-      setTimeout(initScrambleEffects, 200);
+    // Initialize Lucide icons with retry
+    function initLucideIcons() {
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+        console.log('[NEON FIT] Lucide icons initialized');
+      } else {
+        console.log('[NEON FIT] Waiting for Lucide...');
+        setTimeout(initLucideIcons, 100);
+      }
     }
+
+    // Attendre que tout soit chargé
+    window.addEventListener('load', function() {
+      initStars();
+      animateStars();
+      initDashboard();
+      initLucideIcons();
+      setTimeout(initScrambleEffects, 200);
+    });
 
     // Cloud Sync auto-initializes via cloud-sync-supabase.js
   </script>

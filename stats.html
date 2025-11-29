@@ -181,7 +181,7 @@
         import { createRoot } from 'react-dom/client';
         import { 
             Activity, Heart, Zap, Flame, Trophy, Calendar, Settings, User, 
-            Menu, X, Play, Pause, ChevronRight, Target, Bot, Plus, 
+            Menu, X, Play, Pause, ChevronRight, Target, Bot, Plus, Check,
             MessageSquare, Trash2, Download, AlertCircle, TrendingUp, TrendingDown,
             Layers, Clock, Battery, Fan, Disc, Dumbbell, Maximize2, RefreshCw, Cpu,
             RotateCcw, Power, Fingerprint, Hexagon, Crosshair, Scale, ScanLine
@@ -966,15 +966,19 @@
             );
         };
 
-        // 7. BIO SCANNER (DNA Helix + Body Composition)
+        // 7. BIO SCANNER (DNA Helix + Body Composition) - CONNECTED TO STATSDATA
         const BioScanner = () => {
             const canvasRef = useRef(null);
             
-            const currentWeight = 74.5;
-            const startWeight = 80.2;
-            const goalWeight = 70.0;
-            const bodyFat = 14.2;
+            const bodyData = window.StatsData ? window.StatsData.getBodyComposition() : {
+                currentWeight: 74.5, startWeight: 80.2, goalWeight: 70.0, bodyFat: 14.2, height: 178
+            };
+            
+            const { currentWeight, startWeight, goalWeight, bodyFat, height } = bodyData;
             const progress = ((startWeight - currentWeight) / (startWeight - goalWeight)) * 100;
+            const bmi = (currentWeight / ((height / 100) ** 2)).toFixed(1);
+            const leanMass = (currentWeight * (1 - bodyFat / 100)).toFixed(1);
+            const fatMass = (currentWeight * (bodyFat / 100)).toFixed(1);
             
             useEffect(() => {
                 const canvas = canvasRef.current;
@@ -1102,15 +1106,15 @@
                         <div className="grid grid-cols-3 gap-4 text-center">
                             <div>
                                 <div className="text-[9px] text-gray-500 font-mono uppercase mb-1">BMI</div>
-                                <div className="text-lg font-display font-bold text-white">22.8</div>
+                                <div className="text-lg font-display font-bold text-white">{bmi}</div>
                             </div>
                             <div>
                                 <div className="text-[9px] text-gray-500 font-mono uppercase mb-1">Lean Mass</div>
-                                <div className="text-lg font-display font-bold text-cyan-400">63.9<span className="text-xs text-gray-500">kg</span></div>
+                                <div className="text-lg font-display font-bold text-cyan-400">{leanMass}<span className="text-xs text-gray-500">kg</span></div>
                             </div>
                             <div>
                                 <div className="text-[9px] text-gray-500 font-mono uppercase mb-1">Fat Mass</div>
-                                <div className="text-lg font-display font-bold text-purple-400">10.6<span className="text-xs text-gray-500">kg</span></div>
+                                <div className="text-lg font-display font-bold text-purple-400">{fatMass}<span className="text-xs text-gray-500">kg</span></div>
                             </div>
                         </div>
                     </div>
@@ -1118,16 +1122,27 @@
             );
         };
 
-        // 8. BIO SYNTHETICS (Morphological Scanner with Hex Body)
+        // 8. BIO SYNTHETICS (Morphological Scanner with Hex Body) - CONNECTED TO STATSDATA
         const BioSynthetics = () => {
-            const MUSCLE_DATA = [
-                { id: 'chest', label: 'PECTORALIS', score: 85, symmetry: 52, type: 'push' },
-                { id: 'back', label: 'DORSALS', score: 72, symmetry: 48, type: 'pull' },
-                { id: 'shoulders', label: 'DELTOIDS', score: 60, symmetry: 50, type: 'push' },
-                { id: 'arms', label: 'BRACHII', score: 90, symmetry: 45, type: 'pull' },
-                { id: 'legs', label: 'QUADRICEPS', score: 95, symmetry: 50, type: 'legs' },
-                { id: 'core', label: 'ABDOMINALS', score: 40, symmetry: 50, type: 'pull' },
+            const morphData = window.StatsData ? window.StatsData.getMorphologyData() : null;
+            
+            const MUSCLE_DATA = morphData ? [
+                { id: 'chest', label: 'PECTORALIS', score: morphData.muscles.find(m => m.label === 'PECTORAUX')?.score || 50, symmetry: 52, type: 'push', sets: morphData.muscles.find(m => m.label === 'PECTORAUX')?.sets || 0, volume: morphData.muscles.find(m => m.label === 'PECTORAUX')?.volume || 0 },
+                { id: 'back', label: 'DORSALS', score: morphData.muscles.find(m => m.label === 'DOS')?.score || 50, symmetry: 48, type: 'pull', sets: morphData.muscles.find(m => m.label === 'DOS')?.sets || 0, volume: morphData.muscles.find(m => m.label === 'DOS')?.volume || 0 },
+                { id: 'shoulders', label: 'DELTOIDS', score: morphData.muscles.find(m => m.label === 'ÉPAULES')?.score || 50, symmetry: 50, type: 'push', sets: morphData.muscles.find(m => m.label === 'ÉPAULES')?.sets || 0, volume: morphData.muscles.find(m => m.label === 'ÉPAULES')?.volume || 0 },
+                { id: 'arms', label: 'BRACHII', score: morphData.muscles.find(m => m.label === 'BRAS')?.score || 50, symmetry: 45, type: 'pull', sets: morphData.muscles.find(m => m.label === 'BRAS')?.sets || 0, volume: morphData.muscles.find(m => m.label === 'BRAS')?.volume || 0 },
+                { id: 'legs', label: 'QUADRICEPS', score: morphData.muscles.find(m => m.label === 'JAMBES')?.score || 50, symmetry: 50, type: 'legs', sets: morphData.muscles.find(m => m.label === 'JAMBES')?.sets || 0, volume: morphData.muscles.find(m => m.label === 'JAMBES')?.volume || 0 },
+                { id: 'core', label: 'ABDOMINALS', score: morphData.muscles.find(m => m.label === 'ABDOS')?.score || 20, symmetry: 50, type: 'pull', sets: morphData.muscles.find(m => m.label === 'ABDOS')?.sets || 0, volume: morphData.muscles.find(m => m.label === 'ABDOS')?.volume || 0 },
+            ] : [
+                { id: 'chest', label: 'PECTORALIS', score: 50, symmetry: 52, type: 'push', sets: 0, volume: 0 },
+                { id: 'back', label: 'DORSALS', score: 50, symmetry: 48, type: 'pull', sets: 0, volume: 0 },
+                { id: 'shoulders', label: 'DELTOIDS', score: 50, symmetry: 50, type: 'push', sets: 0, volume: 0 },
+                { id: 'arms', label: 'BRACHII', score: 50, symmetry: 45, type: 'pull', sets: 0, volume: 0 },
+                { id: 'legs', label: 'QUADRICEPS', score: 50, symmetry: 50, type: 'legs', sets: 0, volume: 0 },
+                { id: 'core', label: 'ABDOMINALS', score: 20, symmetry: 50, type: 'pull', sets: 0, volume: 0 },
             ];
+            
+            const distribution = morphData?.distribution || { push: 33, pull: 34, legs: 33 };
 
             const [selectedZone, setSelectedZone] = useState(MUSCLE_DATA[0]);
 
@@ -1211,17 +1226,17 @@
 
                             <div className="absolute top-10 left-0">
                                 <div className="flex items-center gap-1 text-[9px] text-red-500 font-bold bg-red-900/20 px-2 py-0.5 rounded border border-red-500/30">
-                                    <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></span> PUSH 35%
+                                    <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></span> PUSH {distribution.push}%
                                 </div>
                             </div>
                             <div className="absolute top-20 right-0">
                                 <div className="flex items-center gap-1 text-[9px] text-blue-500 font-bold bg-blue-900/20 px-2 py-0.5 rounded border border-blue-500/30">
-                                    <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></span> PULL 42%
+                                    <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></span> PULL {distribution.pull}%
                                 </div>
                             </div>
                             <div className="absolute bottom-20 left-0">
                                 <div className="flex items-center gap-1 text-[9px] text-yellow-500 font-bold bg-yellow-900/20 px-2 py-0.5 rounded border border-yellow-500/30">
-                                    <span className="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-pulse"></span> LEGS 23%
+                                    <span className="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-pulse"></span> LEGS {distribution.legs}%
                                 </div>
                             </div>
                         </div>
@@ -1275,17 +1290,98 @@
                         <div className="grid grid-cols-3 gap-2">
                             <div className="bg-[#111] p-2 rounded text-center border border-white/5">
                                 <div className="text-[8px] text-gray-500">SETS</div>
-                                <div className="text-sm font-bold text-white">12</div>
+                                <div className="text-sm font-bold text-white">{selectedZone.sets || 0}</div>
                             </div>
                             <div className="bg-[#111] p-2 rounded text-center border border-white/5">
                                 <div className="text-[8px] text-gray-500">VOL</div>
-                                <div className="text-sm font-bold text-white">4.2k</div>
+                                <div className="text-sm font-bold text-white">{selectedZone.volume ? (selectedZone.volume / 1000).toFixed(1) + 'k' : '0'}</div>
                             </div>
                             <div className="bg-[#111] p-2 rounded text-center border border-white/5">
                                 <div className="text-[8px] text-gray-500">FREQ</div>
-                                <div className="text-sm font-bold text-white">2x</div>
+                                <div className="text-sm font-bold text-white">{Math.ceil(selectedZone.sets / 4) || 0}x</div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // 9. CHALLENGE SYSTEM (Special Ops / Bounties) - CONNECTED TO STATSDATA
+        const ChallengeSystem = () => {
+            const challenges = window.StatsData ? window.StatsData.getChallengesData() : [
+                { id: 1, title: 'IRON CLAD', desc: 'Soulever 100T en un mois', progress: 0, target: 100, reward: 'Titan Badge', color: 'cyan' },
+                { id: 2, title: 'VELOCITY', desc: 'Maintenir densité >500kg/min pour 3 séances', progress: 0, target: 3, reward: 'Speed Demon', color: 'orange' },
+                { id: 3, title: 'WIDOWMAKER', desc: 'Série de 20 reps au Squat', progress: 0, target: 1, reward: 'Legs of Steel', color: 'red' },
+            ];
+
+            const colors = {
+                cyan: { text: 'text-cyan-400', bg: 'bg-cyan-500', border: 'border-cyan-500/30' },
+                orange: { text: 'text-orange-400', bg: 'bg-orange-500', border: 'border-orange-500/30' },
+                red: { text: 'text-red-400', bg: 'bg-red-500', border: 'border-red-500/30' },
+                purple: { text: 'text-purple-400', bg: 'bg-purple-500', border: 'border-purple-500/30' }
+            };
+
+            const completedCount = challenges.filter(c => (c.progress / c.target) >= 1).length;
+
+            return (
+                <div className="relative w-full max-w-md bg-[#020202] border border-white/10 rounded-3xl flex flex-col overflow-hidden group min-h-[500px] shadow-2xl hover:border-white/20 transition-all">
+                    
+                    <div className="bg-[#050505] px-6 py-4 border-b border-white/10 flex justify-between items-center z-10 relative">
+                        <div className="absolute inset-0 bg-yellow-900/5"></div>
+                        <div className="relative z-10">
+                            <h2 className="font-display font-black text-white tracking-widest uppercase flex items-center gap-2 text-lg">
+                                <Crosshair className="text-yellow-500" size={18} />
+                                SPECIAL OPS
+                            </h2>
+                            <p className="text-[10px] text-yellow-600 font-mono font-bold mt-1">ACTIVE BOUNTIES</p>
+                        </div>
+                        <div className="flex -space-x-2">
+                            {completedCount > 0 && (
+                                <div className="w-6 h-6 rounded-full bg-emerald-500 border-2 border-black flex items-center justify-center text-[10px] font-bold text-black">{completedCount}</div>
+                            )}
+                            <div className="w-6 h-6 rounded-full bg-yellow-500 border-2 border-black flex items-center justify-center text-[10px] font-bold text-black">{challenges.length}</div>
+                        </div>
+                    </div>
+
+                    <div className="flex-1 bg-[#010101] p-6 flex flex-col gap-4">
+                        {challenges.map(challenge => {
+                            const pct = Math.min((challenge.progress / challenge.target) * 100, 100);
+                            const isDone = pct >= 100;
+                            const c = colors[challenge.color] || colors.cyan;
+
+                            return (
+                                <div key={challenge.id} className={`bg-[#0a0a0a] border rounded-xl p-4 relative overflow-hidden group hover:bg-[#111] transition-colors ${c.border}`}>
+                                    <Target className="absolute -right-4 -bottom-4 text-white/5 group-hover:scale-110 transition-transform duration-500" size={80} />
+                                    
+                                    <div className="flex justify-between items-start mb-2 relative z-10">
+                                        <div>
+                                            <div className={`text-[9px] font-black uppercase tracking-widest mb-1 ${c.text}`}>OPERATION</div>
+                                            <h3 className="text-white font-display font-bold text-xl">{challenge.title}</h3>
+                                        </div>
+                                        <div className={`p-1.5 rounded border ${isDone ? 'bg-emerald-500/20 border-emerald-500/50' : 'bg-white/5 border-white/10'}`}>
+                                            {isDone ? <Check size={14} className="text-emerald-400"/> : <Target size={14} className="text-gray-500"/>}
+                                        </div>
+                                    </div>
+                                    
+                                    <p className="text-xs text-gray-400 font-mono mb-4 relative z-10">{challenge.desc}</p>
+                                    
+                                    <div className="relative z-10">
+                                        <div className="flex justify-between text-[9px] font-bold text-gray-500 mb-1">
+                                            <span>PROGRESS</span>
+                                            <span className={isDone ? 'text-emerald-400' : ''}>{challenge.progress} / {challenge.target}</span>
+                                        </div>
+                                        <div className="h-1.5 w-full bg-gray-800 rounded-full overflow-hidden">
+                                            <div className={`h-full ${isDone ? 'bg-emerald-500' : c.bg} transition-all duration-1000`} style={{width: `${pct}%`}}></div>
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-3 flex items-center gap-2 text-[9px] text-gray-300 font-bold bg-white/5 w-fit px-2 py-1 rounded relative z-10 border border-white/5">
+                                        <Trophy size={10} className="text-yellow-400"/>
+                                        REWARD: {challenge.reward}
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
             );
@@ -1421,6 +1517,7 @@
                             <div className="animate-slideIn" style={{ animationDelay: '0.6s' }}><MuscleHud musclesData={musclesHUD} /></div>
                             <div className="animate-slideIn" style={{ animationDelay: '0.7s' }}><BioScanner /></div>
                             <div className="animate-slideIn" style={{ animationDelay: '0.8s' }}><BioSynthetics /></div>
+                            <div className="animate-slideIn" style={{ animationDelay: '0.9s' }}><ChallengeSystem /></div>
                         </div>
                     </main>
 

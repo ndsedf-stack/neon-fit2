@@ -288,6 +288,130 @@ const StatsData = {
       }
     };
     input.click();
+  },
+
+  getBodyComposition: () => {
+    const saved = localStorage.getItem('neon_fit_body_composition');
+    if (saved) {
+      return JSON.parse(saved);
+    }
+    return {
+      currentWeight: 74.5,
+      startWeight: 80.2,
+      goalWeight: 70.0,
+      bodyFat: 14.2,
+      height: 178,
+      lastUpdate: new Date().toISOString()
+    };
+  },
+
+  setBodyComposition: (data) => {
+    const current = StatsData.getBodyComposition();
+    const updated = { ...current, ...data, lastUpdate: new Date().toISOString() };
+    localStorage.setItem('neon_fit_body_composition', JSON.stringify(updated));
+    return updated;
+  },
+
+  getMorphologyData: () => {
+    const muscles = StatsData.getMusclesData();
+    const summary = StatsData.getSummary();
+    
+    const pushMuscles = ['PECTORAUX', 'ÉPAULES'];
+    const pullMuscles = ['DOS', 'BRAS'];
+    const legMuscles = ['JAMBES'];
+    
+    let pushVolume = 0, pullVolume = 0, legsVolume = 0, totalVolume = 0;
+    let pushSets = 0, pullSets = 0, legsSets = 0;
+    
+    muscles.forEach(m => {
+      totalVolume += m.volume;
+      if (pushMuscles.includes(m.name)) {
+        pushVolume += m.volume;
+        pushSets += m.sets;
+      } else if (pullMuscles.includes(m.name)) {
+        pullVolume += m.volume;
+        pullSets += m.sets;
+      } else if (legMuscles.includes(m.name)) {
+        legsVolume += m.volume;
+        legsSets += m.sets;
+      }
+    });
+    
+    const totalSets = pushSets + pullSets + legsSets;
+    
+    return {
+      muscles: muscles.map(m => ({
+        id: m.id,
+        label: m.name,
+        score: Math.min(100, Math.round((m.volume / Math.max(totalVolume, 1)) * 300)),
+        symmetry: 50 + Math.round((Math.random() - 0.5) * 10),
+        type: pushMuscles.includes(m.name) ? 'push' : (pullMuscles.includes(m.name) ? 'pull' : 'legs'),
+        volume: m.volume,
+        sets: m.sets
+      })),
+      distribution: {
+        push: totalSets > 0 ? Math.round((pushSets / totalSets) * 100) : 33,
+        pull: totalSets > 0 ? Math.round((pullSets / totalSets) * 100) : 34,
+        legs: totalSets > 0 ? Math.round((legsSets / totalSets) * 100) : 33
+      },
+      symmetryScore: 92
+    };
+  },
+
+  getChallengesData: () => {
+    const summary = StatsData.getSummary();
+    const history = StatsData.getHistory();
+    
+    const totalVolumeKg = Math.round(summary.volume / 1000);
+    const monthlyTarget = 100;
+    
+    const highDensitySessions = history.filter(e => {
+      return e.weight && e.reps && ((e.weight * e.reps) > 500);
+    }).length;
+    
+    const heavySquatSets = history.filter(e => {
+      const name = (e.exercise || '').toLowerCase();
+      return (name.includes('squat') || name.includes('leg')) && e.reps >= 15;
+    }).length;
+    
+    return [
+      { 
+        id: 1, 
+        title: 'IRON CLAD', 
+        desc: 'Soulever 100T en un mois', 
+        progress: Math.min(totalVolumeKg, monthlyTarget), 
+        target: monthlyTarget, 
+        reward: 'Titan Badge', 
+        color: 'cyan' 
+      },
+      { 
+        id: 2, 
+        title: 'VELOCITY', 
+        desc: 'Maintenir densité >500kg/min pour 3 séances', 
+        progress: Math.min(highDensitySessions, 3), 
+        target: 3, 
+        reward: 'Speed Demon', 
+        color: 'orange' 
+      },
+      { 
+        id: 3, 
+        title: 'WIDOWMAKER', 
+        desc: 'Série de 20 reps au Squat', 
+        progress: Math.min(heavySquatSets, 1), 
+        target: 1, 
+        reward: 'Legs of Steel', 
+        color: 'red' 
+      },
+      { 
+        id: 4, 
+        title: 'CONSISTENCY', 
+        desc: 'Compléter 12 séances', 
+        progress: Math.min(summary.sessions, 12), 
+        target: 12, 
+        reward: 'Iron Will', 
+        color: 'purple' 
+      }
+    ];
   }
 };
 

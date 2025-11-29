@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>NEON FIT // Mission Complete</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700;800;900&family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="config.js"></script>
+  <script src="stats-data.js"></script>
+
+  <style>
+    :root {
+      --void: #020408;
+      --cyan: #22d3ee;
+      --purple: #c084fc;
+      --green: #22c55e;
+      --amber: #f59e0b;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      background: var(--void);
+      font-family: 'Inter', sans-serif;
+      color: #f8fafc;
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    
+    .font-hud { font-family: 'Chakra Petch', sans-serif; }
+    
+    .success-glow {
+      box-shadow: 0 0 100px rgba(34, 211, 238, 0.3), 0 0 200px rgba(34, 211, 238, 0.1);
+    }
+    
+    .card {
+      background: rgba(255, 255, 255, 0.02);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 20px;
+    }
+    
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    
+    @keyframes countUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    
+    .animate-fade { animation: fadeInUp 0.6s ease-out forwards; }
+    .animate-scale { animation: scaleIn 0.5s ease-out forwards; }
+    .animate-count { animation: countUp 0.4s ease-out forwards; }
+    
+    .xp-badge {
+      background: linear-gradient(90deg, var(--cyan), #fff, var(--cyan));
+      background-size: 200% 100%;
+      animation: shimmer 2s infinite linear;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      pointer-events: none;
+      z-index: 100;
+    }
+    
+    .stat-ring {
+      position: relative;
+      width: 80px;
+      height: 80px;
+    }
+    
+    .stat-ring svg {
+      transform: rotate(-90deg);
+    }
+    
+    .insight-card {
+      background: linear-gradient(135deg, rgba(34, 211, 238, 0.05), rgba(139, 92, 246, 0.05));
+      border: 1px solid rgba(34, 211, 238, 0.15);
+    }
+    
+    .nav-btn {
+      transition: all 0.2s ease;
+    }
+    
+    .nav-btn:active {
+      transform: scale(0.95);
+    }
+  </style>
+</head>
+
+<body class="pb-24">
+  <div id="confetti-container"></div>
+  
+  <main class="relative z-10 px-4 pt-6 space-y-5 max-w-lg mx-auto">
+    
+    <section class="text-center animate-fade" style="animation-delay: 0s;">
+      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-500/10 border border-green-500/30 mb-4">
+        <i data-lucide="check-circle" class="w-5 h-5 text-green-400"></i>
+        <span class="text-sm font-bold text-green-400 uppercase tracking-wider">Mission Complete</span>
+      </div>
+      
+      <h1 class="text-3xl font-hud font-black text-white uppercase mb-2" id="mission-name">DOS + JAMBES</h1>
+      <p class="text-slate-400 text-sm" id="mission-date">Aujourd'hui</p>
+    </section>
+
+    <section class="animate-scale" style="animation-delay: 0.2s;">
+      <div class="card p-6 text-center success-glow">
+        <div class="text-sm font-bold text-cyan-400 uppercase tracking-wider mb-2">XP Gagnés</div>
+        <div class="text-6xl font-hud font-black xp-badge mb-2" id="xp-earned">+500</div>
+        <div class="text-sm text-slate-400" id="xp-breakdown">25 séries x 20 XP</div>
+      </div>
+    </section>
+
+    <section class="animate-fade" style="animation-delay: 0.3s;">
+      <div class="card p-4">
+        <div class="grid grid-cols-4 gap-2 text-center">
+          <div class="p-2">
+            <i data-lucide="clock" class="w-5 h-5 mx-auto mb-1" style="color: var(--cyan);"></i>
+            <div class="text-2xl font-hud font-black text-white" id="stat-duration">45</div>
+            <div class="text-[9px] font-bold text-slate-500 uppercase">Min</div>
+          </div>
+          <div class="p-2">
+            <i data-lucide="layers" class="w-5 h-5 mx-auto mb-1 text-purple-400"></i>
+            <div class="text-2xl font-hud font-black text-white" id="stat-sets">25</div>
+            <div class="text-[9px] font-bold text-slate-500 uppercase">Séries</div>
+          </div>
+          <div class="p-2">
+            <i data-lucide="repeat" class="w-5 h-5 mx-auto mb-1 text-amber-400"></i>
+            <div class="text-2xl font-hud font-black text-white" id="stat-reps">200</div>
+            <div class="text-[9px] font-bold text-slate-500 uppercase">Reps</div>
+          </div>
+          <div class="p-2">
+            <i data-lucide="weight" class="w-5 h-5 mx-auto mb-1 text-green-400"></i>
+            <div class="text-2xl font-hud font-black text-white" id="stat-volume">2.5</div>
+            <div class="text-[9px] font-bold text-slate-500 uppercase">Tonnes</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="animate-fade" style="animation-delay: 0.4s;">
+      <h3 class="text-xs font-bold text-white uppercase tracking-wider mb-3 flex items-center gap-2">
+        <i data-lucide="activity" class="w-4 h-4" style="color: var(--cyan);"></i>
+        Muscles Travaillés
+      </h3>
+      
+      <div class="card p-4">
+        <div class="space-y-3" id="muscles-worked">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-3 h-3 rounded-full" style="background: #3b82f6;"></div>
+              <span class="text-sm font-medium text-white">DOS</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="h-2 w-24 bg-white/10 rounded-full overflow-hidden">
+                <div class="h-full rounded-full" style="width: 80%; background: #3b82f6;"></div>
+              </div>
+              <span class="text-xs font-bold text-slate-400">12 sets</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="animate-fade" style="animation-delay: 0.5s;" id="ai-insight-section" style="display: none;">
+      <h3 class="text-xs font-bold text-white uppercase tracking-wider mb-3 flex items-center gap-2">
+        <i data-lucide="bot" class="w-4 h-4 text-purple-400"></i>
+        Coach IA
+      </h3>
+      
+      <div class="insight-card card p-4">
+        <p class="text-sm text-slate-300 leading-relaxed" id="ai-insight">
+          Chargement des conseils...
+        </p>
+      </div>
+    </section>
+
+    <section class="animate-fade" style="animation-delay: 0.6s;">
+      <h3 class="text-xs font-bold text-white uppercase tracking-wider mb-3 flex items-center gap-2">
+        <i data-lucide="trophy" class="w-4 h-4 text-amber-400"></i>
+        Progression
+      </h3>
+      
+      <div class="card p-4">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <div class="text-lg font-hud font-bold text-white" id="current-rank">RECRUE</div>
+            <div class="text-xs text-slate-400">Rang actuel</div>
+          </div>
+          <div class="text-right">
+            <div class="text-lg font-hud font-bold" style="color: var(--cyan);" id="total-xp">1500</div>
+            <div class="text-xs text-slate-400">XP Total</div>
+          </div>
+        </div>
+        
+        <div class="h-2 w-full bg-white/10 rounded-full overflow-hidden">
+          <div class="h-full rounded-full" style="background: var(--cyan); width: 45%;" id="rank-progress"></div>
+        </div>
+        <div class="flex justify-between mt-1">
+          <span class="text-[9px] text-slate-500" id="xp-current">1500</span>
+          <span class="text-[9px] text-slate-500" id="xp-next">5000 pour OPÉRATEUR</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="animate-fade" style="animation-delay: 0.7s;">
+      <div class="flex gap-3">
+        <a href="index.html" class="flex-1 card p-4 text-center nav-btn">
+          <i data-lucide="home" class="w-6 h-6 mx-auto mb-2 text-slate-400"></i>
+          <div class="text-sm font-bold text-white">Retour QG</div>
+        </a>
+        <a href="stats.html" class="flex-1 card p-4 text-center nav-btn">
+          <i data-lucide="bar-chart-2" class="w-6 h-6 mx-auto mb-2" style="color: var(--cyan);"></i>
+          <div class="text-sm font-bold text-white">Voir Stats</div>
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    function initIcons() {
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function createConfetti() {
+      var colors = ['#22d3ee', '#c084fc', '#22c55e', '#f59e0b', '#ffffff'];
+      var container = document.getElementById('confetti-container');
+      
+      for (var i = 0; i < 50; i++) {
+        setTimeout(function() {
+          var confetti = document.createElement('div');
+          confetti.className = 'confetti';
+          confetti.style.left = Math.random() * 100 + 'vw';
+          confetti.style.top = '-10px';
+          confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+          confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+          confetti.style.transform = 'rotate(' + Math.random() * 360 + 'deg)';
+          container.appendChild(confetti);
+          
+          var duration = 2000 + Math.random() * 2000;
+          var startTime = Date.now();
+          var startY = -10;
+          var endY = window.innerHeight + 50;
+          var swayAmount = Math.random() * 100 - 50;
+          var startX = parseFloat(confetti.style.left);
+          
+          function animate() {
+            var elapsed = Date.now() - startTime;
+            var progress = elapsed / duration;
+            
+            if (progress < 1) {
+              var y = startY + (endY - startY) * progress;
+              var x = startX + Math.sin(progress * Math.PI * 2) * swayAmount;
+              confetti.style.transform = 'translateY(' + y + 'px) translateX(' + x + 'px) rotate(' + (progress * 720) + 'deg)';
+              requestAnimationFrame(animate);
+            } else {
+              confetti.remove();
+            }
+          }
+          
+          requestAnimationFrame(animate);
+        }, i * 30);
+      }
+    }
+
+    function loadSessionData() {
+      var sessionData = JSON.parse(localStorage.getItem('last_session_data') || '{}');
+      var history = JSON.parse(localStorage.getItem('neon_fit_workout_history') || '[]');
+      
+      var todaySets = history.filter(function(h) {
+        var today = new Date().toDateString();
+        return new Date(h.date).toDateString() === today;
+      });
+      
+      var totalSets = todaySets.length || 25;
+      var totalReps = 0;
+      var totalVolume = 0;
+      var muscleStats = {};
+      
+      todaySets.forEach(function(set) {
+        var reps = parseInt(set.reps) || 0;
+        var weight = parseFloat(set.weight) || 0;
+        totalReps += reps;
+        totalVolume += reps * weight;
+        
+        var muscle = set.muscle || 'AUTRE';
+        if (!muscleStats[muscle]) {
+          muscleStats[muscle] = { sets: 0, volume: 0 };
+        }
+        muscleStats[muscle].sets++;
+        muscleStats[muscle].volume += reps * weight;
+      });
+      
+      var xpEarned = totalSets * 20;
+      document.getElementById('xp-earned').textContent = '+' + xpEarned;
+      document.getElementById('xp-breakdown').textContent = totalSets + ' séries x 20 XP';
+      document.getElementById('stat-sets').textContent = totalSets;
+      document.getElementById('stat-reps').textContent = totalReps;
+      document.getElementById('stat-volume').textContent = (totalVolume / 1000).toFixed(1);
+      
+      if (sessionData.duration) {
+        document.getElementById('stat-duration').textContent = sessionData.duration;
+      }
+      
+      if (sessionData.name) {
+        document.getElementById('mission-name').textContent = sessionData.name;
+      }
+      
+      var today = new Date();
+      var options = { weekday: 'long', day: 'numeric', month: 'long' };
+      document.getElementById('mission-date').textContent = today.toLocaleDateString('fr-FR', options);
+      
+      var musclesContainer = document.getElementById('muscles-worked');
+      var muscleColors = {
+        'DOS': '#3b82f6',
+        'PECTORAUX': '#22d3ee',
+        'JAMBES': '#8b5cf6',
+        'ÉPAULES': '#d946ef',
+        'BRAS': '#f43f5e',
+        'ABDOS': '#10b981'
+      };
+      
+      var maxSets = Math.max.apply(null, Object.values(muscleStats).map(function(m) { return m.sets; })) || 1;
+      
+      musclesContainer.innerHTML = Object.keys(muscleStats).map(function(muscle) {
+        var stats = muscleStats[muscle];
+        var color = muscleColors[muscle.toUpperCase()] || '#64748b';
+        var width = Math.round((stats.sets / maxSets) * 100);
+        
+        return '<div class="flex items-center justify-between">' +
+          '<div class="flex items-center gap-3">' +
+            '<div class="w-3 h-3 rounded-full" style="background: ' + color + ';"></div>' +
+            '<span class="text-sm font-medium text-white">' + muscle.toUpperCase() + '</span>' +
+          '</div>' +
+          '<div class="flex items-center gap-2">' +
+            '<div class="h-2 w-24 bg-white/10 rounded-full overflow-hidden">' +
+              '<div class="h-full rounded-full" style="width: ' + width + '%; background: ' + color + ';"></div>' +
+            '</div>' +
+            '<span class="text-xs font-bold text-slate-400">' + stats.sets + ' sets</span>' +
+          '</div>' +
+        '</div>';
+      }).join('') || '<div class="text-sm text-slate-400">Aucune donnée de muscle</div>';
+      
+      var totalXP = parseInt(localStorage.getItem('hybrid_xp') || '0');
+      document.getElementById('total-xp').textContent = totalXP;
+      document.getElementById('xp-current').textContent = totalXP + ' XP';
+      
+      var ranks = [
+        { name: 'RECRUE', minXP: 0, maxXP: 999 },
+        { name: 'OPÉRATEUR', minXP: 1000, maxXP: 4999 },
+        { name: 'SPÉCIALISTE', minXP: 5000, maxXP: 14999 },
+        { name: 'COMMANDO', minXP: 15000, maxXP: 34999 },
+        { name: 'ÉLITE', minXP: 35000, maxXP: 74999 },
+        { name: 'LÉGENDE', minXP: 75000, maxXP: 149999 },
+        { name: 'TITAN', minXP: 150000, maxXP: Infinity }
+      ];
+      
+      var currentRank = ranks[0];
+      var nextRank = ranks[1];
+      for (var i = 0; i < ranks.length; i++) {
+        if (totalXP >= ranks[i].minXP) {
+          currentRank = ranks[i];
+          nextRank = ranks[i + 1] || ranks[i];
+        }
+      }
+      
+      document.getElementById('current-rank').textContent = currentRank.name;
+      
+      var xpInRank = totalXP - currentRank.minXP;
+      var xpForRank = currentRank.maxXP - currentRank.minXP + 1;
+      var progress = Math.min((xpInRank / xpForRank) * 100, 100);
+      document.getElementById('rank-progress').style.width = progress + '%';
+      document.getElementById('xp-next').textContent = nextRank.maxXP + ' pour ' + nextRank.name;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      initIcons();
+      createConfetti();
+      loadSessionData();
+    });
+  </script>
+</body>
+</html>

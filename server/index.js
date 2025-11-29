@@ -89,6 +89,29 @@ async function startServer() {
     }
   });
 
+  app.get('/api/coach', async (req, res) => {
+    try {
+      const { prompt } = req.query;
+      if (!prompt) {
+        return res.status(400).json({ error: 'Missing prompt' });
+      }
+      const apiUrl = `https://free-unoficial-gpt4o-mini-api-g70n.onrender.com/chat/?query=${encodeURIComponent(prompt)}`;
+      const response = await fetch(apiUrl, { timeout: 5000 });
+      if (!response.ok) {
+        return res.json({ response: null, fallback: true });
+      }
+      const text = await response.text();
+      try {
+        const data = JSON.parse(text);
+        res.json(data);
+      } catch {
+        res.json({ response: null, fallback: true });
+      }
+    } catch (error) {
+      res.json({ response: null, fallback: true });
+    }
+  });
+
   app.use((req, res, next) => {
     if (req.path.endsWith('.html') || req.path === '/') {
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');

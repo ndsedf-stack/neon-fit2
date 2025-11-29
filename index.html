@@ -562,7 +562,7 @@
       msgEl.textContent = fallbackMessages[Math.floor(Math.random() * fallbackMessages.length)];
       
       var prompt = 'Coach fitness francais. 1 phrase motivante pour semaine ' + currentWeek + '/26 du programme, streak ' + streak + ' jours. Bref et percutant.';
-      var apiUrl = 'https://free-unoficial-gpt4o-mini-api-g70n.onrender.com/chat/?query=' + encodeURIComponent(prompt);
+      var apiUrl = '/api/coach?prompt=' + encodeURIComponent(prompt);
       
       fetch(apiUrl, { method: 'GET', headers: { 'Accept': 'application/json' } })
         .then(function(r) { return r.json(); })

@@ -7,258 +7,342 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>NEON FIT // OPÉRATIONS</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700;800;900&family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-  <script src="program-data-v2.js?v=1764354000"></script>
-  <script src="app-v2.js?v=1764354000"></script>
+  <script src="program-data-v2.js"></script>
   
   <style>
     :root { 
-      --void: #020408;
+      --void: #030509;
+      --void-light: #0a0f18;
       --cyan: #22d3ee;
-      --purple: #c084fc;
+      --cyan-dim: rgba(34, 211, 238, 0.15);
+      --purple: #a855f7;
+      --pink: #ec4899;
+      --green: #22c55e;
+      --amber: #f59e0b;
     }
     
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     
     body { 
-      background-color: var(--void);
-      font-family: 'Inter', sans-serif;
-      color: #f8fafc;
+      background: linear-gradient(180deg, var(--void) 0%, #050810 100%);
+      font-family: 'Inter', -apple-system, sans-serif;
+      color: #f1f5f9;
       min-height: 100dvh;
-      padding-bottom: calc(20px + env(safe-area-inset-bottom));
+      overflow-x: hidden;
     }
     
-    .font-hud { font-family: 'Chakra Petch', sans-serif; }
+    .font-display { font-family: 'Orbitron', sans-serif; }
     
-    /* ========== GRAIN OVERLAY ========== */
-    .grain-overlay {
+    /* ========== AMBIENT EFFECTS ========== */
+    .ambient-glow {
+      position: fixed;
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.08;
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    .ambient-cyan { background: var(--cyan); top: -100px; right: -100px; }
+    .ambient-purple { background: var(--purple); bottom: 20%; left: -150px; }
+    
+    .grain {
       position: fixed;
       inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-      opacity: 0.025;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.02;
       pointer-events: none;
-      z-index: 999;
+      z-index: 1000;
     }
+    
+    .content { position: relative; z-index: 1; }
     
     /* ========== ANIMATIONS ========== */
-    @keyframes subtlePulse {
+    @keyframes softPulse {
       0%, 100% { opacity: 1; }
-      50% { opacity: 0.7; }
+      50% { opacity: 0.6; }
     }
     
-    @keyframes glowPulse {
-      0%, 100% { box-shadow: 0 0 15px rgba(34, 211, 238, 0.3); }
-      50% { box-shadow: 0 0 25px rgba(34, 211, 238, 0.5); }
+    @keyframes glowBreath {
+      0%, 100% { box-shadow: 0 0 20px rgba(34, 211, 238, 0.25), inset 0 0 20px rgba(34, 211, 238, 0.03); }
+      50% { box-shadow: 0 0 35px rgba(34, 211, 238, 0.4), inset 0 0 30px rgba(34, 211, 238, 0.05); }
     }
     
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(20px); }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(24px); }
       to { opacity: 1; transform: translateY(0); }
     }
     
-    @keyframes shimmer {
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes shimmerFlow {
       0% { background-position: -200% 0; }
       100% { background-position: 200% 0; }
     }
     
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-3px); }
-    }
-    
-    .animate-slide-up {
-      animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    @keyframes borderGlow {
+      0%, 100% { border-color: rgba(34, 211, 238, 0.2); }
+      50% { border-color: rgba(34, 211, 238, 0.4); }
     }
     
     /* ========== HEADER ========== */
-    .header-bar {
-      padding: max(14px, env(safe-area-inset-top)) 20px 12px;
+    .header {
+      padding: max(16px, env(safe-area-inset-top)) 20px 14px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      animation: fadeIn 0.5s ease;
     }
     
-    .net-status {
+    .header-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .status-badge {
       display: flex;
       align-items: center;
       gap: 6px;
+      margin-top: 4px;
     }
     
-    .net-dot {
-      width: 6px;
-      height: 6px;
-      background: #22c55e;
+    .status-dot {
+      width: 5px;
+      height: 5px;
+      background: var(--green);
       border-radius: 50%;
-      box-shadow: 0 0 8px #22c55e;
-      animation: subtlePulse 2s ease-in-out infinite;
+      box-shadow: 0 0 10px var(--green);
+      animation: softPulse 2s ease-in-out infinite;
     }
+    
+    .status-text {
+      font-size: 8px;
+      font-weight: 600;
+      color: var(--green);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+    
+    .home-btn {
+      width: 40px;
+      height: 40px;
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.2);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+    
+    .home-btn:active { transform: scale(0.92); background: rgba(245, 158, 11, 0.15); }
     
     /* ========== TIMELINE ========== */
-    .timeline-scroll {
+    .timeline-container {
+      padding: 8px 0;
+      animation: slideIn 0.5s ease 0.1s both;
+    }
+    
+    .timeline {
       display: flex;
       overflow-x: auto;
       scroll-snap-type: x mandatory;
-      padding: 12px 20px;
-      gap: 10px;
+      padding: 8px 16px;
+      gap: 8px;
       scrollbar-width: none;
       -webkit-overflow-scrolling: touch;
     }
     
-    .timeline-scroll::-webkit-scrollbar { display: none; }
+    .timeline::-webkit-scrollbar { display: none; }
     
     .week-chip {
       scroll-snap-align: center;
       flex: 0 0 auto;
-      width: 50px;
-      height: 54px;
-      background: linear-gradient(145deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 12px;
+      min-width: 46px;
+      height: 52px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 10px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
     }
     
-    .week-chip:active { transform: scale(0.92); }
+    .week-chip:active { transform: scale(0.9); }
     
     .week-chip.active {
-      background: linear-gradient(145deg, rgba(34, 211, 238, 0.15) 0%, rgba(34, 211, 238, 0.05) 100%);
+      background: linear-gradient(135deg, rgba(34, 211, 238, 0.12) 0%, rgba(34, 211, 238, 0.04) 100%);
       border-color: var(--cyan);
-      animation: glowPulse 2s ease-in-out infinite;
-    }
-    
-    .week-chip.active .week-num {
-      color: var(--cyan);
-      text-shadow: 0 0 10px var(--cyan);
+      animation: glowBreath 2.5s ease-in-out infinite;
     }
     
     .week-chip.active::after {
       content: '';
       position: absolute;
-      bottom: 6px;
+      bottom: 5px;
       width: 4px;
       height: 4px;
       background: var(--cyan);
       border-radius: 50%;
-      box-shadow: 0 0 6px var(--cyan);
+      box-shadow: 0 0 8px var(--cyan);
     }
     
-    .week-chip.deload { border-color: rgba(34, 197, 94, 0.4); }
-    .week-chip.deload .week-label, .week-chip.deload .week-num { color: #22c55e; }
-    .week-chip.deload.active { 
-      background: linear-gradient(145deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.05) 100%);
-      border-color: #22c55e;
-      box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+    .week-chip.deload {
+      border-color: rgba(34, 197, 94, 0.25);
     }
     
-    .week-chip.peak { border-color: rgba(168, 85, 247, 0.4); }
-    .week-chip.peak .week-label, .week-chip.peak .week-num { color: #a855f7; }
+    .week-chip.deload .week-label,
+    .week-chip.deload .week-num { color: var(--green); }
+    
+    .week-chip.deload.active {
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.12) 0%, rgba(34, 197, 94, 0.04) 100%);
+      border-color: var(--green);
+      box-shadow: 0 0 25px rgba(34, 197, 94, 0.2);
+    }
+    
+    .week-chip.peak {
+      border-color: rgba(168, 85, 247, 0.25);
+    }
+    
+    .week-chip.peak .week-label,
+    .week-chip.peak .week-num { color: var(--purple); }
+    
     .week-chip.peak.active {
-      background: linear-gradient(145deg, rgba(168, 85, 247, 0.15) 0%, rgba(168, 85, 247, 0.05) 100%);
-      border-color: #a855f7;
-      box-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.12) 0%, rgba(168, 85, 247, 0.04) 100%);
+      border-color: var(--purple);
+      box-shadow: 0 0 25px rgba(168, 85, 247, 0.2);
     }
     
-    .week-label { font-size: 7px; font-weight: 700; color: #64748b; text-transform: uppercase; }
-    .week-num { font-family: 'Chakra Petch', sans-serif; font-size: 18px; font-weight: 800; color: #e2e8f0; }
+    .week-label {
+      font-size: 7px;
+      font-weight: 700;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .week-num {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: #cbd5e1;
+    }
+    
+    .week-chip.active .week-num {
+      color: var(--cyan);
+      text-shadow: 0 0 12px var(--cyan);
+    }
     
     /* ========== BLOCK HEADER ========== */
-    .block-header {
-      padding: 16px 20px;
+    .block-section {
+      padding: 12px 20px 8px;
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
+      animation: slideIn 0.5s ease 0.15s both;
     }
     
     .block-title {
-      font-family: 'Chakra Petch', sans-serif;
-      font-size: 24px;
-      font-weight: 900;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
       color: #fff;
-      text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 2px;
     }
     
-    .block-meta {
+    .block-subtitle {
       display: flex;
       align-items: center;
       gap: 8px;
       margin-top: 4px;
     }
     
-    .block-meta::before {
-      content: '//';
+    .block-slash {
       color: var(--cyan);
       font-weight: 700;
+      font-size: 11px;
     }
     
-    .block-meta-text {
-      font-size: 10px;
+    .block-info {
+      font-size: 9px;
       font-weight: 600;
       color: var(--cyan);
+      letter-spacing: 1px;
       text-transform: uppercase;
-      letter-spacing: 0.12em;
     }
     
-    .sys-badge {
+    .sys-chip {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       padding: 6px 10px;
-      background: rgba(34, 211, 238, 0.08);
-      border: 1px solid rgba(34, 211, 238, 0.2);
+      background: rgba(34, 211, 238, 0.06);
+      border: 1px solid rgba(34, 211, 238, 0.15);
       border-radius: 8px;
-      animation: float 3s ease-in-out infinite;
+      animation: borderGlow 3s ease-in-out infinite;
     }
     
-    .sys-badge-text {
-      font-size: 9px;
+    .sys-chip span {
+      font-size: 8px;
       font-weight: 700;
       color: var(--cyan);
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
+      letter-spacing: 1px;
     }
     
-    /* ========== HERO MISSION CARD ========== */
-    .hero-mission {
-      margin: 0 16px 16px;
-      border-radius: 24px;
+    /* ========== HERO CARD ========== */
+    .hero-card {
+      margin: 8px 16px 12px;
+      border-radius: 20px;
       overflow: hidden;
       position: relative;
       cursor: pointer;
-      opacity: 0;
-      animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
+      animation: slideIn 0.6s ease 0.2s both;
     }
     
-    .hero-mission:active { transform: scale(0.98); }
+    .hero-card:active { transform: scale(0.985); }
     
-    .hero-mission-bg {
+    .hero-bg {
       position: absolute;
       inset: 0;
-      background: url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80') center/cover;
-      opacity: 0.35;
-      filter: grayscale(20%) brightness(0.9);
-      transition: all 0.5s ease;
+      background: url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=900&q=85') center/cover;
+      opacity: 0.4;
+      filter: saturate(0.8) brightness(0.85);
+      transition: all 0.6s ease;
     }
     
-    .hero-mission:hover .hero-mission-bg { opacity: 0.45; transform: scale(1.02); }
+    .hero-card:hover .hero-bg { opacity: 0.5; transform: scale(1.03); }
     
-    .hero-mission-gradient {
+    .hero-overlay {
       position: absolute;
       inset: 0;
-      background: linear-gradient(180deg, rgba(2,4,8,0.3) 0%, rgba(2,4,8,0.8) 100%);
+      background: linear-gradient(180deg, 
+        rgba(3, 5, 9, 0.2) 0%, 
+        rgba(3, 5, 9, 0.6) 50%,
+        rgba(3, 5, 9, 0.92) 100%);
     }
     
-    .hero-mission-content {
+    .hero-content {
       position: relative;
       z-index: 2;
-      padding: 20px;
-      min-height: 260px;
+      padding: 18px;
+      min-height: 240px;
       display: flex;
       flex-direction: column;
     }
@@ -269,184 +353,188 @@
       align-items: flex-start;
     }
     
-    .priority-badge {
-      display: inline-flex;
+    .priority-tag {
+      display: flex;
       align-items: center;
       gap: 6px;
       padding: 5px 10px;
-      background: rgba(0,0,0,0.6);
-      border: 1px solid rgba(245, 158, 11, 0.4);
-      border-radius: 16px;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: 20px;
     }
     
     .priority-dot {
-      width: 6px;
-      height: 6px;
-      background: #f59e0b;
+      width: 5px;
+      height: 5px;
+      background: var(--amber);
       border-radius: 50%;
-      box-shadow: 0 0 8px #f59e0b;
-      animation: subtlePulse 1.5s ease-in-out infinite;
+      box-shadow: 0 0 8px var(--amber);
+      animation: softPulse 1.5s ease-in-out infinite;
     }
     
     .priority-text {
-      font-size: 9px;
+      font-size: 8px;
       font-weight: 700;
-      color: #fbbf24;
+      color: var(--amber);
+      letter-spacing: 1px;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
     }
     
-    .settings-btn {
-      width: 36px;
-      height: 36px;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 50%;
+    .nav-btn {
+      width: 34px;
+      height: 34px;
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.3s ease;
+      transition: all 0.2s ease;
     }
     
-    .settings-btn:active {
-      background: rgba(34, 211, 238, 0.2);
-      border-color: var(--cyan);
-    }
+    .nav-btn:active { background: rgba(34, 211, 238, 0.15); border-color: var(--cyan); }
     
-    .hero-center {
+    .hero-main {
       flex: 1;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      padding: 16px 0;
+      padding: 12px 0;
     }
     
     .hero-day {
-      font-family: 'Chakra Petch', sans-serif;
-      font-size: 38px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 32px;
       font-weight: 900;
       color: #fff;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      text-shadow: 0 4px 20px rgba(0,0,0,0.5);
-      line-height: 1;
+      letter-spacing: 3px;
+      text-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
     }
     
-    .hero-workout-row {
+    .hero-workout-line {
       display: flex;
       align-items: center;
       gap: 8px;
-      margin-top: 8px;
+      margin-top: 6px;
     }
     
-    .hero-workout-bar {
+    .workout-bar {
       width: 3px;
-      height: 18px;
+      height: 16px;
       background: var(--cyan);
       border-radius: 2px;
-      box-shadow: 0 0 10px var(--cyan);
+      box-shadow: 0 0 12px var(--cyan);
     }
     
-    .hero-workout-name {
-      font-size: 13px;
+    .workout-name {
+      font-size: 12px;
       font-weight: 600;
       color: var(--cyan);
+      letter-spacing: 1.5px;
       text-transform: uppercase;
-      letter-spacing: 0.1em;
     }
     
-    .hero-technique {
+    .technique-badge {
       display: inline-flex;
-      margin-top: 12px;
+      align-items: center;
+      margin-top: 10px;
       padding: 4px 10px;
-      background: rgba(0,0,0,0.5);
-      border: 1px solid rgba(34, 211, 238, 0.3);
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      border: 1px solid rgba(34, 211, 238, 0.25);
       border-radius: 6px;
-      font-size: 10px;
-      font-weight: 700;
-      color: var(--cyan);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
       width: fit-content;
     }
     
-    /* ========== HERO METRICS ========== */
-    .hero-metrics {
+    .technique-badge span {
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--cyan);
+      letter-spacing: 1px;
+    }
+    
+    /* ========== METRICS - ULTRA GLASS ========== */
+    .metrics-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
+      gap: 6px;
     }
     
-    .hero-metric {
-      background: rgba(15, 23, 42, 0.85);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 14px;
-      padding: 12px 8px;
+    .metric-card {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 10px 6px;
       text-align: center;
       transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
     }
     
-    .hero-metric:hover {
-      border-color: rgba(34, 211, 238, 0.3);
-      background: rgba(15, 23, 42, 0.95);
+    .metric-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    
+    .metric-card:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(34, 211, 238, 0.2);
+      transform: translateY(-2px);
     }
     
     .metric-icon {
-      color: var(--cyan);
       margin-bottom: 4px;
-      filter: drop-shadow(0 0 4px rgba(34, 211, 238, 0.4));
+      opacity: 0.9;
     }
     
     .metric-value {
-      font-family: 'Chakra Petch', sans-serif;
-      font-size: 18px;
-      font-weight: 800;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
       color: #fff;
     }
     
+    .metric-value.rpe { color: var(--pink); }
+    .metric-value.xp { color: var(--green); text-shadow: 0 0 10px rgba(34, 197, 94, 0.4); }
+    
     .metric-label {
-      font-size: 8px;
+      font-size: 7px;
       font-weight: 600;
       color: #64748b;
+      letter-spacing: 0.8px;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
       margin-top: 2px;
     }
     
-    .metric-rpe {
-      color: #ec4899;
-    }
-    
-    .metric-xp {
-      color: #22c55e;
-      text-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
-    }
-    
-    /* ========== ANALYTICS GRID ========== */
-    .analytics-section {
-      padding: 0 16px 16px;
+    /* ========== ANALYTICS ========== */
+    .analytics {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      opacity: 0;
-      animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
+      gap: 10px;
+      padding: 0 16px 12px;
+      animation: slideIn 0.6s ease 0.3s both;
     }
     
     .analytics-card {
-      background: rgba(255,255,255,0.02);
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 18px;
-      padding: 16px;
+      background: rgba(255, 255, 255, 0.02);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 14px;
       position: relative;
       overflow: hidden;
       transition: all 0.3s ease;
-    }
-    
-    .analytics-card:hover {
-      border-color: rgba(34, 211, 238, 0.2);
-      background: rgba(255,255,255,0.03);
     }
     
     .analytics-card::before {
@@ -456,453 +544,444 @@
       left: 0;
       right: 0;
       height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(34,211,238,0.15), transparent);
+      background: linear-gradient(90deg, transparent, rgba(34, 211, 238, 0.12), transparent);
+    }
+    
+    .analytics-card:hover {
+      border-color: rgba(34, 211, 238, 0.15);
+      background: rgba(255, 255, 255, 0.03);
     }
     
     .analytics-label {
-      font-size: 9px;
+      font-size: 8px;
       font-weight: 700;
       color: #64748b;
+      letter-spacing: 1px;
       text-transform: uppercase;
-      letter-spacing: 0.1em;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
     
     .analytics-value {
-      font-family: 'Chakra Petch', sans-serif;
-      font-size: 28px;
-      font-weight: 900;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 26px;
+      font-weight: 800;
       color: #fff;
     }
     
     .analytics-unit {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
       color: #64748b;
+      margin-left: 2px;
     }
     
-    .analytics-change {
+    .analytics-trend {
       display: flex;
       align-items: center;
       gap: 4px;
-      margin-top: 6px;
-      font-size: 10px;
+      margin-top: 4px;
+      font-size: 9px;
       font-weight: 600;
-      color: #22c55e;
+      color: var(--green);
     }
     
     .analytics-icon {
       position: absolute;
-      right: 14px;
+      right: 12px;
       top: 50%;
       transform: translateY(-50%);
-      color: #334155;
+      opacity: 0.15;
     }
     
-    .analytics-bar {
-      margin-top: 10px;
+    .progress-bar {
+      margin-top: 8px;
       height: 3px;
-      background: rgba(255,255,255,0.06);
+      background: rgba(255, 255, 255, 0.05);
       border-radius: 2px;
       overflow: hidden;
     }
     
-    .analytics-bar-fill {
+    .progress-fill {
       height: 100%;
-      background: linear-gradient(90deg, var(--cyan), #22c55e);
+      background: linear-gradient(90deg, var(--cyan), var(--green));
       border-radius: 2px;
-      animation: shimmer 2s linear infinite;
       background-size: 200% 100%;
+      animation: shimmerFlow 3s linear infinite;
     }
     
-    /* ========== OTHER MISSIONS ========== */
-    .missions-section {
-      padding: 0 16px 100px;
+    /* ========== MISSIONS LIST ========== */
+    .missions {
+      padding: 0 16px 120px;
+      animation: slideIn 0.6s ease 0.35s both;
     }
     
-    .section-header {
+    .missions-header {
       display: flex;
       align-items: center;
       gap: 8px;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
     
-    .section-bar {
+    .missions-bar {
       width: 3px;
-      height: 12px;
+      height: 10px;
       background: var(--cyan);
       border-radius: 2px;
     }
     
-    .section-title {
-      font-size: 10px;
+    .missions-title {
+      font-size: 9px;
       font-weight: 700;
       color: #64748b;
+      letter-spacing: 1.2px;
       text-transform: uppercase;
-      letter-spacing: 0.12em;
     }
     
-    .mission-card {
+    .mission-item {
       display: flex;
       align-items: center;
-      gap: 14px;
-      padding: 14px;
-      background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 16px;
-      margin-bottom: 10px;
+      gap: 12px;
+      padding: 12px 14px;
+      background: rgba(255, 255, 255, 0.015);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 14px;
+      margin-bottom: 8px;
       cursor: pointer;
-      transition: all 0.3s ease;
-      opacity: 0;
-      animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      transition: all 0.25s ease;
     }
     
-    .mission-card:nth-child(1) { animation-delay: 0.25s; }
-    .mission-card:nth-child(2) { animation-delay: 0.3s; }
-    .mission-card:nth-child(3) { animation-delay: 0.35s; }
-    .mission-card:nth-child(4) { animation-delay: 0.4s; }
-    
-    .mission-card:active { transform: scale(0.98); }
-    .mission-card:hover { border-color: rgba(255,255,255,0.12); background: rgba(255,255,255,0.04); }
+    .mission-item:active { transform: scale(0.98); }
+    .mission-item:hover { 
+      background: rgba(255, 255, 255, 0.03); 
+      border-color: rgba(255, 255, 255, 0.08);
+    }
     
     .mission-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
     }
     
-    .mission-icon.cyan { background: rgba(34,211,238,0.12); border: 1px solid rgba(34,211,238,0.25); color: var(--cyan); }
-    .mission-icon.pink { background: rgba(236,72,153,0.12); border: 1px solid rgba(236,72,153,0.25); color: #ec4899; }
-    .mission-icon.purple { background: rgba(168,85,247,0.12); border: 1px solid rgba(168,85,247,0.25); color: #a855f7; }
-    .mission-icon.amber { background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.25); color: #f59e0b; }
+    .mission-icon.cyan { background: rgba(34, 211, 238, 0.1); border: 1px solid rgba(34, 211, 238, 0.2); }
+    .mission-icon.pink { background: rgba(236, 72, 153, 0.1); border: 1px solid rgba(236, 72, 153, 0.2); }
+    .mission-icon.purple { background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.2); }
+    .mission-icon.amber { background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2); }
     
-    .mission-content { flex: 1; min-width: 0; }
+    .mission-body { flex: 1; min-width: 0; }
     
-    .mission-top {
+    .mission-meta {
       display: flex;
       align-items: center;
       gap: 8px;
-      margin-bottom: 4px;
+      margin-bottom: 3px;
     }
     
-    .mission-technique {
-      font-size: 9px;
+    .mission-tech {
+      font-size: 8px;
       font-weight: 700;
       color: var(--cyan);
-      text-transform: uppercase;
       padding: 2px 6px;
-      background: rgba(34,211,238,0.1);
-      border: 1px solid rgba(34,211,238,0.2);
+      background: rgba(34, 211, 238, 0.08);
+      border: 1px solid rgba(34, 211, 238, 0.15);
       border-radius: 4px;
+      letter-spacing: 0.5px;
     }
     
-    .mission-day {
-      font-size: 9px;
+    .mission-day-label {
+      font-size: 8px;
       font-weight: 600;
       color: #64748b;
+      letter-spacing: 0.5px;
       text-transform: uppercase;
     }
     
     .mission-name {
-      font-family: 'Chakra Petch', sans-serif;
-      font-size: 15px;
-      font-weight: 800;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
       color: #fff;
-      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
     
     .mission-stats {
       display: flex;
-      gap: 12px;
-      margin-top: 8px;
-    }
-    
-    .mission-stat {
-      display: flex;
-      flex-direction: column;
+      gap: 14px;
+      margin-top: 6px;
     }
     
     .mission-stat-label {
-      font-size: 8px;
+      font-size: 7px;
       font-weight: 600;
       color: #475569;
       text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
     
     .mission-stat-value {
-      font-family: 'Chakra Petch', sans-serif;
-      font-size: 13px;
-      font-weight: 700;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
       color: #e2e8f0;
     }
     
     .mission-rpe {
-      margin-left: auto;
       text-align: right;
+      margin-left: auto;
     }
     
     .mission-rpe-value {
-      font-family: 'Chakra Petch', sans-serif;
-      font-size: 16px;
-      font-weight: 800;
-      color: #ec4899;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--pink);
     }
     
     .mission-rpe-label {
-      font-size: 8px;
+      font-size: 7px;
       font-weight: 600;
       color: #475569;
       text-transform: uppercase;
     }
     
-    .mission-eye {
-      width: 36px;
-      height: 36px;
-      background: rgba(34,211,238,0.1);
-      border: 1px solid rgba(34,211,238,0.2);
+    .mission-action {
+      width: 32px;
+      height: 32px;
+      background: rgba(34, 211, 238, 0.08);
+      border: 1px solid rgba(34, 211, 238, 0.15);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: var(--cyan);
       flex-shrink: 0;
-      transition: all 0.3s ease;
+      transition: all 0.2s ease;
     }
     
-    .mission-card:hover .mission-eye {
-      background: rgba(34,211,238,0.2);
-      box-shadow: 0 0 15px rgba(34,211,238,0.3);
+    .mission-item:hover .mission-action {
+      background: rgba(34, 211, 238, 0.15);
+      box-shadow: 0 0 15px rgba(34, 211, 238, 0.2);
     }
   </style>
 </head>
 
 <body>
-  <div class="grain-overlay"></div>
+  <!-- AMBIENT -->
+  <div class="ambient-glow ambient-cyan"></div>
+  <div class="ambient-glow ambient-purple"></div>
+  <div class="grain"></div>
   
-  <!-- HEADER -->
-  <div class="header-bar">
-    <div>
-      <h1 class="font-hud text-lg font-black text-white tracking-wider">OPÉRATIONS</h1>
-      <div class="net-status">
-        <div class="net-dot"></div>
-        <span class="text-[9px] font-bold text-green-400 uppercase tracking-widest">NET_LINK_ACTIVE</span>
-      </div>
-    </div>
-    <button onclick="window.location.href='index.html'" class="w-9 h-9 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
-      <i data-lucide="trophy" class="w-4 h-4 text-amber-400"></i>
-    </button>
-  </div>
-  
-  <!-- TIMELINE -->
-  <div class="timeline-scroll" id="timeline">
-    <div class="week-chip active"><span class="week-label">SEM</span><span class="week-num">1</span></div>
-    <div class="week-chip"><span class="week-label">SEM</span><span class="week-num">2</span></div>
-    <div class="week-chip"><span class="week-label">SEM</span><span class="week-num">3</span></div>
-    <div class="week-chip"><span class="week-label">SEM</span><span class="week-num">4</span></div>
-    <div class="week-chip"><span class="week-label">SEM</span><span class="week-num">5</span></div>
-    <div class="week-chip deload"><span class="week-label">DELOAD</span><span class="week-num">6</span></div>
-  </div>
-  
-  <!-- BLOCK HEADER -->
-  <div class="block-header">
-    <div>
-      <h2 class="block-title" id="block-name">FONDATIONS</h2>
-      <div class="block-meta">
-        <span class="block-meta-text" id="block-info">BLOC 1 • VOLUME & TECHNIQUE</span>
-      </div>
-    </div>
-    <div class="sys-badge">
-      <i data-lucide="cpu" class="w-3.5 h-3.5 text-cyan-400"></i>
-      <span class="sys-badge-text">SYS.READY</span>
-    </div>
-  </div>
-  
-  <!-- HERO MISSION -->
-  <div class="hero-mission" id="hero-mission">
-    <div class="hero-mission-bg"></div>
-    <div class="hero-mission-gradient"></div>
-    <div class="hero-mission-content">
-      <div class="hero-top">
-        <div class="priority-badge">
-          <div class="priority-dot"></div>
-          <span class="priority-text">Priorité Alpha</span>
-        </div>
-        <button class="settings-btn" id="hero-next-btn">
-          <i data-lucide="settings" class="w-4 h-4 text-white/70"></i>
-        </button>
-      </div>
-      
-      <div class="hero-center">
-        <h3 class="hero-day" id="hero-day">DIMANCHE</h3>
-        <div class="hero-workout-row">
-          <div class="hero-workout-bar"></div>
-          <span class="hero-workout-name" id="hero-workout">DOS + JAMBES</span>
-        </div>
-        <div class="hero-technique" id="hero-technique">TEMPO 3-1-2</div>
-      </div>
-      
-      <div class="hero-metrics">
-        <div class="hero-metric">
-          <i data-lucide="clock" class="w-4 h-4 metric-icon"></i>
-          <div class="metric-value" id="hero-duration">68m</div>
-          <div class="metric-label">Durée</div>
-        </div>
-        <div class="hero-metric">
-          <i data-lucide="layers" class="w-4 h-4 metric-icon"></i>
-          <div class="metric-value" id="hero-sets">31</div>
-          <div class="metric-label">Séries</div>
-        </div>
-        <div class="hero-metric">
-          <i data-lucide="gauge" class="w-4 h-4 metric-icon" style="color: #ec4899;"></i>
-          <div class="metric-value metric-rpe" id="hero-rpe">6-7</div>
-          <div class="metric-label">RPE</div>
-        </div>
-        <div class="hero-metric">
-          <i data-lucide="zap" class="w-4 h-4 metric-icon" style="color: #22c55e;"></i>
-          <div class="metric-value metric-xp" id="hero-xp">+620</div>
-          <div class="metric-label">XP</div>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  <!-- ANALYTICS -->
-  <div class="analytics-section">
-    <div class="analytics-card">
-      <div class="analytics-label">Meilleur Perf</div>
+  <div class="content">
+    <!-- HEADER -->
+    <header class="header">
       <div>
-        <span class="analytics-value" id="best-perf">140</span>
-        <span class="analytics-unit">KG</span>
+        <h1 class="header-title">OPÉRATIONS</h1>
+        <div class="status-badge">
+          <div class="status-dot"></div>
+          <span class="status-text">NET_LINK_ACTIVE</span>
+        </div>
       </div>
-      <div class="analytics-change">
-        <i data-lucide="trending-up" class="w-3 h-3"></i>
-        <span>+2.5% vs Sem 3</span>
-      </div>
-      <div class="analytics-icon">
-        <i data-lucide="trophy" class="w-5 h-5"></i>
-      </div>
+      <button class="home-btn" onclick="location.href='index.html'">
+        <i data-lucide="trophy" class="w-4 h-4 text-amber-400"></i>
+      </button>
+    </header>
+    
+    <!-- TIMELINE 26 WEEKS -->
+    <div class="timeline-container">
+      <div class="timeline" id="timeline"></div>
     </div>
     
-    <div class="analytics-card">
-      <div class="analytics-label">Volume Hebdo</div>
+    <!-- BLOCK INFO -->
+    <section class="block-section">
       <div>
-        <span class="analytics-value" id="weekly-volume">42</span>
-        <span class="analytics-unit">T</span>
+        <h2 class="block-title" id="block-name">FONDATIONS</h2>
+        <div class="block-subtitle">
+          <span class="block-slash">//</span>
+          <span class="block-info" id="block-info">BLOC 1 • VOLUME & TECHNIQUE</span>
+        </div>
       </div>
-      <div class="analytics-bar">
-        <div class="analytics-bar-fill" style="width: 75%;"></div>
+      <div class="sys-chip">
+        <i data-lucide="cpu" class="w-3 h-3 text-cyan-400"></i>
+        <span>SYS.READY</span>
       </div>
-      <div class="analytics-icon">
-        <span class="font-hud text-xl font-black">#</span>
+    </section>
+    
+    <!-- HERO MISSION -->
+    <article class="hero-card" id="hero-card">
+      <div class="hero-bg"></div>
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <div class="hero-top">
+          <div class="priority-tag">
+            <div class="priority-dot"></div>
+            <span class="priority-text">Priorité Alpha</span>
+          </div>
+          <button class="nav-btn" id="nav-btn">
+            <i data-lucide="chevron-right" class="w-4 h-4 text-white/70"></i>
+          </button>
+        </div>
+        
+        <div class="hero-main">
+          <h3 class="hero-day" id="hero-day">DIMANCHE</h3>
+          <div class="hero-workout-line">
+            <div class="workout-bar"></div>
+            <span class="workout-name" id="hero-workout">DOS + JAMBES</span>
+          </div>
+          <div class="technique-badge">
+            <span id="hero-technique">TEMPO 3-1-2</span>
+          </div>
+        </div>
+        
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <i data-lucide="clock" class="w-4 h-4 text-cyan-400 metric-icon"></i>
+            <div class="metric-value" id="hero-duration">68m</div>
+            <div class="metric-label">Durée</div>
+          </div>
+          <div class="metric-card">
+            <i data-lucide="layers" class="w-4 h-4 text-cyan-400 metric-icon"></i>
+            <div class="metric-value" id="hero-sets">31</div>
+            <div class="metric-label">Séries</div>
+          </div>
+          <div class="metric-card">
+            <i data-lucide="gauge" class="w-4 h-4 text-pink-400 metric-icon"></i>
+            <div class="metric-value rpe" id="hero-rpe">6-7</div>
+            <div class="metric-label">RPE</div>
+          </div>
+          <div class="metric-card">
+            <i data-lucide="zap" class="w-4 h-4 text-green-400 metric-icon"></i>
+            <div class="metric-value xp" id="hero-xp">+620</div>
+            <div class="metric-label">XP</div>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-  
-  <!-- OTHER MISSIONS -->
-  <div class="missions-section">
-    <div class="section-header">
-      <div class="section-bar"></div>
-      <span class="section-title">Autres Missions</span>
-    </div>
-    <div id="other-missions"></div>
+    </article>
+    
+    <!-- ANALYTICS -->
+    <section class="analytics">
+      <div class="analytics-card">
+        <div class="analytics-label">Meilleur Perf</div>
+        <div>
+          <span class="analytics-value">140</span>
+          <span class="analytics-unit">KG</span>
+        </div>
+        <div class="analytics-trend">
+          <i data-lucide="trending-up" class="w-3 h-3"></i>
+          +2.5% vs Sem 3
+        </div>
+        <i data-lucide="trophy" class="w-6 h-6 analytics-icon"></i>
+      </div>
+      <div class="analytics-card">
+        <div class="analytics-label">Volume Hebdo</div>
+        <div>
+          <span class="analytics-value">42</span>
+          <span class="analytics-unit">T</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 78%"></div>
+        </div>
+        <i data-lucide="bar-chart-3" class="w-6 h-6 analytics-icon"></i>
+      </div>
+    </section>
+    
+    <!-- OTHER MISSIONS -->
+    <section class="missions">
+      <div class="missions-header">
+        <div class="missions-bar"></div>
+        <span class="missions-title">Autres Missions</span>
+      </div>
+      <div id="missions-list"></div>
+    </section>
   </div>
 
   <script>
+    const days = ['dimanche', 'mardi', 'vendredi', 'maison'];
+    const dayLabels = { dimanche: 'DIMANCHE', mardi: 'MARDI', vendredi: 'VENDREDI', maison: 'MAISON' };
+    const dayIcons = { dimanche: 'zap', mardi: 'dumbbell', vendredi: 'activity', maison: 'home' };
+    const dayColors = { dimanche: 'cyan', mardi: 'pink', vendredi: 'purple', maison: 'amber' };
+    
     let currentWeek = 1;
     let currentDayIndex = 0;
-    const days = ['dimanche', 'mardi', 'vendredi', 'maison'];
-    const dayLabels = { 'dimanche': 'DIMANCHE', 'mardi': 'MARDI', 'vendredi': 'VENDREDI', 'maison': 'MAISON' };
-    const dayIcons = { 'dimanche': 'zap', 'mardi': 'dumbbell', 'vendredi': 'activity', 'maison': 'home' };
-    const dayColors = { 'dimanche': 'cyan', 'mardi': 'pink', 'vendredi': 'purple', 'maison': 'amber' };
     
     function initIcons() {
       if (typeof lucide !== 'undefined') lucide.createIcons();
     }
     
-    function init() {
-      currentWeek = parseInt(localStorage.getItem('hybrid_current_week') || '1');
-      initIcons();
-      renderTimeline();
-      renderContent(currentWeek);
-      
-      document.getElementById('hero-mission').onclick = (e) => {
-        if (e.target.closest('.settings-btn')) return;
-        const day = days[currentDayIndex];
-        window.location.href = `briefing.html?week=${currentWeek}&day=${day}`;
-      };
-      
-      document.getElementById('hero-next-btn').onclick = (e) => {
-        e.stopPropagation();
-        currentDayIndex = (currentDayIndex + 1) % days.length;
-        updateHeroCard(currentWeek);
-      };
-    }
-    
-    function renderTimeline() {
+    function buildTimeline() {
       const container = document.getElementById('timeline');
       container.innerHTML = '';
       
       for (let i = 1; i <= 26; i++) {
-        const weekData = programData.getWeek(i);
-        const isDeload = weekData.isDeload;
+        const weekData = window.programData ? programData.getWeek(i) : { isDeload: [6,12,18,24,26].includes(i) };
+        const isDeload = weekData.isDeload || [6,12,18,24,26].includes(i);
         const isPeak = i === 25;
         
-        let extraClass = '';
-        if (isDeload) extraClass = 'deload';
-        if (isPeak) extraClass = 'peak';
-        
-        const chip = document.createElement('div');
-        chip.className = `week-chip ${i === currentWeek ? 'active' : ''} ${extraClass}`;
-        
-        chip.onclick = () => {
-          document.querySelectorAll('.week-chip').forEach(c => c.classList.remove('active'));
-          chip.classList.add('active');
-          currentWeek = i;
-          localStorage.setItem('hybrid_current_week', i);
-          currentDayIndex = 0;
-          renderContent(i);
-        };
+        let cls = 'week-chip';
+        if (i === currentWeek) cls += ' active';
+        if (isDeload) cls += ' deload';
+        if (isPeak) cls += ' peak';
         
         const label = isDeload ? 'DELOAD' : (isPeak ? 'PEAK' : 'SEM');
+        
+        const chip = document.createElement('div');
+        chip.className = cls;
         chip.innerHTML = `<span class="week-label">${label}</span><span class="week-num">${i}</span>`;
+        chip.onclick = () => selectWeek(i);
         container.appendChild(chip);
       }
       
       setTimeout(() => {
         const active = container.querySelector('.active');
         if (active) active.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-      }, 300);
+      }, 200);
     }
     
-    function renderContent(week) {
-      const weekData = programData.getWeek(week);
-      const blockName = programData.info.blockTechniques[`block${weekData.block}`]?.name || "FONDATIONS";
-      document.getElementById('block-name').textContent = blockName.toUpperCase();
+    function selectWeek(week) {
+      currentWeek = week;
+      currentDayIndex = 0;
+      localStorage.setItem('hybrid_current_week', week);
+      
+      document.querySelectorAll('.week-chip').forEach((c, i) => {
+        c.classList.toggle('active', i + 1 === week);
+      });
+      
+      updateContent();
+    }
+    
+    function updateContent() {
+      if (!window.programData) return;
+      
+      const weekData = programData.getWeek(currentWeek);
+      const blockNames = {1: 'FONDATIONS', 2: 'INTENSIFICATION', 3: 'PUISSANCE', 4: 'PEAK'};
+      
+      document.getElementById('block-name').textContent = blockNames[weekData.block] || 'FONDATIONS';
       document.getElementById('block-info').textContent = `BLOC ${weekData.block} • ${weekData.technique}`;
       
-      updateHeroCard(week);
-      renderOtherMissions(week);
+      updateHero();
+      renderMissions();
       initIcons();
     }
     
-    function updateHeroCard(week) {
-      const weekData = programData.getWeek(week);
+    function updateHero() {
+      if (!window.programData) return;
+      
+      const weekData = programData.getWeek(currentWeek);
       const day = days[currentDayIndex];
       const workout = weekData[day];
       
       if (!workout) {
         currentDayIndex = 0;
-        updateHeroCard(week);
+        updateHero();
         return;
       }
       
       document.getElementById('hero-day').textContent = dayLabels[day];
       document.getElementById('hero-workout').textContent = workout.name;
-      document.getElementById('hero-technique').textContent = weekData.technique.split('+')[0];
+      document.getElementById('hero-technique').textContent = weekData.technique.split('+')[0].trim();
       document.getElementById('hero-duration').textContent = workout.duration + 'm';
       document.getElementById('hero-sets').textContent = workout.totalSets;
       document.getElementById('hero-rpe').textContent = weekData.rpeTarget;
@@ -911,39 +990,46 @@
       initIcons();
     }
     
-    function renderOtherMissions(week) {
-      const container = document.getElementById('other-missions');
+    function renderMissions() {
+      const container = document.getElementById('missions-list');
       container.innerHTML = '';
-      const weekData = programData.getWeek(week);
       
-      days.forEach((day, index) => {
-        if (index === currentDayIndex) return;
+      if (!window.programData) return;
+      
+      const weekData = programData.getWeek(currentWeek);
+      
+      days.forEach((day, idx) => {
+        if (idx === currentDayIndex) return;
         
         const workout = weekData[day];
         if (!workout) return;
         
-        const card = document.createElement('div');
-        card.className = 'mission-card';
-        card.onclick = () => window.location.href = `briefing.html?week=${week}&day=${day}`;
+        const item = document.createElement('div');
+        item.className = 'mission-item';
+        item.onclick = () => location.href = `briefing.html?week=${currentWeek}&day=${day}`;
         
-        card.innerHTML = `
+        item.innerHTML = `
           <div class="mission-icon ${dayColors[day]}">
-            <i data-lucide="${dayIcons[day]}" class="w-5 h-5"></i>
+            <i data-lucide="${dayIcons[day]}" class="w-5 h-5 text-${dayColors[day]}-400"></i>
           </div>
-          <div class="mission-content">
-            <div class="mission-top">
-              <span class="mission-technique">${weekData.technique.split('+')[0]}</span>
-              <span class="mission-day">${dayLabels[day]}</span>
+          <div class="mission-body">
+            <div class="mission-meta">
+              <span class="mission-tech">${weekData.technique.split('+')[0].trim()}</span>
+              <span class="mission-day-label">${dayLabels[day]}</span>
             </div>
             <div class="mission-name">${workout.name}</div>
             <div class="mission-stats">
-              <div class="mission-stat">
-                <span class="mission-stat-label">Durée</span>
-                <span class="mission-stat-value">${workout.duration}m</span>
+              <div>
+                <div class="mission-stat-label">Durée</div>
+                <div class="mission-stat-value">${workout.duration}m</div>
               </div>
-              <div class="mission-stat">
-                <span class="mission-stat-label">Séries</span>
-                <span class="mission-stat-value">${workout.totalSets}</span>
+              <div>
+                <div class="mission-stat-label">Séries</div>
+                <div class="mission-stat-value">${workout.totalSets}</div>
+              </div>
+              <div>
+                <div class="mission-stat-label">XP</div>
+                <div class="mission-stat-value" style="color: var(--green);">+${workout.totalSets * 20}</div>
               </div>
             </div>
           </div>
@@ -951,30 +1037,52 @@
             <div class="mission-rpe-value">${weekData.rpeTarget}</div>
             <div class="mission-rpe-label">RPE</div>
           </div>
-          <div class="mission-eye">
-            <i data-lucide="eye" class="w-4 h-4"></i>
+          <div class="mission-action">
+            <i data-lucide="eye" class="w-4 h-4 text-cyan-400"></i>
           </div>
         `;
         
-        container.appendChild(card);
+        container.appendChild(item);
       });
       
       initIcons();
     }
     
+    function init() {
+      currentWeek = parseInt(localStorage.getItem('hybrid_current_week') || '1');
+      
+      buildTimeline();
+      
+      if (window.programData) {
+        updateContent();
+      }
+      
+      document.getElementById('hero-card').onclick = (e) => {
+        if (e.target.closest('.nav-btn')) return;
+        location.href = `briefing.html?week=${currentWeek}&day=${days[currentDayIndex]}`;
+      };
+      
+      document.getElementById('nav-btn').onclick = (e) => {
+        e.stopPropagation();
+        currentDayIndex = (currentDayIndex + 1) % days.length;
+        updateHero();
+      };
+      
+      initIcons();
+    }
+    
     function waitForData() {
-      if (typeof programData !== 'undefined' && programData.getWeek) {
-        init();
+      if (window.programData && programData.getWeek) {
+        updateContent();
       } else {
         setTimeout(waitForData, 50);
       }
     }
     
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', waitForData);
-    } else {
+    document.addEventListener('DOMContentLoaded', () => {
+      init();
       waitForData();
-    }
+    });
   </script>
 </body>
 </html>

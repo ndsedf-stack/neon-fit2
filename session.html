@@ -439,18 +439,26 @@
 
             <div className="flex-1 flex items-stretch gap-3 min-h-0">
               
-              <div className="flex-none w-14 flex flex-col items-center relative">
-                <div className="relative w-full h-full rounded-[18px] border-2 overflow-hidden" style={{ borderColor: isResting && breathPhase === 'in' ? '#22d3ee' : '#0e7490', background: '#021622' }}>
-                  <div className="absolute inset-[4px] rounded-[14px] overflow-hidden">
-                    <div className="absolute inset-x-0 bottom-0 transition-all duration-150" style={{ 
-                      height: `${getEccFill()}%`, 
-                      background: 'linear-gradient(180deg, #22d3ee 0%, #0ea5e9 30%, #064e6e 70%, #021622 100%)',
-                      boxShadow: getEccFill() > 0 ? '0 0 40px rgba(34,211,238,0.5), inset 0 0 30px rgba(34,211,238,0.4), inset 0 2px 10px rgba(255,255,255,0.1)' : 'none'
-                    }} />
-                    <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% 100%, rgba(34,211,238,0.2), transparent 60%)' }} />
+              <div className="flex-none w-16 flex flex-col items-center relative">
+                <div 
+                  className="relative w-full h-full rounded-3xl border-4 overflow-hidden transition-all duration-300" 
+                  style={{ 
+                    borderColor: phase === 'ecc' && !isResting ? 'rgba(34,211,238,0.5)' : isResting && breathPhase === 'in' ? 'rgba(34,211,238,0.4)' : 'rgba(34,211,238,0.2)',
+                    background: 'linear-gradient(to bottom, rgba(15,23,42,0.9), rgba(15,23,42,0.95))',
+                    boxShadow: phase === 'ecc' && !isResting 
+                      ? '0 0 40px rgba(34,211,238,0.5), inset 0 -4px 20px rgba(34,211,238,0.2)' 
+                      : '0 8px 32px rgba(0,0,0,0.5), inset 0 -4px 12px rgba(0,0,0,0.3)'
+                  }}
+                >
+                  <div className="absolute inset-x-0 bottom-0 transition-all duration-150" style={{ 
+                    height: `${getEccFill()}%`, 
+                    background: 'linear-gradient(to top, rgba(34,211,238,0.9), rgba(34,211,238,0.5))',
+                    boxShadow: getEccFill() > 0 ? '0 0 30px rgba(34,211,238,0.7)' : 'none'
+                  }}>
+                    <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/15 to-transparent animate-pulse" style={{ animationDuration: '1.5s' }} />
                   </div>
-                  <ArrowDown className={`absolute top-3 left-1/2 -translate-x-1/2 w-5 h-5 z-10 ${phase === 'ecc' && !isResting ? 'text-white' : 'text-cyan-300/50'}`} />
-                  <ArrowUp className={`absolute bottom-3 left-1/2 -translate-x-1/2 w-5 h-5 z-10 ${isResting && breathPhase === 'in' ? 'text-cyan-300' : 'text-cyan-300/40'}`} />
+                  <ArrowDown className={`absolute top-4 left-1/2 -translate-x-1/2 w-6 h-6 z-10 ${phase === 'ecc' && !isResting ? 'text-cyan-300 animate-bounce' : 'text-cyan-400/40'}`} />
+                  <ArrowUp className={`absolute bottom-4 left-1/2 -translate-x-1/2 w-6 h-6 z-10 ${isResting && breathPhase === 'in' ? 'text-cyan-300' : 'text-cyan-400/30'}`} />
                 </div>
               </div>
 
@@ -466,25 +474,19 @@
                   </div>
                 )}
 
-                <div className="relative mb-3 w-40 h-40 flex items-center justify-center">
+                <div className="relative mb-3 w-44 h-44 flex items-center justify-center overflow-visible">
                   <div 
-                    className="absolute inset-[-20px] rounded-full animate-pulseGlow pointer-events-none"
-                    style={{
-                      background: isResting 
-                        ? 'radial-gradient(circle, rgba(34,211,238,0.5) 0%, rgba(232,121,249,0.4) 40%, transparent 70%)'
+                    className={`absolute w-80 h-80 rounded-full blur-3xl pointer-events-none transition-all duration-700 ${
+                      isResting 
+                        ? 'bg-gradient-to-br from-cyan-500/30 to-fuchsia-500/30' 
                         : phase === 'ecc' 
-                          ? 'radial-gradient(circle, rgba(34,211,238,0.6) 0%, rgba(34,211,238,0.3) 40%, transparent 70%)'
+                          ? 'bg-cyan-500/30'
                           : phase === 'con'
-                            ? 'radial-gradient(circle, rgba(232,121,249,0.6) 0%, rgba(232,121,249,0.3) 40%, transparent 70%)'
-                            : 'radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.2) 40%, transparent 70%)',
-                      boxShadow: isResting
-                        ? '0 0 60px rgba(34,211,238,0.5), 0 0 100px rgba(232,121,249,0.4)'
-                        : phase === 'ecc'
-                          ? '0 0 80px rgba(34,211,238,0.6), 0 0 120px rgba(34,211,238,0.3)'
-                          : phase === 'con'
-                            ? '0 0 80px rgba(232,121,249,0.6), 0 0 120px rgba(232,121,249,0.3)'
-                            : '0 0 60px rgba(255,255,255,0.4), 0 0 100px rgba(255,255,255,0.2)',
-                      transition: 'background 0.5s ease, box-shadow 0.5s ease'
+                            ? 'bg-fuchsia-500/30'
+                            : 'bg-white/20'
+                    }`}
+                    style={{ 
+                      animation: 'pulse 2.5s ease-in-out infinite',
                     }}
                   ></div>
 
@@ -618,18 +620,26 @@
                 )}
               </div>
 
-              <div className="flex-none w-14 flex flex-col items-center relative">
-                <div className="relative w-full h-full rounded-[18px] border-2 overflow-hidden" style={{ borderColor: isResting && breathPhase === 'out' ? '#e879f9' : '#7e22ce', background: '#0f0518' }}>
-                  <div className="absolute inset-[4px] rounded-[14px] overflow-hidden">
-                    <div className="absolute inset-x-0 bottom-0 transition-all duration-150" style={{ 
-                      height: `${getConFill()}%`, 
-                      background: 'linear-gradient(180deg, #e879f9 0%, #c026d3 30%, #581c87 70%, #0f0518 100%)',
-                      boxShadow: getConFill() > 0 ? '0 0 40px rgba(232,121,249,0.5), inset 0 0 30px rgba(232,121,249,0.4), inset 0 2px 10px rgba(255,255,255,0.1)' : 'none'
-                    }} />
-                    <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% 100%, rgba(232,121,249,0.2), transparent 60%)' }} />
+              <div className="flex-none w-16 flex flex-col items-center relative">
+                <div 
+                  className="relative w-full h-full rounded-3xl border-4 overflow-hidden transition-all duration-300" 
+                  style={{ 
+                    borderColor: phase === 'con' && !isResting ? 'rgba(232,121,249,0.5)' : isResting && breathPhase === 'out' ? 'rgba(232,121,249,0.4)' : 'rgba(168,85,247,0.2)',
+                    background: 'linear-gradient(to bottom, rgba(15,10,25,0.9), rgba(15,10,25,0.95))',
+                    boxShadow: phase === 'con' && !isResting 
+                      ? '0 0 40px rgba(232,121,249,0.5), inset 0 -4px 20px rgba(232,121,249,0.2)' 
+                      : '0 8px 32px rgba(0,0,0,0.5), inset 0 -4px 12px rgba(0,0,0,0.3)'
+                  }}
+                >
+                  <div className="absolute inset-x-0 bottom-0 transition-all duration-150" style={{ 
+                    height: `${getConFill()}%`, 
+                    background: 'linear-gradient(to top, rgba(232,121,249,0.9), rgba(232,121,249,0.5))',
+                    boxShadow: getConFill() > 0 ? '0 0 30px rgba(232,121,249,0.7)' : 'none'
+                  }}>
+                    <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/15 to-transparent animate-pulse" style={{ animationDuration: '1.5s' }} />
                   </div>
-                  <ArrowUp className={`absolute bottom-3 left-1/2 -translate-x-1/2 w-5 h-5 z-10 ${phase === 'con' && !isResting ? 'text-white' : 'text-fuchsia-300/50'}`} />
-                  <ArrowDown className={`absolute top-3 left-1/2 -translate-x-1/2 w-5 h-5 z-10 ${isResting && breathPhase === 'out' ? 'text-fuchsia-300' : 'text-fuchsia-300/40'}`} />
+                  <ArrowUp className={`absolute bottom-4 left-1/2 -translate-x-1/2 w-6 h-6 z-10 ${phase === 'con' && !isResting ? 'text-fuchsia-300 animate-bounce' : 'text-fuchsia-400/30'}`} />
+                  <ArrowDown className={`absolute top-4 left-1/2 -translate-x-1/2 w-6 h-6 z-10 ${isResting && breathPhase === 'out' ? 'text-fuchsia-300' : 'text-fuchsia-400/40'}`} />
                 </div>
               </div>
 

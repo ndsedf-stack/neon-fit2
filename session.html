@@ -227,6 +227,35 @@
         return (repsCompleted + currentRepProgress) / currentTargetReps;
       };
 
+      const getPhaseCountdown = () => {
+        const eccDur = ecc * 1000;
+        const isoDur = iso * 1000;
+        const conDur = con * 1000;
+        if (phase === 'ecc') return Math.max(1, Math.ceil((eccDur - phaseProgress) / 1000));
+        if (phase === 'iso') return Math.max(1, Math.ceil((eccDur + isoDur - phaseProgress) / 1000));
+        return Math.max(1, Math.ceil((eccDur + isoDur + conDur - phaseProgress) / 1000));
+      };
+
+      const getEccFill = () => {
+        if (isResting) return getBreathPercentage('left');
+        if (phase === 'ecc') return getPhasePercentage('ecc');
+        if (phase === 'iso' || phase === 'con') return 100;
+        return 0;
+      };
+
+      const getConFill = () => {
+        if (isResting) return getBreathPercentage('right');
+        if (phase === 'con') return getPhasePercentage('con');
+        if (phase === 'iso') return 0;
+        return 0;
+      };
+
+      const getPhaseName = () => {
+        if (phase === 'ecc') return 'DESCENTE';
+        if (phase === 'iso') return 'MAINTIEN';
+        return 'MONTÉE';
+      };
+
       const handleValidate = () => {
         setIsSetFinished(true);
         setSessionVolume(prev => prev + currentLoad * currentTargetReps);
@@ -393,19 +422,26 @@
             <div className="flex-1 flex items-stretch gap-3 min-h-0">
               
               <div className="flex-none w-14 flex flex-col items-center">
-                <div className={`w-full h-full bg-slate-900/50 rounded-xl border-2 overflow-hidden ${isResting && breathPhase === 'in' ? 'border-white' : 'border-cyan-500/20'}`}>
-                  <div className="absolute inset-0 flex flex-col justify-between py-2 opacity-20">
-                    {[...Array(10)].map((_, i) => <div key={i} className="w-full h-px bg-cyan-400"></div>)}
-                  </div>
+                <div className={`relative w-full h-full rounded-xl border-2 overflow-hidden ${isResting && breathPhase === 'in' ? 'border-cyan-400' : 'border-slate-600'}`} style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.8), rgba(10,20,30,0.9))' }}>
+                  <div className="absolute inset-0 pointer-events-none" style={{ 
+                    backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 10%, rgba(100,200,255,0.05) 10%, rgba(100,200,255,0.05) 10.5%)',
+                    backgroundSize: '100% 10%'
+                  }}></div>
                   <div 
-                    className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-cyan-500 to-cyan-400/50 transition-all duration-75"
+                    className="absolute bottom-0 left-0 right-0 transition-all duration-100"
                     style={{ 
-                      height: (isResting ? getBreathPercentage('left') : (phase === 'ecc' ? 100 - getPhasePercentage('ecc') : 0)) + '%'
+                      height: getEccFill() + '%',
+                      background: 'linear-gradient(to top, #00f0ff, #6a5cff, #c084fc)'
                     }}
-                  />
-                  <ArrowDown className={`absolute top-2 left-1/2 -translate-x-1/2 w-5 h-5 text-cyan-400 ${!isResting ? 'opacity-100' : 'opacity-0'}`} />
+                  >
+                    <div className="absolute inset-0 pointer-events-none" style={{ 
+                      backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 8px, rgba(0,0,0,0.3) 8px, rgba(0,0,0,0.3) 10px)',
+                    }}></div>
+                  </div>
+                  <ArrowDown className={`absolute top-3 left-1/2 -translate-x-1/2 w-5 h-5 ${phase === 'ecc' && !isResting ? 'text-white' : 'text-cyan-400/50'}`} />
+                  <ArrowUp className={`absolute bottom-3 left-1/2 -translate-x-1/2 w-5 h-5 ${isResting ? 'text-cyan-400' : 'text-cyan-400/30'}`} />
                 </div>
-                <span className="mt-1 text-[8px] font-black text-cyan-400/50">{isResting ? 'IN' : 'ECC'}</span>
+                <span className="mt-1 text-[8px] font-black text-cyan-400">{isResting ? 'IN' : 'ECC'}</span>
               </div>
 
               <div className="flex-1 flex flex-col items-center justify-center min-w-0">
@@ -459,10 +495,11 @@
                     phase === 'ecc' ? 'text-cyan-400' :
                     phase === 'iso' ? 'text-white' :
                     'text-fuchsia-400'
-                  }`} style={{ fontSize: '70px' }}>
-                    {isResting ? restTimeRemaining : repsRemaining}
+                  }`} style={{ fontSize: '80px' }}>
+                    {isResting ? restTimeRemaining : getPhaseCountdown()}
                   </div>
                   {isResting && <div className="absolute bottom-6 text-[10px] font-bold text-slate-500">SECONDES</div>}
+                  {!isResting && <div className="absolute bottom-6 text-[9px] font-bold text-slate-500 uppercase">{repsRemaining} REPS</div>}
                 </div>
                 
                 {!isResting ? (
@@ -517,19 +554,38 @@
                     ))
                   )}
                 </div>
+
+                {!isResting && !isSetFinished && (
+                  <button
+                    onClick={handleValidate}
+                    className="w-full py-3 mt-2 rounded-xl font-black text-lg tracking-wider bg-emerald-500 hover:bg-emerald-400 text-black shadow-[0_0_25px_rgba(16,185,129,0.4)] active:scale-[0.98] transition-all border-2 border-emerald-400"
+                  >
+                    VALIDER SÉRIE
+                  </button>
+                )}
               </div>
 
               <div className="flex-none w-14 flex flex-col items-center">
-                <div className={`w-full h-full bg-slate-900/50 rounded-xl border-2 overflow-hidden ${isResting && breathPhase === 'out' ? 'border-white' : 'border-fuchsia-500/20'}`}>
+                <div className={`relative w-full h-full rounded-xl border-2 overflow-hidden ${isResting && breathPhase === 'out' ? 'border-fuchsia-400' : 'border-slate-600'}`} style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.8), rgba(20,10,30,0.9))' }}>
+                  <div className="absolute inset-0 pointer-events-none" style={{ 
+                    backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 10%, rgba(200,100,255,0.05) 10%, rgba(200,100,255,0.05) 10.5%)',
+                    backgroundSize: '100% 10%'
+                  }}></div>
                   <div 
-                    className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-fuchsia-600 to-fuchsia-400/50 transition-all duration-75"
+                    className="absolute bottom-0 left-0 right-0 transition-all duration-100"
                     style={{ 
-                      height: (isResting ? getBreathPercentage('right') : (phase === 'con' ? getPhasePercentage('con') : 0)) + '%'
+                      height: getConFill() + '%',
+                      background: 'linear-gradient(to top, #7c3aed, #c084fc, #f472b6)'
                     }}
-                  />
-                  <ArrowUp className="absolute bottom-2 left-1/2 -translate-x-1/2 w-5 h-5 text-fuchsia-400" />
+                  >
+                    <div className="absolute inset-0 pointer-events-none" style={{ 
+                      backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 8px, rgba(0,0,0,0.3) 8px, rgba(0,0,0,0.3) 10px)',
+                    }}></div>
+                  </div>
+                  <ArrowUp className={`absolute bottom-3 left-1/2 -translate-x-1/2 w-5 h-5 ${phase === 'con' && !isResting ? 'text-white' : 'text-fuchsia-400/50'}`} />
+                  <ArrowDown className={`absolute top-3 left-1/2 -translate-x-1/2 w-5 h-5 ${isResting ? 'text-fuchsia-400' : 'text-fuchsia-400/30'}`} />
                 </div>
-                <span className="mt-1 text-[8px] font-black text-fuchsia-400/50">{isResting ? 'OUT' : 'CON'}</span>
+                <span className="mt-1 text-[8px] font-black text-fuchsia-400">{isResting ? 'OUT' : 'CON'}</span>
               </div>
 
             </div>

@@ -429,7 +429,8 @@
                     className="absolute bottom-0 left-0 right-0 transition-all duration-100"
                     style={{ 
                       height: getEccFill() + '%',
-                      background: 'linear-gradient(to top, #00f0ff, #6a5cff, #c084fc)'
+                      background: 'linear-gradient(to top, #00f0ff, #6a5cff, #c084fc)',
+                      boxShadow: getEccFill() > 0 ? '0 0 25px rgba(34,211,238,0.5), inset 0 -4px 15px rgba(0,0,0,0.3)' : 'none'
                     }}
                   >
                     <div className="absolute inset-0 pointer-events-none" style={{ 
@@ -489,9 +490,11 @@
                   )}
 
                   <div className="relative font-black text-center leading-none" style={{ 
-                    fontSize: '80px',
-                    color: isResting ? '#ffffff' : phase === 'ecc' ? '#22d3ee' : phase === 'iso' ? '#ffffff' : '#e879f9'
+                    fontSize: '90px',
+                    color: isResting ? '#ffffff' : phase === 'ecc' ? '#22d3ee' : phase === 'iso' ? '#ffffff' : '#e879f9',
+                    textShadow: '0 4px 30px rgba(0,0,0,0.6)'
                   }}>
+                    <span className="absolute inset-0 animate-shimmer bg-gradient-to-r from-transparent via-white/10 to-transparent bg-[length:200%_100%] pointer-events-none" style={{WebkitBackgroundClip:'text'}}></span>
                     {isResting ? restTimeRemaining : repsRemaining}
                   </div>
                   {isResting && <div className="absolute bottom-6 text-[10px] font-bold text-slate-500">SECONDES</div>}
@@ -531,8 +534,14 @@
                       { l: 'ISO', v: iso, active: phase === 'iso', c: 'white' },
                       { l: 'CON', v: con, active: phase === 'con', c: 'fuchsia' }
                     ].map((item, i) => (
-                      <div key={i} className={`flex-1 bg-slate-900/80 border ${item.active ? 'border-cyan-500/50 shadow-lg' : 'border-slate-800'} rounded p-2 flex flex-col items-center`}>
-                        <span className={`text-lg font-black ${item.active ? (item.c === 'cyan' ? 'text-cyan-400' : item.c === 'fuchsia' ? 'text-fuchsia-400' : 'text-white') : 'text-slate-600'}`}>{item.v}</span>
+                      <div key={i} className={`flex-1 bg-slate-900/80 backdrop-blur-sm border rounded p-2 flex flex-col items-center transition-all duration-300`}
+                        style={{
+                          borderColor: item.active ? (item.c === 'cyan' ? 'rgba(34,211,238,0.6)' : item.c === 'fuchsia' ? 'rgba(232,121,249,0.6)' : 'rgba(255,255,255,0.6)') : 'rgba(51,65,85,0.5)',
+                          boxShadow: item.active ? (item.c === 'cyan' ? '0 0 20px rgba(34,211,238,0.3)' : item.c === 'fuchsia' ? '0 0 20px rgba(232,121,249,0.3)' : '0 0 15px rgba(255,255,255,0.2)') : 'none',
+                          transform: item.active ? 'scale(1.05)' : 'scale(1)'
+                        }}
+                      >
+                        <span className="text-lg font-black" style={{color: item.active ? (item.c === 'cyan' ? '#22d3ee' : item.c === 'fuchsia' ? '#e879f9' : '#ffffff') : '#475569'}}>{item.v}</span>
                         <span className="text-[8px] font-bold text-slate-600">{item.l}</span>
                       </div>
                     ))
@@ -542,8 +551,14 @@
                       { l: 'HOLD', v: 4, active: breathPhase === 'hold', c: 'white' },
                       { l: 'OUT', v: 4, active: breathPhase === 'out', c: 'fuchsia' }
                     ].map((item, i) => (
-                      <div key={i} className={`flex-1 bg-slate-900/80 border ${item.active ? 'border-cyan-500/50 shadow-lg scale-105' : 'border-slate-800'} rounded p-2 flex flex-col items-center transition-transform`}>
-                        <span className={`text-lg font-black ${item.active ? (item.c === 'cyan' ? 'text-cyan-400' : item.c === 'fuchsia' ? 'text-fuchsia-400' : 'text-white') : 'text-slate-600'}`}>{item.v}</span>
+                      <div key={i} className={`flex-1 bg-slate-900/80 backdrop-blur-sm border rounded p-2 flex flex-col items-center transition-all duration-300`}
+                        style={{
+                          borderColor: item.active ? (item.c === 'cyan' ? 'rgba(34,211,238,0.6)' : item.c === 'fuchsia' ? 'rgba(232,121,249,0.6)' : 'rgba(255,255,255,0.6)') : 'rgba(51,65,85,0.5)',
+                          boxShadow: item.active ? (item.c === 'cyan' ? '0 0 20px rgba(34,211,238,0.3)' : item.c === 'fuchsia' ? '0 0 20px rgba(232,121,249,0.3)' : '0 0 15px rgba(255,255,255,0.2)') : 'none',
+                          transform: item.active ? 'scale(1.05)' : 'scale(1)'
+                        }}
+                      >
+                        <span className="text-lg font-black" style={{color: item.active ? (item.c === 'cyan' ? '#22d3ee' : item.c === 'fuchsia' ? '#e879f9' : '#ffffff') : '#475569'}}>{item.v}</span>
                         <span className="text-[8px] font-bold text-slate-600">{item.l}</span>
                       </div>
                     ))
@@ -570,7 +585,8 @@
                     className="absolute bottom-0 left-0 right-0 transition-all duration-100"
                     style={{ 
                       height: getConFill() + '%',
-                      background: 'linear-gradient(to top, #7c3aed, #c084fc, #f472b6)'
+                      background: 'linear-gradient(to top, #7c3aed, #c084fc, #f472b6)',
+                      boxShadow: getConFill() > 0 ? '0 0 25px rgba(232,121,249,0.5), inset 0 -4px 15px rgba(0,0,0,0.3)' : 'none'
                     }}
                   >
                     <div className="absolute inset-0 pointer-events-none" style={{ 
@@ -593,11 +609,14 @@
                     <button
                       key={rpe}
                       onClick={() => handleRPESelect(rpe)}
-                      className={`w-11 h-11 rounded-lg font-black text-lg border ${
-                        selectedRPE === rpe 
-                          ? 'bg-cyan-500 text-black border-cyan-400 scale-110' 
-                          : 'bg-slate-800/80 text-white border-slate-700 hover:border-cyan-500/50 hover:scale-105'
-                      } transition-all`}
+                      className="w-12 h-12 rounded-lg font-black text-lg border transition-all duration-200 active:scale-95"
+                      style={{
+                        backgroundColor: selectedRPE === rpe ? '#22d3ee' : 'rgba(30,41,59,0.8)',
+                        color: selectedRPE === rpe ? '#000000' : '#ffffff',
+                        borderColor: selectedRPE === rpe ? '#06b6d4' : 'rgba(71,85,105,0.5)',
+                        boxShadow: selectedRPE === rpe ? '0 0 25px rgba(34,211,238,0.5), inset 0 0 10px rgba(255,255,255,0.2)' : 'none',
+                        transform: selectedRPE === rpe ? 'scale(1.1)' : 'scale(1)'
+                      }}
                     >
                       {rpe}
                     </button>
@@ -605,7 +624,11 @@
                 </div>
                 <button
                   onClick={handleValidate}
-                  className="w-full py-3 bg-gradient-to-r from-green-600 to-green-500 rounded-lg font-black text-base uppercase text-white shadow-lg active:scale-[0.98]"
+                  className="w-full py-3 rounded-xl font-black text-base uppercase text-white active:scale-[0.98] transition-all"
+                  style={{
+                    background: 'linear-gradient(to right, #059669, #10b981)',
+                    boxShadow: '0 0 25px rgba(16,185,129,0.4)'
+                  }}
                 >
                   VALIDER SÉRIE
                 </button>
@@ -616,7 +639,12 @@
               <div className="mt-3 animate-slideIn">
                 <button
                   onClick={skipRest}
-                  className="w-full py-3 bg-gradient-to-r from-cyan-600 to-fuchsia-600 rounded-lg font-black text-base uppercase text-white shadow-lg flex items-center justify-center gap-2 active:scale-[0.98]"
+                  className="w-full py-3 rounded-xl font-black text-base uppercase text-white flex items-center justify-center gap-2 active:scale-[0.98] transition-all border"
+                  style={{
+                    background: 'linear-gradient(to right, #0891b2, #c026d3)',
+                    boxShadow: '0 0 25px rgba(34,211,238,0.3), 0 0 25px rgba(192,38,211,0.3)',
+                    borderColor: 'rgba(34,211,238,0.3)'
+                  }}
                 >
                   <SkipForward size={18} />
                   SKIP REPOS

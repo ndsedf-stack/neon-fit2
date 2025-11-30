@@ -239,14 +239,12 @@
       const getEccFill = () => {
         if (isResting) return getBreathPercentage('left');
         if (phase === 'ecc') return getPhasePercentage('ecc');
-        if (phase === 'iso' || phase === 'con') return 100;
         return 0;
       };
 
       const getConFill = () => {
         if (isResting) return getBreathPercentage('right');
         if (phase === 'con') return getPhasePercentage('con');
-        if (phase === 'iso') return 0;
         return 0;
       };
 
@@ -490,16 +488,13 @@
                     </svg>
                   )}
 
-                  <div className={`relative font-black text-center leading-none ${
-                    isResting ? 'text-white' :
-                    phase === 'ecc' ? 'text-cyan-400' :
-                    phase === 'iso' ? 'text-white' :
-                    'text-fuchsia-400'
-                  }`} style={{ fontSize: '80px' }}>
-                    {isResting ? restTimeRemaining : getPhaseCountdown()}
+                  <div className="relative font-black text-center leading-none" style={{ 
+                    fontSize: '80px',
+                    color: isResting ? '#ffffff' : phase === 'ecc' ? '#22d3ee' : phase === 'iso' ? '#ffffff' : '#e879f9'
+                  }}>
+                    {isResting ? restTimeRemaining : repsRemaining}
                   </div>
                   {isResting && <div className="absolute bottom-6 text-[10px] font-bold text-slate-500">SECONDES</div>}
-                  {!isResting && <div className="absolute bottom-6 text-[9px] font-bold text-slate-500 uppercase">{repsRemaining} REPS</div>}
                 </div>
                 
                 {!isResting ? (

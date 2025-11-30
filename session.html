@@ -467,9 +467,10 @@
                 )}
 
                 <div className="relative mb-3 w-40 h-40 flex items-center justify-center">
-                  <div className={`absolute inset-0 blur-[60px] rounded-full animate-pulse transition-colors duration-500 ${
-                    isResting ? 'bg-slate-500/30' :
-                    phase === 'ecc' ? 'bg-cyan-500/40' : phase === 'con' ? 'bg-fuchsia-500/40' : 'bg-white/20'
+                  <div className={`absolute -inset-8 blur-[80px] rounded-full animate-pulse transition-colors duration-500 ${
+                    isResting 
+                      ? (breathPhase === 'in' ? 'bg-cyan-500/60' : breathPhase === 'hold' ? 'bg-white/50' : 'bg-fuchsia-500/60')
+                      : (phase === 'ecc' ? 'bg-cyan-500/60' : phase === 'con' ? 'bg-fuchsia-500/60' : 'bg-white/40')
                   }`}></div>
 
                   {isResting ? (

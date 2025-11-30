@@ -499,8 +499,8 @@
                   </div>
                 )}
 
-                <div className="relative mb-3 w-40 h-40 flex items-center justify-center">
-                  <div className={`absolute -inset-8 blur-[80px] rounded-full ${
+                <div className="relative mb-4 w-56 h-56 flex items-center justify-center">
+                  <div className={`absolute -inset-12 blur-[100px] rounded-full ${
                     isResting 
                       ? (breathPhase === 'in' ? 'bg-cyan-500' : breathPhase === 'hold' ? 'bg-white' : 'bg-fuchsia-500')
                       : (phase === 'ecc' ? 'bg-cyan-500' : phase === 'con' ? 'bg-fuchsia-500' : 'bg-white')
@@ -526,11 +526,11 @@
 
                   {isResting ? (
                     <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 200 200">
-                      <circle cx="100" cy="100" r="80" fill="none" stroke="rgba(148, 163, 184, 0.2)" strokeWidth="4" strokeDasharray="4 8" />
-                      <circle cx="100" cy="100" r="80" fill="none" stroke="url(#gradRest)" strokeWidth="6" strokeLinecap="round"
-                        strokeDasharray={2 * Math.PI * 80}
-                        strokeDashoffset={(2 * Math.PI * 80) * (1 - restTimeRemaining/restTime)}
-                        style={{ transition: 'stroke-dashoffset 1s linear' }}
+                      <circle cx="100" cy="100" r="88" fill="none" stroke="rgba(148, 163, 184, 0.15)" strokeWidth="3" strokeDasharray="6 10" />
+                      <circle cx="100" cy="100" r="88" fill="none" stroke="url(#gradRest)" strokeWidth="8" strokeLinecap="round"
+                        strokeDasharray={2 * Math.PI * 88}
+                        strokeDashoffset={(2 * Math.PI * 88) * (1 - restTimeRemaining/restTime)}
+                        style={{ transition: 'stroke-dashoffset 1s linear', filter: 'drop-shadow(0 0 8px rgba(34,211,238,0.5))' }}
                       />
                       <defs>
                         <linearGradient id="gradRest" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -541,25 +541,27 @@
                     </svg>
                   ) : (
                     <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 200 200">
-                      <circle cx="100" cy="100" r="80" fill="none" stroke="#1e293b" strokeWidth="4" />
-                      <circle cx="100" cy="100" r="80" fill="none" 
+                      <circle cx="100" cy="100" r="88" fill="none" stroke="#1e293b" strokeWidth="5" />
+                      <circle cx="100" cy="100" r="88" fill="none" 
                         stroke={phase === 'ecc' ? '#22d3ee' : phase === 'con' ? '#e879f9' : '#ffffff'} 
-                        strokeWidth="4" strokeLinecap="round"
-                        strokeDasharray={2 * Math.PI * 80}
-                        strokeDashoffset={(2 * Math.PI * 80) * (1 - getRepProgress())}
-                        style={{ transition: 'stroke-dashoffset 100ms linear, stroke 300ms ease' }}
+                        strokeWidth="6" strokeLinecap="round"
+                        strokeDasharray={2 * Math.PI * 88}
+                        strokeDashoffset={(2 * Math.PI * 88) * (1 - getRepProgress())}
+                        style={{ transition: 'stroke-dashoffset 100ms linear, stroke 300ms ease', filter: phase === 'ecc' ? 'drop-shadow(0 0 6px rgba(34,211,238,0.5))' : phase === 'con' ? 'drop-shadow(0 0 6px rgba(232,121,249,0.5))' : 'none' }}
                       />
                     </svg>
                   )}
 
-                  <div className="relative font-black text-center leading-none" style={{ 
-                    fontSize: '90px',
+                  <div className="relative font-black text-center leading-none flex flex-col items-center justify-center" style={{ 
+                    fontSize: '110px',
+                    fontFamily: "'Rajdhani', sans-serif",
+                    letterSpacing: '-2px',
                     color: isResting ? '#ffffff' : phase === 'ecc' ? '#22d3ee' : phase === 'iso' ? '#ffffff' : '#e879f9',
-                    textShadow: '0 4px 30px rgba(0,0,0,0.6)'
+                    textShadow: isResting ? '0 0 40px rgba(255,255,255,0.3), 0 4px 30px rgba(0,0,0,0.6)' : '0 4px 30px rgba(0,0,0,0.6)'
                   }}>
                     {isResting ? restTimeRemaining : repsRemaining}
+                    {isResting && <div className="text-sm font-bold text-slate-400 tracking-widest mt-1" style={{ fontSize: '12px' }}>SECONDES</div>}
                   </div>
-                  {isResting && <div className="absolute bottom-6 text-[10px] font-bold text-slate-500">SECONDES</div>}
                 </div>
                 
                 {!isResting ? (

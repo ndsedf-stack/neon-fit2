@@ -1,4 +1,7 @@
-# NEON FIT V3 Elite - Replit Configuration
+# NEON FIT V3.1 Elite - Replit Configuration
+
+**Version**: 3.1 - ActiveSeriesModule React + Timer Premium  
+**Last Update**: 30 novembre 2025
 
 ## Quick Start
 
@@ -57,8 +60,26 @@ node server/index.js
 - Design: Refined cyberpunk aesthetic, no visual overload
 - No audio/vibration feedback (visual-only)
 
-## Recent Changes (Nov 2024)
+## Recent Changes (Nov 30, 2025) - V3.1
 
+### ActiveSeriesModule Timer (session.html)
+- **React + Babel** : Composant React compile in-browser (5-15s ecran noir au chargement = normal)
+- **parseTempo()** : Convertit "3-1-2" string → {ecc: 3, iso: 1, con: 2} object
+- **Donnees dynamiques** : Tempo, repos, charge lus depuis `currentExercise` (plus de valeurs hardcodees)
+- **Affichage enrichi** : Nom exercice, badge SUPERSET, badge technique, badge DELOAD
+- **Barres laterales premium** : Gradients lisses cyan/fuchsia avec inner glow
+- **Halo pulsant central** : blur-[80px], -inset-8, opacite 50-60%, sync phases
+
+### Problemes resolus V3.0 → V3.1
+| Avant | Apres |
+|-------|-------|
+| tempo lu depuis weekData (n'existe pas) | tempo lu depuis currentExercise.tempo |
+| rest toujours 90s | rest depuis currentExercise.rest (75-120s) |
+| load hardcode 60kg | load depuis currentExercise.weight |
+| Pas d'info superset | Badge "SUPERSET → partner" |
+| Technique invisible | Badge technique (Rest-Pause, Drop-sets...) |
+
+### Design Updates
 - **Animated Starfield Background**: Canvas-based starfield with 250 stars moving upward, cyan/purple colored stars for cyberpunk aesthetic
 - **Ultra-Transparent Glass Cards**: All UI cards use extreme transparency (0.003-0.008 opacity) with 30px backdrop blur
 - **Shared starfield.js Module**: Reusable starfield canvas applied to all pages (index, workouts, briefing, debrief, session, stats)
@@ -224,5 +245,69 @@ session.html → localStorage → stats-data.js → stats.html (React)
   completedAt: "ISO-date"
 }
 ```
+
+## ActiveSeriesModule - Guide Modification
+
+### Flux de donnees Timer
+
+```
+program-data-v2.js → SessionPage → ActiveSeriesModule
+       ↓                  ↓              ↓
+  getWorkout()      parseTempo()    Timer phases
+       ↓                  ↓              ↓
+  exercises[]     {ecc, iso, con}   UI rendering
+```
+
+### Modifier les styles SAFE
+
+| Element | Ou modifier | Exemple |
+|---------|-------------|---------|
+| Halo couleur | session.html L470-477 | `bg-cyan-500/60` → `bg-blue-500/60` |
+| Halo taille | session.html L469 | `-inset-8` → `-inset-12` |
+| Halo blur | session.html L469 | `blur-[80px]` → `blur-[100px]` |
+| Barre cyan gradient | session.html L447 | Modifier les couleurs hex |
+| Barre fuchsia gradient | session.html L640 | Modifier les couleurs hex |
+| Badges phase | session.html L460-464 | Classes Tailwind bg/border |
+
+### NE PAS toucher (casse le timer)
+
+- `parseTempo()` function
+- `ecc`, `iso`, `con` variables
+- `phaseProgress`, `breathProgress` state
+- `getEccFill()`, `getConFill()` functions
+- Props interface ActiveSeriesModule
+
+### Tester differentes semaines
+
+```bash
+# Tempo 3-1-2 (semaines 1-5)
+/session.html?week=3&day=dimanche
+
+# Rest-Pause (semaines 7-11)  
+/session.html?week=9&day=mardi
+
+# Drop-sets (semaines 13-17)
+/session.html?week=15&day=vendredi
+
+# Clusters (semaines 19-23)
+/session.html?week=21&day=dimanche
+
+# Deload (semaines 6,12,18,24,26)
+/session.html?week=6&day=dimanche
+```
+
+### Connexions fichiers critiques
+
+| Fichier | Depend de | Utilise par |
+|---------|-----------|-------------|
+| program-data-v2.js | - | session.html, briefing.html, workouts.html |
+| session.html | program-data-v2.js | debrief.html (via localStorage) |
+| stats-data.js | localStorage | stats.html |
+
+### Ecran noir au chargement session.html
+
+**C'est normal!** Babel compile le JSX en runtime = 5-15 secondes d'attente.
+
+Pas de solution sans migration vers build-step (Vite/Webpack).
 
 ## See README.md for full documentation

@@ -1,7 +1,7 @@
-# NEON FIT V3.0 - PWA Fitness Tracker Cyberpunk
+# NEON FIT V3.1 - PWA Fitness Tracker Cyberpunk
 
-**Date de mise a jour** : 28 novembre 2025  
-**Version** : V3.0 - Timer Guide + Cloud Sync Supabase  
+**Date de mise a jour** : 30 novembre 2025  
+**Version** : V3.1 - ActiveSeriesModule React + Timer Premium  
 **Repo GitHub** : [ndsedf-stack/neon-fit2](https://github.com/ndsedf-stack/neon-fit2)  
 **Live Demo** : [ndsedf-stack.github.io/neon-fit2](https://ndsedf-stack.github.io/neon-fit2)
 
@@ -14,17 +14,18 @@
 3. [Technologies utilisees](#3-technologies-utilisees)
 4. [Installation et lancement](#4-installation-et-lancement)
 5. [Pages de l'application](#5-pages-de-lapplication)
-6. [Systeme de Timer Guide](#6-systeme-de-timer-guide)
-7. [Systeme de Timer Repos](#7-systeme-de-timer-repos)
-8. [Systeme de Gamification XP](#8-systeme-de-gamification-xp)
-9. [Cloud Sync Supabase](#9-cloud-sync-supabase)
-10. [Guide de modification](#10-guide-de-modification)
-11. [Palette de couleurs](#11-palette-de-couleurs)
-12. [Animations et effets CSS](#12-animations-et-effets-css)
-13. [Compatibilite iOS Safari](#13-compatibilite-ios-safari)
-14. [Formats de donnees](#14-formats-de-donnees)
-15. [Problemes connus et solutions](#15-problemes-connus-et-solutions)
-16. [Conventions de code](#16-conventions-de-code)
+6. [ActiveSeriesModule - Timer Workout React](#6-activeseriesmodule---timer-workout-react)
+7. [Systeme de Timer Guide](#7-systeme-de-timer-guide)
+8. [Systeme de Timer Repos](#8-systeme-de-timer-repos)
+9. [Systeme de Gamification XP](#9-systeme-de-gamification-xp)
+10. [Cloud Sync Supabase](#10-cloud-sync-supabase)
+11. [Guide de modification](#11-guide-de-modification)
+12. [Palette de couleurs](#12-palette-de-couleurs)
+13. [Animations et effets CSS](#13-animations-et-effets-css)
+14. [Compatibilite iOS Safari](#14-compatibilite-ios-safari)
+15. [Formats de donnees](#15-formats-de-donnees)
+16. [Problemes connus et solutions](#16-problemes-connus-et-solutions)
+17. [Conventions de code](#17-conventions-de-code)
 
 ---
 
@@ -565,7 +566,314 @@ const MonComposant = ({ value }) => {
 
 ---
 
-## 6. Systeme de Timer Guide
+## 6. ActiveSeriesModule - Timer Workout React
+
+### 6.1 Vue d'ensemble
+
+Le `ActiveSeriesModule` est le composant React central de `session.html` qui gere :
+- **Timer Tempo** : Phases ECC (descente) / ISO (maintien) / CON (montee)
+- **Timer Repos** : Compte a rebours avec respiration guidee 4-4-4-4
+- **Barres laterales** : Visualisation premium des phases avec gradients
+- **Halo pulsant** : Effet lumineux synchronise avec les phases
+- **Gestion des series** : Compteur, RPE, volume cumule
+
+### 6.2 Architecture et Flux de Donnees
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    program-data-v2.js                           │
+│                  (Source de verite)                             │
+├─────────────────────────────────────────────────────────────────┤
+│  getWeek(weekNum)                                               │
+│  └── weekData = {                                               │
+│        block: 1-5,                                              │
+│        technique: "Tempo 3-1-2" | "Rest-Pause" | "Drop-sets"... │
+│        isDeload: true/false,                                    │
+│        rpeTarget: "6-7" | "7-8" | "8" | "8-9"                   │
+│      }                                                          │
+│                                                                 │
+│  getWorkout(weekNum, dayKey)                                    │
+│  └── workoutData = {                                            │
+│        name: "DOS + JAMBES",                                    │
+│        exercises: [                                             │
+│          {                                                      │
+│            name: "Trap Bar Deadlift",                           │
+│            tempo: "3-1-2",     ← STRING format                  │
+│            rest: 120,          ← Secondes                       │
+│            weight: 75,         ← KG calcule                     │
+│            sets: 5,                                             │
+│            reps: "6-8",                                         │
+│            isSuperset: false,                                   │
+│            supersetWith: null,                                  │
+│            notes: "Rest-Pause S5 : 6-8 reps → 20s → 2-3 reps"   │
+│          },                                                     │
+│          ...                                                    │
+│        ]                                                        │
+│      }                                                          │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    session.html                                  │
+│                  (SessionPage Component)                         │
+├─────────────────────────────────────────────────────────────────┤
+│  // 1. Charger les donnees                                      │
+│  const weekData = pData.getWeek(weekNum);                       │
+│  const workoutData = pData.getWorkout(weekNum, dayKey);         │
+│                                                                 │
+│  // 2. Parser le tempo STRING → OBJECT                          │
+│  const parseTempo = (tempoStr) => {                             │
+│    const parts = tempoStr.split('-').map(n => parseInt(n));     │
+│    return { ecc: parts[0], iso: parts[1], con: parts[2] };      │
+│  };                                                             │
+│  // "3-1-2" → { ecc: 3, iso: 1, con: 2 }                        │
+│                                                                 │
+│  // 3. Extraire les valeurs par exercice                        │
+│  const tempo = parseTempo(currentExercise?.tempo);              │
+│  const rest = currentExercise?.rest || 90;                      │
+│  const load = currentExercise?.weight || 20;                    │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                  ActiveSeriesModule                              │
+│                    (Props recues)                                │
+├─────────────────────────────────────────────────────────────────┤
+│  exercise={{                                                    │
+│    name: "Trap Bar Deadlift",                                   │
+│    muscleGroup: "DOS + JAMBES",                                 │
+│    isSuperset: false,                                           │
+│    supersetWith: null,                                          │
+│    technique: "Rest-Pause",                                     │
+│    isDeload: false                                              │
+│  }}                                                             │
+│  tempo={{ ecc: 3, iso: 1, con: 2 }}  ← OBJECT (parse)           │
+│  restTime={120}                       ← Secondes                │
+│  load={75}                            ← KG                      │
+│  totalSets={5}                                                  │
+│  targetReps={10}                                                │
+│  instruction="Rest-Pause S5..."                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 6.3 Problemes resolus (V3.0 → V3.1)
+
+| Probleme V3.0 | Solution V3.1 |
+|---------------|---------------|
+| `tempo` lu depuis `weekData?.tempo` qui n'existe pas | Lecture depuis `currentExercise.tempo` |
+| Tempo string "3-1-2" non parse | Fonction `parseTempo()` convertit en objet |
+| `rest` fallback toujours 90s | Lecture depuis `currentExercise.rest` (75-120s) |
+| `load` hardcode a 60kg | Lecture depuis `currentExercise.weight` (calcule) |
+| Pas d'affichage superset | Badge "SUPERSET → partner" visible |
+| Technique d'intensification invisible | Badge technique (Rest-Pause, Drop-sets...) |
+| Deload non indique | Badge vert "DELOAD" en semaines 6,12,18,24,26 |
+
+### 6.4 Coherence Tempo par Bloc
+
+Le tempo change selon la semaine/bloc dans `program-data-v2.js` :
+
+| Semaines | Bloc | Tempo | Technique | RPE |
+|----------|------|-------|-----------|-----|
+| 1-5 | 1 | **3-1-2** | Tempo controlé | 6-7 |
+| 6 | 1 | **4-1-2** | Deload | 5-6 |
+| 7-11 | 2 | **2-1-2** | Rest-Pause | 7-8 |
+| 12 | 2 | **4-1-2** | Deload | 5-6 |
+| 13-17 | 3 | **2-1-2** | Drop-sets + Myo-reps | 8 |
+| 18 | 3 | **4-1-2** | Deload | 5-6 |
+| 19-23 | 4 | **2-1-2** | Clusters + Myo-reps + Partials | 8-9 |
+| 24,26 | 4-5 | **4-1-2** | Deload | 5-6 |
+| 25 | 5 | **2-1-2** | Peak Week | 8-9 |
+
+### 6.5 Timer Travail - Cycle de Rep
+
+```javascript
+// Duree totale d'une rep
+const totalRepDuration = (ecc + iso + con) * 1000; // ms
+
+// Cycle automatique
+setInterval(() => {
+  if (phaseProgress < ecc * 1000) {
+    phase = 'ecc';     // DESCENTE (cyan)
+  } else if (phaseProgress < (ecc + iso) * 1000) {
+    phase = 'iso';     // MAINTIEN (blanc)
+  } else if (phaseProgress < totalRepDuration) {
+    phase = 'con';     // MONTEE (fuchsia)
+  } else {
+    repsRemaining--;   // Nouvelle rep
+    phaseProgress = 0;
+  }
+}, 50); // Tick 50ms pour fluidite
+```
+
+### 6.6 Timer Repos - Respiration 4-4-4-4
+
+```javascript
+// Cycle coherence cardiaque
+const breathCycle = 16000; // 16 secondes total
+
+if (breathProgress < 4000) {
+  breathPhase = 'in';    // INSPIRER (cyan)
+} else if (breathProgress < 8000) {
+  breathPhase = 'hold';  // RETENIR (blanc)  
+} else if (breathProgress < 12000) {
+  breathPhase = 'out';   // EXPIRER (fuchsia)
+} else {
+  breathPhase = 'hold';  // RETENIR (blanc)
+}
+```
+
+### 6.7 Barres Laterales Premium
+
+Les deux barres verticales utilisent des gradients lisses :
+
+```jsx
+// Barre gauche (ECC - Cyan)
+<div style={{
+  background: 'linear-gradient(180deg, #22d3ee 0%, #0ea5e9 30%, #064e6e 70%, #021622 100%)',
+  boxShadow: '0 0 40px rgba(34,211,238,0.5), inset 0 0 30px rgba(34,211,238,0.4)'
+}} />
+
+// Barre droite (CON - Fuchsia)  
+<div style={{
+  background: 'linear-gradient(180deg, #e879f9 0%, #c026d3 30%, #581c87 70%, #0f0518 100%)',
+  boxShadow: '0 0 40px rgba(232,121,249,0.5), inset 0 0 30px rgba(232,121,249,0.4)'
+}} />
+```
+
+**Remplissage dynamique :**
+```javascript
+const getEccFill = () => {
+  if (isResting) {
+    return breathPhase === 'in' ? (breathProgress / 4000) * 100 : 
+           breathPhase === 'hold' && breathProgress < 8000 ? 100 : 0;
+  }
+  if (phase !== 'ecc') return phase === 'iso' ? 100 : 0;
+  return (phaseProgress / (ecc * 1000)) * 100;
+};
+```
+
+### 6.8 Halo Pulsant Central
+
+```jsx
+<div className={`absolute -inset-8 blur-[80px] rounded-full animate-pulse ${
+  isResting 
+    ? (breathPhase === 'in' ? 'bg-cyan-500/60' 
+       : breathPhase === 'hold' ? 'bg-white/50' 
+       : 'bg-fuchsia-500/60')
+    : (phase === 'ecc' ? 'bg-cyan-500/60' 
+       : phase === 'con' ? 'bg-fuchsia-500/60' 
+       : 'bg-white/40')
+}`} />
+```
+
+**Parametres modifiables :**
+- `-inset-8` : Taille du spread (augmenter = plus grand)
+- `blur-[80px]` : Intensite du flou (augmenter = plus diffus)
+- `bg-xxx/60` : Opacite (60 = 60%)
+
+### 6.9 Modifier les Styles (Sans Casser)
+
+#### Couleurs sures a modifier
+
+| Element | Classes/Styles | Fichier |
+|---------|---------------|---------|
+| Halo pulsant | `bg-cyan-500/60`, `bg-fuchsia-500/60` | session.html L470-477 |
+| Barres gradient | `#22d3ee`, `#e879f9` | session.html L447, L640 |
+| Badges phase | `bg-cyan-500/10`, `border-cyan-500/50` | session.html L460-464 |
+| Boutons RPE | `backgroundColor`, `borderColor` | session.html L654-660 |
+| Fond cards | `bg-slate-900/60`, `backdrop-blur` | session.html L388 |
+
+#### NE PAS MODIFIER (Casse la logique)
+
+| Element | Pourquoi |
+|---------|----------|
+| `ecc`, `iso`, `con` variables | Timing du timer |
+| `phaseProgress`, `breathProgress` | Cycle automatique |
+| `parseTempo()` | Conversion tempo |
+| `getEccFill()`, `getConFill()` | Remplissage barres |
+| Props de `ActiveSeriesModule` | Interface avec SessionPage |
+
+### 6.10 Ajouter un Nouvel Effet Visuel
+
+1. **Definir l'animation dans Tailwind config :**
+```javascript
+// session.html, dans tailwind.config
+animation: {
+  'monEffet': 'monEffet 2s ease-in-out infinite'
+},
+keyframes: {
+  monEffet: {
+    '0%, 100%': { opacity: '0.5' },
+    '50%': { opacity: '1' }
+  }
+}
+```
+
+2. **Appliquer conditionnellement :**
+```jsx
+<div className={`animate-monEffet ${phase === 'ecc' ? 'visible' : 'hidden'}`} />
+```
+
+### 6.11 Compilation React/Babel
+
+**Limitation connue :** Babel standalone compile en runtime, causant un ecran noir de 5-15 secondes au chargement.
+
+**Pourquoi ce choix :**
+- Pas de build step requis
+- Compatible GitHub Pages (statique)
+- Modification directe du JSX sans compilation
+
+**Alternatives (non implementees) :**
+- Pre-compilation avec Vite/Webpack
+- React sans JSX (createElement)
+
+### 6.12 Connexions entre Fichiers
+
+```
+program-data-v2.js  ──────────────────────────────────┐
+  │                                                    │
+  │ window.programData.getWeek()                       │
+  │ window.programData.getWorkout()                    │
+  │                                                    │
+  ▼                                                    │
+session.html ─────────────────────────────────────────┤
+  │                                                    │
+  │ weekNum ← URL param ?week= ou localStorage         │
+  │ dayKey ← URL param ?day= ou 'dimanche'             │
+  │                                                    │
+  │ Charge: program-data-v2.js (script classique)      │
+  │ Utilise: React 18 + Babel (ESM importmap)          │
+  │                                                    │
+  │ Sauvegarde → localStorage:                         │
+  │   - last_session_data (pour debrief.html)          │
+  │   - hybrid_xp (pour stats)                         │
+  │   - neon_fit_workout_history (pour stats)          │
+  │                                                    │
+  └────────────────────────────────────────────────────┘
+```
+
+### 6.13 Tester les Differentes Semaines
+
+```bash
+# Semaine 1-5 (Tempo 3-1-2)
+/session.html?week=3&day=dimanche
+
+# Semaine 6 (Deload 4-1-2)
+/session.html?week=6&day=mardi
+
+# Semaine 7-11 (Rest-Pause 2-1-2)
+/session.html?week=9&day=vendredi
+
+# Semaine 13-17 (Drop-sets + Myo-reps)
+/session.html?week=15&day=dimanche
+
+# Semaine 19-23 (Clusters + Myo-reps + Partials)
+/session.html?week=21&day=mardi
+```
+
+---
+
+## 7. Systeme de Timer Guide
 
 Le Timer Guide (`session-tempo.html`) guide l'utilisateur a travers les phases tempo d'une repetition.
 

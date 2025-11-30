@@ -114,6 +114,20 @@
 </head>
 
 <body class="flex flex-col">
+  <script>
+    // Force unregister service worker and clear cache
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(regs => {
+        regs.forEach(reg => reg.unregister());
+      });
+    }
+    if ('caches' in window) {
+      caches.keys().then(names => {
+        names.forEach(name => caches.delete(name));
+      });
+    }
+  </script>
+  <div id="loading-indicator" style="position:fixed;top:0;left:0;right:0;background:#22d3ee;color:black;padding:10px;text-align:center;z-index:9999;font-weight:bold;">SESSION V2 LOADING...</div>
   <canvas id="starfield-canvas" class="fixed inset-0 w-full h-full z-0 pointer-events-none"></canvas>
   
   <!-- XP Flash -->
@@ -759,6 +773,10 @@
     // ========================================
     
     function init() {
+      // Hide loading indicator
+      const loadingEl = document.getElementById('loading-indicator');
+      if (loadingEl) loadingEl.style.display = 'none';
+      
       initIcons();
       
       const p = new URLSearchParams(window.location.search);
